@@ -1,0 +1,150 @@
+services:
+  # ──────────────────────────────────────────────
+  # MySQL 8.0
+  # ──────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: astra_mysql
+    restart: unless-stopped
+    env_file: .env.docker
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - astra_network
+
+  # ──────────────────────────────────────────────
+  # Redis 7 (Cache + Celery Result Backend)
+  # ──────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: astra_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - astra_network
+
+  # ──────────────────────────────────────────────
+  # RabbitMQ 3 (Message Broker)
+  # ──────────────────────────────────────────────
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: astra_rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"     # AMQP protocol
+      - "15672:15672"   # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - astra_network
+
+  # ──────────────────────────────────────────────
+  # Django Backend (Development — runserver)
+  # ──────────────────────────────────────────────
+  backend:
+    build:
+      context: ./Backend/astra_sales
+      dockerfile: Dockerfile
+    container_name: astra_backend
+    restart: unless-stopped
+    env_file: .env.docker
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount source code for hot-reload
+      - ./Backend/astra_sales:/app
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - astra_network
+
+  # ──────────────────────────────────────────────
+  # Celery Worker
+  # ──────────────────────────────────────────────
+  celery_worker:
+    build:
+      context: ./Backend/astra_sales
+      dockerfile: Dockerfile
+    container_name: astra_celery_worker
+    restart: unless-stopped
+    env_file: .env.docker
+    command: celery -A astra_sales worker --loglevel=info
+    volumes:
+      - ./Backend/astra_sales:/app
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - astra_network
+
+  # ──────────────────────────────────────────────
+  # React Frontend (Development — Vite dev server)
+  # ──────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./Frontend/frontend_admin
+      dockerfile: Dockerfile
+    container_name: astra_frontend
+    restart: unless-stopped
+    ports:
+      - "5174:5174"
+    volumes:
+      # Mount source code for hot-reload (HMR)
+      - ./Frontend/frontend_admin:/app
+      # Prevent host node_modules from overriding container's
+      - /app/node_modules
+    environment:
+      - VITE_DEV_BACKEND_URL=http://backend:8000
+    depends_on:
+      - backend
+    networks:
+      - astra_network
+
+# ──────────────────────────────────────────────
+# Persistent Volumes
+# ──────────────────────────────────────────────
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+
+# ──────────────────────────────────────────────
+# Network
+# ──────────────────────────────────────────────
+networks:
+  astra_network:
+    driver: bridge

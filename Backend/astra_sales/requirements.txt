@@ -4,3 +4,7 @@ djangorestframework-simplejwt
 python-dotenv
 mysqlclient
 django-cors-headers
+django-redis
+gunicorn
+celery
+pika
