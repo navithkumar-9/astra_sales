@@ -1175,7 +1175,7 @@ button[type="submit"] .spinner,
     margin-bottom: 32px;
 }
 .login-icon {
-    width: 56px;
+    width: 200px;
     height: 56px;
     margin: 0 auto 14px;
     display: flex;
@@ -5671,4 +5671,28 @@ button[type="submit"] .spinner,
     padding: 2px 6px;
     font-weight: 600;
     color: #475569;
+}
+
+/* Sidebar Submenu */
+.submenu-item {
+    font-size: 0.8rem;
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.15s ease;
+    display: block;
+    border-left: 2px solid transparent;
+    margin-bottom: 2px;
+}
+.submenu-item:hover {
+    color: var(--text-primary) !important;
+    background: var(--bg-hover) !important;
+    padding-left: 16px;
+}
+.submenu-item-active {
+    color: var(--primary-color) !important;
+    background: rgba(79, 70, 229, 0.05) !important;
+    border-left: 2px solid var(--primary-color) !important;
+    font-weight: 600 !important;
 }

@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getAvatarStyle } from '../utils/avatar';
-import GlobalSearchModal from './GlobalSearchModal';
+
 
 const SEARCH_BUTTON_STYLE = {
     background: 'transparent',
@@ -54,8 +53,10 @@ const Sidebar = () => {
         localStorage.setItem('sidebar_collapsed', String(nextState));
     };
 
+    const isSuperAdmin = user?.role === 'SUPERADMIN';
     const isAdmin = user?.role === 'ADMIN';
-    const canCrud = isAdmin || user?.can_crud_tasks;
+    const canManageMembers = isSuperAdmin || isAdmin;
+    const canCrud = canManageMembers || user?.can_crud_tasks;
 
     const displayName = user?.name || user?.username || 'User';
     const profilePic = user?.profile_picture || null;
@@ -87,104 +88,6 @@ const Sidebar = () => {
                 </svg>
             ),
         },
-        {
-            path: '/tasks',
-            label: 'Tasks',
-            icon: (
-                <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                >
-                    <path d="M9 11l3 3L22 4" />
-                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-                </svg>
-            ),
-        },
-        {
-            path: '/timesheets',
-            label: 'Timesheets',
-            icon: (
-                <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                >
-                    <circle cx="12" cy="12" r="10" />
-                    <polyline points="12 6 12 12 16 14" />
-                </svg>
-            ),
-        },
-        {
-            path: '/announcements',
-            label: 'Announcements',
-            icon: (
-                <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                >
-                    <path d="M11 5L6 9H2v6h4l5 4V5z" />
-                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-                </svg>
-            ),
-        },
-        {
-            path: '/calendar',
-            label: 'Calendar',
-            icon: (
-                <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                >
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
-            ),
-        },
-        {
-            path: '/scorecards',
-            label: 'Scorecards',
-            icon: (
-                <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                >
-                    <path d="M12 20h9" />
-                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-                </svg>
-            ),
-        },
     ];
 
     if (canCrud) {
@@ -209,7 +112,7 @@ const Sidebar = () => {
         });
     }
 
-    if (isAdmin) {
+    if (canManageMembers) {
         navItems.push(
             {
                 path: '/create-member',
@@ -256,25 +159,55 @@ const Sidebar = () => {
         );
     }
 
-    navItems.push({
-        path: '/settings',
-        label: 'Settings',
-        icon: (
-            <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            >
-                <circle cx="12" cy="12" r="3" />
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-            </svg>
-        ),
-    });
+    if (canManageMembers) {
+        navItems.push({
+            label: 'Create Types',
+            icon: (
+                <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+                    <path d="M12 8v8" />
+                    <path d="M8 12h8" />
+                </svg>
+            ),
+            children: [
+                { path: '/settings?tab=sbu', label: 'SBU' },
+                { path: '/settings?tab=division', label: 'Division' },
+                { path: '/settings?tab=fg', label: 'FG Type' },
+                { path: '/settings?tab=rfq', label: 'RFQ' },
+                { path: '/settings?tab=customer', label: 'Customer' },
+                { path: '/settings?tab=mail', label: 'Notification Mail' },
+            ]
+        });
+    } else {
+        navItems.push({
+            path: '/settings',
+            label: 'Settings',
+            icon: (
+                <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+            ),
+        });
+    }
 
     return (
         <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
@@ -282,7 +215,7 @@ const Sidebar = () => {
                 <div className="sidebar-brand">
                     <div className="sidebar-logo">
                         <img
-                            src="/logo.jpg"
+                            src="/logo.png"
                             alt="Logo"
                             className="ext-sidebar-1"
                         />
@@ -342,18 +275,47 @@ const Sidebar = () => {
                             Search <kbd style={KBD_STYLE}>Ctrl+K</kbd>
                         </span>
                     </button>
-                    {navItems.map((item) => (
-                        <NavLink
-                            key={item.path}
-                            to={item.path}
-                            className={({ isActive }) =>
-                                `nav-item ${isActive ? 'nav-item-active' : ''}`
-                            }
-                        >
-                            <span className="nav-icon">{item.icon}</span>
-                            <span className="nav-label">{item.label}</span>
-                        </NavLink>
-                    ))}
+                    {navItems.map((item) => {
+                        if (item.children) {
+                            return (
+                                <div key={item.label} className="nav-item-group" style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <div className="nav-item nav-item-parent" style={{ cursor: 'default' }}>
+                                        <span className="nav-icon">{item.icon}</span>
+                                        <span className="nav-label" style={{ display: isCollapsed ? 'none' : 'inline' }}>
+                                            {item.label}
+                                        </span>
+                                    </div>
+                                    {!isCollapsed && (
+                                        <div className="sidebar-submenu" style={{ paddingLeft: '28px', display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px', marginBottom: '8px' }}>
+                                            {item.children.map((sub) => (
+                                                <NavLink
+                                                    key={sub.path}
+                                                    to={sub.path}
+                                                    className={({ isActive }) =>
+                                                        `submenu-item ${isActive ? 'submenu-item-active' : ''}`
+                                                    }
+                                                >
+                                                    {sub.label}
+                                                </NavLink>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        }
+                        return (
+                            <NavLink
+                                key={item.path}
+                                to={item.path}
+                                className={({ isActive }) =>
+                                    `nav-item ${isActive ? 'nav-item-active' : ''}`
+                                }
+                            >
+                                <span className="nav-icon">{item.icon}</span>
+                                <span className="nav-label" style={{ display: isCollapsed ? 'none' : 'inline' }}>{item.label}</span>
+                            </NavLink>
+                        );
+                    })}
                 </nav>
             </div>
             <div className="sidebar-bottom-row">
@@ -368,7 +330,6 @@ const Sidebar = () => {
                         ) : (
                             <div
                                 className="sidebar-profile-avatar-fallback"
-                                style={getAvatarStyle(user?.username)}
                             >
                                 {displayName?.charAt(0)?.toUpperCase()}
                             </div>
@@ -403,7 +364,6 @@ const Sidebar = () => {
                     </svg>
                 </button>
             </div>
-            <GlobalSearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
         </aside>
     );
 };

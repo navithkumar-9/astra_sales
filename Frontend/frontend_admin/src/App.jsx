@@ -2,21 +2,16 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
 import Layout from './components/Layout';
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute, { PublicRoute } from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
 
 // Lazy load page components
 const Login = lazy(() => import('./pages/Login'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
-const Tasks = lazy(() => import('./pages/Tasks'));
-const CreateMember = lazy(() => import('./pages/CreateMember'));
 const TeamList = lazy(() => import('./pages/TeamList'));
+const CreateMember = lazy(() => import('./pages/CreateMember'));
 const Settings = lazy(() => import('./pages/Settings'));
-const Timesheet = lazy(() => import('./pages/Timesheet'));
-const Calendar = lazy(() => import('./pages/Calendar'));
-const Announcements = lazy(() => import('./pages/Announcements'));
-const CompletedTasks = lazy(() => import('./pages/CompletedTasks'));
-const Scorecards = lazy(() => import('./pages/Scorecards'));
 
 const LoadingFallback = () => (
     <div className="loading-fallback-container">
@@ -27,121 +22,59 @@ const LoadingFallback = () => (
 function App() {
     return (
         <AuthProvider>
-            <BrowserRouter>
-                <Suspense fallback={<LoadingFallback />}>
-                    <Routes>
-                        <Route path="/login" element={<Login />} />
-                        <Route
-                            path="/dashboard"
-                            element={
-                                <ProtectedRoute>
-                                    <Layout>
-                                        <Dashboard />
-                                    </Layout>
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/tasks"
-                            element={
-                                <ProtectedRoute>
-                                    <Layout>
-                                        <Tasks />
-                                    </Layout>
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/completed-tasks"
-                            element={
-                                <ProtectedRoute>
-                                    <Layout>
-                                        <CompletedTasks />
-                                    </Layout>
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/scorecards"
-                            element={
-                                <ProtectedRoute>
-                                    <Layout>
-                                        <Scorecards />
-                                    </Layout>
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/timesheets"
-                            element={
-                                <ProtectedRoute>
-                                    <Layout>
-                                        <Timesheet />
-                                    </Layout>
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/announcements"
-                            element={
-                                <ProtectedRoute>
-                                    <Layout>
-                                        <Announcements />
-                                    </Layout>
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/create-member"
-                            element={
-                                <ProtectedRoute>
-                                    <Layout>
-                                        <CreateMember />
-                                    </Layout>
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/team"
-                            element={
-                                <ProtectedRoute>
-                                    <Layout>
-                                        <TeamList />
-                                    </Layout>
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/settings"
-                            element={
-                                <ProtectedRoute>
-                                    <Layout>
-                                        <Settings />
-                                    </Layout>
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/calendar"
-                            element={
-                                <ProtectedRoute>
-                                    <Layout>
-                                        <Calendar />
-                                    </Layout>
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/scoreboard"
-                            element={<Navigate to="/scorecards" replace />}
-                        />
-                        <Route
-                            path="*"
-                            element={<Navigate to="/login" replace />}
-                        />
-                    </Routes>
-                </Suspense>
-            </BrowserRouter>
+            <ToastProvider>
+                <BrowserRouter>
+                    <Suspense fallback={<LoadingFallback />}>
+                        <Routes>
+                            <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+                            <Route
+                                path="/dashboard"
+                                element={
+                                    <ProtectedRoute>
+                                        <Layout>
+                                            <Dashboard />
+                                        </Layout>
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/team"
+                                element={
+                                    <ProtectedRoute>
+                                        <Layout>
+                                            <TeamList />
+                                        </Layout>
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/create-member"
+                                element={
+                                    <ProtectedRoute>
+                                        <Layout>
+                                            <CreateMember />
+                                        </Layout>
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/settings"
+                                element={
+                                    <ProtectedRoute>
+                                        <Layout>
+                                            <Settings />
+                                        </Layout>
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="*"
+                                element={<Navigate to="/login" replace />}
+                            />
+                        </Routes>
+                    </Suspense>
+                </BrowserRouter>
+            </ToastProvider>
         </AuthProvider>
     );
 }

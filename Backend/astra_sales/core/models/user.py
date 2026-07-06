@@ -7,6 +7,7 @@ class RoleChoices(models.TextChoices):
     SUPERADMIN = 'SUPERADMIN', 'Superadmin'
     ADMIN = 'ADMIN', 'Admin'
     RFQ_TRACKER = 'RFQ_TRACKER', 'RFQ Tracker'
+    SALES_REP = 'SALES_REP', 'Sales Rep'
 
 class UserManager(BaseUserManager):
     def create_user(self, username, password=None, **extra_fields):

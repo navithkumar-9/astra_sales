@@ -51,11 +51,11 @@ const Login = () => {
                 <div className="login-card">
                     <div className="login-header">
                         <div className="login-icon">
-                            <img src="/logo.jpg" alt="Logo" className="ext-login-167"/>
+                            <img src="/logo.png" alt="Logo" className="ext-login-167"/>
                         </div>
-                        <h1>Tracker</h1>
+                        <h1>Sales</h1>
                         <p className="login-subtitle">
-                            Admin &amp; Team Portal
+                            Admin 
                         </p>
                     </div>
 

@@ -7,4 +7,10 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+export const PublicRoute = ({ children }) => {
+  const { tokens } = useAuth();
+  if (tokens) return <Navigate to="/dashboard" replace />;
+  return children;
+};
+
 export default ProtectedRoute;
