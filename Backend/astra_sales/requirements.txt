@@ -8,3 +8,4 @@ django-redis
 gunicorn
 celery
 pika
+django-prometheus

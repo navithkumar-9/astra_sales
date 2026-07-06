@@ -1,5 +1,5 @@
-import NotificationPopup from './NotificationPopup';
-import Sidebar from './Sidebar';
+import NotificationPopup from './notifications/NotificationPopup';
+import Sidebar from './sidebar/Sidebar';
 
 const Layout = ({ children }) => {
     return (
