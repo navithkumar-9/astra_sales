@@ -19,36 +19,8 @@ const CompletedTasks = lazy(() => import('./pages/CompletedTasks'));
 const Scorecards = lazy(() => import('./pages/Scorecards'));
 
 const LoadingFallback = () => (
-    <div
-        style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100vh',
-            width: '100vw',
-            backgroundColor: '#0a0a0c',
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            zIndex: 9999,
-        }}
-    >
-        <div
-            style={{
-                width: '40px',
-                height: '40px',
-                border: '3px solid rgba(79, 70, 229, 0.1)',
-                borderTop: '3px solid #4f46e5',
-                borderRadius: '50%',
-                animation: 'spin 0.8s linear infinite',
-            }}
-        ></div>
-        <style>{`
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-    `}</style>
+    <div className="loading-fallback-container">
+        <div className="loading-fallback-spinner"></div>
     </div>
 );
 
