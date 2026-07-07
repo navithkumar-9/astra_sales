@@ -6,3 +6,4 @@ from .fg import FG
 from .rfq import RFQ
 from .customer import Customer
 from .mail import Mail
+from .enquiry import Enquiry, EnquiryFGDetail

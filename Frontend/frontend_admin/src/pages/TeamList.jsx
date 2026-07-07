@@ -12,6 +12,14 @@ const TeamList = () => {
 
     const [members, setMembers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
+    const pageSize = 10;
+
+    // Search and Filter states
+    const [search, setSearch] = useState('');
+    const [roleFilter, setRoleFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
 
     // Edit Modal State
     const [editingMember, setEditingMember] = useState(null);
@@ -31,11 +39,17 @@ const TeamList = () => {
     const canManage = isSuperAdmin || isAdmin;
 
     const fetchMembers = async () => {
-        setLoading(true);
         try {
-            const res = await API.get('/users/');
-            if (res.data.success) {
-                setMembers(res.data.data);
+            const res = await API.get(
+                `/users/?page=${page}&page_size=${pageSize}&search=${encodeURIComponent(search)}&role=${roleFilter}&is_active=${statusFilter}`
+            );
+            const responseData = res.data.success ? res.data.data : res.data;
+            if (responseData && responseData.results) {
+                setMembers(responseData.results);
+                setTotalCount(responseData.count || 0);
+            } else {
+                setMembers(Array.isArray(responseData) ? responseData : []);
+                setTotalCount(Array.isArray(responseData) ? responseData.length : 0);
             }
         } catch (err) {
             showToast(err.response?.data?.error || 'Failed to fetch team members.', 'error');
@@ -44,14 +58,27 @@ const TeamList = () => {
         }
     };
 
+    // Check permissions
     useEffect(() => {
         if (!canManage) {
             showToast('You do not have permission to view this page.', 'error');
             navigate('/dashboard');
-            return;
         }
-        fetchMembers();
     }, [user, navigate]);
+
+    // Reset page to 1 when filters change
+    useEffect(() => {
+        setPage(1);
+    }, [search, roleFilter, statusFilter]);
+
+    // Debounced search fetch trigger
+    useEffect(() => {
+        setLoading(true);
+        const delayDebounce = setTimeout(() => {
+            fetchMembers();
+        }, 300);
+        return () => clearTimeout(delayDebounce);
+    }, [page, search, roleFilter, statusFilter]);
 
     const handleEditClick = (member) => {
         setEditingMember(member);
@@ -132,15 +159,11 @@ const TeamList = () => {
     const getRoleBadgeClass = (role) => {
         switch (role) {
             case 'SUPERADMIN':
-                return 'badge-superadmin';
+                return 'role-superadmin';
             case 'ADMIN':
-                return 'badge-admin';
-            case 'RFQ_TRACKER':
-                return 'badge-rfq';
-            case 'SALES_REP':
-                return 'badge-sales';
+                return 'role-admin';
             default:
-                return '';
+                return 'role-member';
         }
     };
 
@@ -154,28 +177,25 @@ const TeamList = () => {
         }
     };
 
-    if (loading) {
+    if (loading && members.length === 0) {
         return (
-            <div className="page">
-                <div className="page-loader">
-                    <div className="page-loader-spinner"></div>
-                    <div className="page-loader-text">Loading team list...</div>
-                </div>
+            <div className="d-flex flex-column align-items-center justify-content-center min-vh-50 mt-5">
+                <div className="page-loader-spinner mb-3"></div>
+                <div className="text-muted font-weight-bold">Loading team list...</div>
             </div>
         );
     }
 
     return (
-        <div className="page">
-            <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <div className="page container-fluid px-4 py-4">
+            <div className="page-header d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h1 className="page-title">Team Members</h1>
-                    <p className="page-subtitle">Manage user accounts and roles permissions</p>
+                    <h1 className="page-title h3 font-weight-bold mb-1">Team Members</h1>
+                    <p className="page-subtitle text-muted mb-0">Manage user accounts and roles permissions</p>
                 </div>
                 <button 
-                    className="btn-primary-gradient" 
+                    className="btn btn-gradient-primary d-flex align-items-center gap-2 border-0 shadow-sm" 
                     onClick={() => navigate('/create-member')}
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0.6rem 1.2rem', borderRadius: '8px', border: 'none', color: '#fff', cursor: 'pointer' }}
                 >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <line x1="12" y1="5" x2="12" y2="19" />
@@ -185,23 +205,68 @@ const TeamList = () => {
                 </button>
             </div>
 
-            <div className="card" style={{ padding: '0px', overflow: 'hidden' }}>
-                <div className="table-wrapper">
-                    <table className="data-table">
-                        <thead>
+            {/* Filters and Search Bar */}
+            <div className="row g-3 mb-4 align-items-center">
+                <div className="col-md-6">
+                    <div className="input-group">
+                        <span className="input-group-text bg-white border-end-0">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted">
+                                <circle cx="11" cy="11" r="8" />
+                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                            </svg>
+                        </span>
+                        <input
+                            type="text"
+                            className="form-control border-start-0 ps-0"
+                            placeholder="Search by name or username..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+                    </div>
+                </div>
+                <div className="col-md-3">
+                    <select
+                        className="form-select text-secondary font-weight-bold"
+                        value={roleFilter}
+                        onChange={(e) => setRoleFilter(e.target.value)}
+                    >
+                        <option value="">All Roles</option>
+                        <option value="SUPERADMIN">Superadmin</option>
+                        <option value="ADMIN">Admin</option>
+                        <option value="RFQ_TRACKER">RFQ Tracker</option>
+                        <option value="SALES_REP">Sales Rep</option>
+                    </select>
+                </div>
+                <div className="col-md-3">
+                    <select
+                        className="form-select text-secondary font-weight-bold"
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                        <option value="">All Statuses</option>
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                    </select>
+                </div>
+            </div>
+
+            <div className="card shadow-sm border-0 overflow-hidden">
+                <div className="table-responsive">
+                    <table className="table table-hover mb-0 data-table">
+                        <thead className="bg-light">
                             <tr>
-                                <th>Member</th>
-                                <th>Username</th>
-                                <th>Role</th>
-                                <th>Status</th>
-                                <th>Joined</th>
-                                <th>Actions</th>
+                                <th className="text-uppercase text-secondary font-weight-bold">Member</th>
+                                <th className="text-uppercase text-secondary font-weight-bold">Username</th>
+                                <th className="text-uppercase text-secondary font-weight-bold">Role</th>
+                                <th className="text-uppercase text-secondary font-weight-bold">Status</th>
+                                <th className="text-uppercase text-secondary font-weight-bold">Joined</th>
+                                <th className="text-uppercase text-secondary font-weight-bold">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {members.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                                    <td colSpan="6" className="text-center p-5 text-muted">
                                         No team members found.
                                     </td>
                                 </tr>
@@ -214,66 +279,49 @@ const TeamList = () => {
 
                                     return (
                                         <tr key={member.id}>
-                                            <td>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                    <div style={{
-                                                        width: '36px',
-                                                        height: '36px',
-                                                        borderRadius: '50%',
-                                                        background: avatar.bg,
-                                                        color: avatar.text,
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        fontWeight: '600',
-                                                        fontSize: '0.9rem'
-                                                    }}>
+                                            <td className="align-middle">
+                                                <div className="d-flex align-items-center gap-3">
+                                                    <div 
+                                                        className="avatar-circle shadow-sm flex-shrink-0"
+                                                        style={{
+                                                            width: '36px',
+                                                            height: '36px',
+                                                            background: avatar.bg,
+                                                            color: avatar.text
+                                                        }}
+                                                    >
                                                         {(member.name || member.username).substring(0, 2).toUpperCase()}
                                                     </div>
                                                     <div>
-                                                        <div className="text-bold">{member.name || 'No Name'}</div>
+                                                        <div className="font-weight-bold text-dark">{member.name || 'No Name'}</div>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td>{member.username}</td>
-                                            <td>
-                                                <span className={`badge ${getRoleBadgeClass(member.role)}`}>
+                                            <td className="align-middle">{member.username}</td>
+                                            <td className="align-middle">
+                                                <span className={`badge rounded-pill ${getRoleBadgeClass(member.role)} px-3 py-2`}>
                                                     {formatRoleName(member.role)}
                                                 </span>
                                             </td>
-                                            <td>
-                                                <span style={{ 
-                                                    display: 'inline-flex', 
-                                                    alignItems: 'center', 
-                                                    gap: '6px',
-                                                    fontSize: '0.8rem',
-                                                    color: member.is_active ? '#4bcf82' : '#ff6b6b',
-                                                    fontWeight: '500'
-                                                }}>
-                                                    <span style={{ 
-                                                        width: '6px', 
-                                                        height: '6px', 
-                                                        borderRadius: '50%', 
-                                                        background: member.is_active ? '#4bcf82' : '#ff6b6b' 
-                                                    }}></span>
+                                            <td className="align-middle">
+                                                <span className={`badge rounded-pill ${member.is_active ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'} px-3 py-2`}>
                                                     {member.is_active ? 'Active' : 'Inactive'}
                                                 </span>
                                             </td>
-                                            <td className="text-muted">
+                                            <td className="text-muted align-middle">
                                                 {new Date(member.date_joined).toLocaleDateString(undefined, {
                                                     year: 'numeric',
                                                     month: 'short',
                                                     day: 'numeric'
                                                 })}
                                             </td>
-                                            <td>
+                                            <td className="align-middle">
                                                 {allowedToManage ? (
-                                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                                    <div className="d-flex gap-2">
                                                         <button 
-                                                            className="btn-icon" 
+                                                            className="btn btn-link text-secondary p-1 text-decoration-none" 
                                                             onClick={() => handleEditClick(member)}
                                                             title="Edit Member"
-                                                            style={{ border: 'none', padding: '6px', background: 'transparent', cursor: 'pointer', color: 'var(--text-secondary)' }}
                                                         >
                                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -282,10 +330,9 @@ const TeamList = () => {
                                                         </button>
                                                         {member.id !== user.id && (
                                                             <button 
-                                                                className="btn-icon" 
+                                                                className="btn btn-link text-danger p-1 text-decoration-none" 
                                                                 onClick={() => handleDeleteClick(member)}
                                                                 title="Delete Member"
-                                                                style={{ border: 'none', padding: '6px', background: 'transparent', cursor: 'pointer', color: '#ff6b6b' }}
                                                             >
                                                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                                     <polyline points="3 6 5 6 21 6" />
@@ -297,7 +344,7 @@ const TeamList = () => {
                                                         )}
                                                     </div>
                                                 ) : (
-                                                    <span className="text-muted" style={{ fontSize: '0.8rem' }}>View-only</span>
+                                                    <span className="text-muted small">View-only</span>
                                                 )}
                                             </td>
                                         </tr>
@@ -307,82 +354,103 @@ const TeamList = () => {
                         </tbody>
                     </table>
                 </div>
+                {totalCount > pageSize && (
+                    <div className="pagination">
+                        <button 
+                            className="pagination-btn" 
+                            disabled={page === 1} 
+                            onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+                        >
+                            Previous
+                        </button>
+                        <span className="pagination-info">
+                            Page {page} of {Math.ceil(totalCount / pageSize)} ({totalCount} items)
+                        </span>
+                        <button 
+                            className="pagination-btn" 
+                            disabled={page >= Math.ceil(totalCount / pageSize)} 
+                            onClick={() => setPage(prev => prev + 1)}
+                        >
+                            Next
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* EDIT MEMBER MODAL */}
             {editingMember && (
-                <div className="modal-overlay">
-                    <div className="modal-card">
-                        <div className="modal-header">
-                            <h2>Edit Team Member</h2>
-                            <button className="modal-close" onClick={() => setEditingMember(null)}>&times;</button>
+                <div className="modal-overlay d-flex align-items-center justify-content-center position-fixed w-100 h-100 top-0 start-0 z-3 bg-dark bg-opacity-50">
+                    <div className="modal-card bg-white rounded shadow-lg p-4 w-100" style={{ maxWidth: '500px' }}>
+                        <div className="modal-header d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                            <h5 className="mb-0 font-weight-bold">Edit Team Member</h5>
+                            <button className="btn-close" onClick={() => setEditingMember(null)}></button>
                         </div>
                         <form onSubmit={handleEditSubmit}>
-                            <div className="form-group" style={{ marginBottom: '1.2rem' }}>
-                                <label className="form-label">Username</label>
+                            <div className="mb-3">
+                                <label className="form-label font-weight-bold text-secondary">Username</label>
                                 <input 
                                     type="text" 
-                                    className="form-input" 
+                                    className="form-control" 
                                     value={editForm.username}
                                     onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
                                     required 
                                 />
                             </div>
-                            <div className="form-group" style={{ marginBottom: '1.2rem' }}>
-                                <label className="form-label">Full Name</label>
+                            <div className="mb-3">
+                                <label className="form-label font-weight-bold text-secondary">Full Name</label>
                                 <input 
                                     type="text" 
-                                    className="form-input" 
+                                    className="form-control" 
                                     value={editForm.name}
                                     onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                                 />
                             </div>
                             {editingMember.id !== user.id && (
-                                <div className="form-group" style={{ marginBottom: '1.2rem' }}>
-                                    <label className="form-label">Role</label>
+                                <div className="mb-3">
+                                    <label className="form-label font-weight-bold text-secondary">Role</label>
                                     <select 
-                                        className="form-input" 
+                                        className="form-select bg-light" 
                                         value={editForm.role}
                                         onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
                                         required
-                                        style={{ width: '100%', background: 'transparent', color: 'var(--text-primary)' }}
                                     >
                                         {getAllowedRoles().map((role) => (
-                                            <option key={role.value} value={role.value} style={{ background: '#1e1e24' }}>
+                                            <option key={role.value} value={role.value}>
                                                 {role.label}
                                             </option>
                                         ))}
                                     </select>
                                 </div>
                             )}
-                            <div className="form-group" style={{ marginBottom: '1.2rem' }}>
-                                <label className="form-label">New Password (leave blank to keep current)</label>
+                            <div className="mb-3">
+                                <label className="form-label font-weight-bold text-secondary">New Password (leave blank to keep current)</label>
                                 <input 
                                     type="password" 
-                                    className="form-input" 
+                                    className="form-control" 
                                     placeholder="Enter new password"
                                     value={editForm.password}
                                     onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
                                 />
                             </div>
                             {editingMember.id !== user.id && (
-                                <div className="form-group" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div className="mb-4 form-check">
                                     <input 
                                         type="checkbox" 
+                                        className="form-check-input"
                                         id="edit-is-active"
                                         checked={editForm.is_active}
                                         onChange={(e) => setEditForm({ ...editForm, is_active: e.target.checked })}
                                     />
-                                    <label htmlFor="edit-is-active" className="form-label" style={{ marginBottom: '0px', cursor: 'pointer' }}>
+                                    <label htmlFor="edit-is-active" className="form-check-label cursor-pointer">
                                         Account is Active
                                     </label>
                                 </div>
                             )}
-                            <div className="modal-actions">
+                            <div className="d-flex justify-content-end gap-2">
                                 <button type="button" className="btn-cancel-white" onClick={() => setEditingMember(null)}>
                                     Cancel
                                 </button>
-                                <button type="submit" className="btn-primary-gradient" style={{ border: 'none', color: '#fff', cursor: 'pointer' }}>
+                                <button type="submit" className="btn btn-gradient-primary border-0 shadow-sm text-white">
                                     Save Changes
                                 </button>
                             </div>
@@ -393,23 +461,21 @@ const TeamList = () => {
 
             {/* DELETE MEMBER MODAL */}
             {deletingMember && (
-                <div className="modal-overlay">
-                    <div className="modal-card">
-                        <div className="modal-header">
-                            <h2>Delete Team Member</h2>
-                            <button className="modal-close" onClick={() => setDeletingMember(null)}>&times;</button>
+                <div className="modal-overlay d-flex align-items-center justify-content-center position-fixed w-100 h-100 top-0 start-0 z-3 bg-dark bg-opacity-50">
+                    <div className="modal-card bg-white rounded shadow-lg p-4 w-100" style={{ maxWidth: '400px' }}>
+                        <div className="modal-header d-flex justify-content-between align-items-center mb-3">
+                            <h5 className="mb-0 font-weight-bold text-danger">Delete Team Member</h5>
+                            <button className="btn-close" onClick={() => setDeletingMember(null)}></button>
                         </div>
-                        <div style={{ marginBottom: '2rem' }}>
-                            <p>Are you sure you want to delete <strong>{deletingMember.name || deletingMember.username}</strong>?</p>
-                            <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: '8px' }}>
-                                This action is permanent and cannot be undone.
-                            </p>
+                        <div className="mb-4">
+                            <p className="mb-1">Are you sure you want to delete <strong>{deletingMember.name || deletingMember.username}</strong>?</p>
+                            <p className="text-muted small mb-0">This action is permanent and cannot be undone.</p>
                         </div>
-                        <div className="modal-actions">
+                        <div className="d-flex justify-content-end gap-2">
                             <button className="btn-cancel-white" onClick={() => setDeletingMember(null)}>
                                 Cancel
                             </button>
-                            <button className="btn-danger" onClick={handleDeleteConfirm} style={{ border: 'none', color: '#fff', cursor: 'pointer', padding: '0.6rem 1.2rem', borderRadius: '8px' }}>
+                            <button className="btn btn-danger border-0 shadow-sm" onClick={handleDeleteConfirm}>
                                 Confirm Delete
                             </button>
                         </div>

@@ -1,30 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-
-
-const SEARCH_BUTTON_STYLE = {
-    background: 'transparent',
-    border: 'none',
-    width: 'calc(100% - 24px)',
-    margin: '0 12px 6px 12px',
-    textAlign: 'left',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    padding: '10px 12px',
-    color: 'var(--text-secondary)'
-};
-
-const KBD_STYLE = {
-    marginLeft: '6px',
-    background: '#cbd5e1',
-    padding: '1px 5px',
-    borderRadius: '4px',
-    fontSize: '0.65rem',
-    color: '#475569'
-};
+import { getAvatarStyle } from '../utils/avatar';
 
 const Sidebar = () => {
     const { user, logout } = useAuth();
@@ -34,18 +11,7 @@ const Sidebar = () => {
         return localStorage.getItem('sidebar_collapsed') === 'true';
     });
 
-    const [isSearchOpen, setIsSearchOpen] = useState(false);
-
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-                e.preventDefault();
-                setIsSearchOpen(true);
-            }
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, []);
+    const [isCreateTypesOpen, setIsCreateTypesOpen] = useState(false);
 
     const toggleSidebar = () => {
         const nextState = !isCollapsed;
@@ -56,7 +22,6 @@ const Sidebar = () => {
     const isSuperAdmin = user?.role === 'SUPERADMIN';
     const isAdmin = user?.role === 'ADMIN';
     const canManageMembers = isSuperAdmin || isAdmin;
-    const canCrud = canManageMembers || user?.can_crud_tasks;
 
     const displayName = user?.name || user?.username || 'User';
     const profilePic = user?.profile_picture || null;
@@ -81,19 +46,14 @@ const Sidebar = () => {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                 >
-                    <rect x="3" y="3" width="7" height="7" rx="1" />
-                    <rect x="14" y="3" width="7" height="7" rx="1" />
-                    <rect x="3" y="14" width="7" height="7" rx="1" />
-                    <rect x="14" y="14" width="7" height="7" rx="1" />
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
                 </svg>
             ),
         },
-    ];
-
-    if (canCrud) {
-        navItems.push({
-            path: '/completed-tasks',
-            label: 'Completed Tasks',
+        {
+            path: '/enquiries',
+            label: 'Enquiry Tracker',
             icon: (
                 <svg
                     width="20"
@@ -105,12 +65,15 @@ const Sidebar = () => {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                 >
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                    <polyline points="22 4 12 14.01 9 11.01" />
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
                 </svg>
             ),
-        });
-    }
+        },
+    ];
 
     if (canManageMembers) {
         navItems.push(
@@ -149,10 +112,11 @@ const Sidebar = () => {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                     >
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        <rect x="3" y="4" width="18" height="16" rx="2" />
+                        <line x1="16" y1="8" x2="16" y2="8.01" />
+                        <line x1="16" y1="12" x2="16" y2="12.01" />
+                        <line x1="16" y1="16" x2="16" y2="16.01" />
+                        <path d="M7 8h5M7 12h5M7 16h5" />
                     </svg>
                 ),
             },
@@ -173,9 +137,12 @@ const Sidebar = () => {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                 >
-                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
-                    <path d="M12 8v8" />
-                    <path d="M8 12h8" />
+                    <line x1="8" y1="6" x2="21" y2="6" />
+                    <line x1="8" y1="12" x2="21" y2="12" />
+                    <line x1="8" y1="18" x2="21" y2="18" />
+                    <line x1="3" y1="6" x2="3.01" y2="6" />
+                    <line x1="3" y1="12" x2="3.01" y2="12" />
+                    <line x1="3" y1="18" x2="3.01" y2="18" />
                 </svg>
             ),
             children: [
@@ -221,7 +188,7 @@ const Sidebar = () => {
                         />
                     </div>
                     <div className="sidebar-brand-info">
-                        <span className="sidebar-brand-name">Tracker</span>
+                        <span className="sidebar-brand-name">Sales</span>
                         <span className="sidebar-brand-role">
                             {user?.role || 'Admin'}
                         </span>
@@ -251,42 +218,36 @@ const Sidebar = () => {
                 </div>
                 <nav className="sidebar-nav">
                     <div className="nav-section-label">MENU</div>
-                    <button
-                        onClick={() => setIsSearchOpen(true)}
-                        className="nav-item"
-                        style={SEARCH_BUTTON_STYLE}
-                    >
-                        <span className="nav-icon">
-                            <svg
-                                width="20"
-                                height="20"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <circle cx="11" cy="11" r="8" />
-                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                            </svg>
-                        </span>
-                        <span className="nav-label" style={{ display: isCollapsed ? 'none' : 'inline' }}>
-                            Search <kbd style={KBD_STYLE}>Ctrl+K</kbd>
-                        </span>
-                    </button>
                     {navItems.map((item) => {
                         if (item.children) {
                             return (
-                                <div key={item.label} className="nav-item-group" style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <div className="nav-item nav-item-parent" style={{ cursor: 'default' }}>
-                                        <span className="nav-icon">{item.icon}</span>
-                                        <span className="nav-label" style={{ display: isCollapsed ? 'none' : 'inline' }}>
-                                            {item.label}
-                                        </span>
-                                    </div>
-                                    {!isCollapsed && (
-                                        <div className="sidebar-submenu" style={{ paddingLeft: '28px', display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px', marginBottom: '8px' }}>
+                                <div key={item.label} className="nav-item-group">
+                                    <button
+                                        onClick={() => setIsCreateTypesOpen(!isCreateTypesOpen)}
+                                        className="nav-item nav-item-parent w-100 text-start bg-transparent border-0 d-flex align-items-center justify-content-between cursor-pointer"
+                                    >
+                                        <div className="d-flex align-items-center gap-3">
+                                            <span className="nav-icon">{item.icon}</span>
+                                            <span className="nav-label">
+                                                {item.label}
+                                            </span>
+                                        </div>
+                                        {!isCollapsed && (
+                                            <svg
+                                                width="12"
+                                                height="12"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2.5"
+                                                className={`submenu-arrow ${isCreateTypesOpen ? 'rotated' : ''}`}
+                                            >
+                                                <polyline points="6 9 12 15 18 9" />
+                                            </svg>
+                                        )}
+                                    </button>
+                                    {!isCollapsed && isCreateTypesOpen && (
+                                        <div className="sidebar-submenu">
                                             {item.children.map((sub) => (
                                                 <NavLink
                                                     key={sub.path}
@@ -312,7 +273,7 @@ const Sidebar = () => {
                                 }
                             >
                                 <span className="nav-icon">{item.icon}</span>
-                                <span className="nav-label" style={{ display: isCollapsed ? 'none' : 'inline' }}>{item.label}</span>
+                                <span className="nav-label">{item.label}</span>
                             </NavLink>
                         );
                     })}
@@ -330,6 +291,10 @@ const Sidebar = () => {
                         ) : (
                             <div
                                 className="sidebar-profile-avatar-fallback"
+                                style={{
+                                    background: getAvatarStyle(user?.username || displayName).background,
+                                    color: getAvatarStyle(user?.username || displayName).color
+                                }}
                             >
                                 {displayName?.charAt(0)?.toUpperCase()}
                             </div>

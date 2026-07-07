@@ -248,12 +248,8 @@ const Dashboard = () => {
 
                         <div className="ext-dashboard-138">
                             <div
-                                style={{
-                                    width: `${headerMetrics.progress}%`,
-                                    height: '100%',
-                                    background: '#4bcf82',
-                                    borderRadius: '3px',
-                                }}
+                                className="progress-bar-fill"
+                                style={{ width: `${headerMetrics.progress}%` }}
                             ></div>
                         </div>
                     </div>
@@ -452,32 +448,13 @@ const Dashboard = () => {
 
                                                 <td>
                                                     <span
-                                                        style={{
-                                                            padding: '4px 10px',
-                                                            borderRadius: '6px',
-                                                            fontSize: '0.7rem',
-                                                            fontWeight: 700,
-                                                            background: `${getPriorityColor(task.priority)}15`,
-                                                            color: getPriorityColor(
-                                                                task.priority,
-                                                            ),
-                                                        }}
+                                                        className={`badge badge-${task.priority.toLowerCase()}`}
                                                     >
                                                         {task.priority}
                                                     </span>
                                                 </td>
 
-                                                <td
-                                                    style={{
-                                                        fontSize: '0.85rem',
-                                                        fontWeight: isOverdue
-                                                            ? 700
-                                                            : 500,
-                                                        color: isOverdue
-                                                            ? '#ff6b6b'
-                                                            : 'var(--text-secondary)',
-                                                    }}
-                                                >
+                                                <td className={isOverdue ? "text-danger fw-bold" : "text-secondary fw-medium"}>
                                                     {task.revised_due_date ? (
                                                         <div className="ext-dashboard-150">
                                                             <span className="ext-dashboard-151">
@@ -486,14 +463,7 @@ const Dashboard = () => {
                                                                 ).toLocaleDateString()}
                                                             </span>
 
-                                                            <span
-                                                                style={{
-                                                                    fontWeight: 600,
-                                                                    color: isOverdue
-                                                                        ? '#ff6b6b'
-                                                                        : 'var(--text-primary)',
-                                                                }}
-                                                            >
+                                                            <span className={isOverdue ? "text-danger fw-bold" : "text-dark fw-bold"}>
                                                                 {new Date(
                                                                     task.revised_due_date,
                                                                 ).toLocaleDateString()}
@@ -536,29 +506,10 @@ const Dashboard = () => {
                                                                 />
                                                             ) : (
                                                                 <div
+                                                                    className="avatar-circle shadow-sm"
                                                                     style={{
-                                                                        width: '28px',
-                                                                        height: '28px',
-                                                                        borderRadius:
-                                                                            '50%',
-
-                                                                        background:
-                                                                            avStyle.bg,
-                                                                        color: avStyle.text,
-
-                                                                        display:
-                                                                            'flex',
-                                                                        alignItems:
-                                                                            'center',
-                                                                        justifyContent:
-                                                                            'center',
-
-                                                                        fontSize:
-                                                                            '0.8rem',
-                                                                        fontWeight: 700,
-
-                                                                        boxShadow:
-                                                                            '0 2px 4px rgba(15, 23, 42, 0.08)',
+                                                                        background: avStyle.bg,
+                                                                        color: avStyle.text
                                                                     }}
                                                                 >
                                                                     {assigneeName
@@ -616,24 +567,7 @@ const Dashboard = () => {
                                     )}
 
                                     <div
-                                        style={{
-                                            width: '40px',
-                                            height: '40px',
-                                            borderRadius: '50%',
-                                            background:
-                                                activity.type === 'TASK'
-                                                    ? 'rgba(123,104,238,0.1)'
-                                                    : 'rgba(73,204,249,0.1)',
-                                            color:
-                                                activity.type === 'TASK'
-                                                    ? '#7B68EE'
-                                                    : '#49CCF9',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            flexShrink: 0,
-                                            zIndex: 1,
-                                        }}
+                                        className={`activity-icon-wrapper ${activity.type === 'TASK' ? 'activity-task' : 'activity-other'}`}
                                     >
                                         {activity.type === 'TASK' ? (
                                             <svg

@@ -72,14 +72,14 @@ const CreateMember = () => {
 
     return (
         <div className="page">
-            <div className="page-header" style={{ marginBottom: '2rem' }}>
+            <div className="page-header mb-4">
                 <h1 className="page-title">Create Member</h1>
                 <p className="page-subtitle">Add a new user to the organization</p>
             </div>
 
-            <div className="card" style={{ maxWidth: '540px', margin: '0 auto', padding: '28px' }}>
+            <div className="card shadow-sm p-4 mx-auto" style={{ maxWidth: '540px' }}>
                 <form onSubmit={handleSubmit}>
-                    <div className="form-group" style={{ marginBottom: '1.2rem' }}>
+                    <div className="form-group mb-3">
                         <label className="form-label">Username</label>
                         <input
                             type="text"
@@ -90,7 +90,7 @@ const CreateMember = () => {
                             required
                         />
                     </div>
-                    <div className="form-group" style={{ marginBottom: '1.2rem' }}>
+                    <div className="form-group mb-3">
                         <label className="form-label">Full Name</label>
                         <input
                             type="text"
@@ -100,23 +100,23 @@ const CreateMember = () => {
                             onChange={(e) => setForm({ ...form, name: e.target.value })}
                         />
                     </div>
-                    <div className="form-group" style={{ marginBottom: '1.2rem' }}>
+                    <div className="form-group mb-3">
                         <label className="form-label">Role</label>
                         <select
                             className="form-input"
                             value={form.role}
                             onChange={(e) => setForm({ ...form, role: e.target.value })}
                             required
-                            style={{ width: '100%', background: 'transparent', color: 'var(--text-primary)' }}
+                            className="form-control bg-transparent text-dark w-100"
                         >
                             {getAllowedRoles().map((role) => (
-                                <option key={role.value} value={role.value} style={{ background: '#1e1e24' }}>
+                                <option key={role.value} value={role.value} className="text-dark bg-white">
                                     {role.label}
                                 </option>
                             ))}
                         </select>
                     </div>
-                    <div className="form-group" style={{ marginBottom: '2rem' }}>
+                    <div className="form-group mb-4">
                         <label className="form-label">Password</label>
                         <input
                             type="password"
@@ -127,23 +127,21 @@ const CreateMember = () => {
                             required
                         />
                     </div>
-                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                    <div className="d-flex gap-2 justify-content-end">
                         <button
                             type="button"
-                            className="btn-cancel-white"
+                            className="btn-cancel-white px-4"
                             onClick={() => navigate('/team')}
-                            style={{ padding: '0.6rem 1.2rem', borderRadius: '8px' }}
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="btn-primary-gradient"
+                            className="btn btn-gradient-primary d-flex align-items-center gap-2 border-0 text-white"
                             disabled={loading}
-                            style={{ border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                         >
                             {loading ? (
-                                <span className="spinner" style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid #fff', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite' }}></span>
+                                <span className="spinner"></span>
                             ) : null}
                             Create Account
                         </button>

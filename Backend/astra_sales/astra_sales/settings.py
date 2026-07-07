@@ -167,10 +167,13 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_CLASSES": [
         "core.throttling.TokenBucketRateThrottle",
     ],
+    "DEFAULT_PAGINATION_CLASS": "core.pagination.CustomPagination",
+    "PAGE_SIZE": 10,
+    "EXCEPTION_HANDLER": "core.exceptions.custom_exception_handler",
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
 

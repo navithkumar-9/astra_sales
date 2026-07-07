@@ -39,6 +39,7 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-size: 0.9rem;
 }
 
 ::-webkit-scrollbar { width: 6px; }

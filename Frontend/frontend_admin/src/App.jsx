@@ -12,6 +12,7 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const TeamList = lazy(() => import('./pages/TeamList'));
 const CreateMember = lazy(() => import('./pages/CreateMember'));
 const Settings = lazy(() => import('./pages/Settings'));
+const Enquiries = lazy(() => import('./pages/Enquiries'));
 
 const LoadingFallback = () => (
     <div className="loading-fallback-container">
@@ -63,6 +64,16 @@ function App() {
                                     <ProtectedRoute>
                                         <Layout>
                                             <Settings />
+                                        </Layout>
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/enquiries"
+                                element={
+                                    <ProtectedRoute>
+                                        <Layout>
+                                            <Enquiries />
                                         </Layout>
                                     </ProtectedRoute>
                                 }

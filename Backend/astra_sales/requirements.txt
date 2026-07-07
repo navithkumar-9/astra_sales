@@ -9,3 +9,4 @@ gunicorn
 celery
 pika
 django-prometheus
+celery-prometheus-exporter

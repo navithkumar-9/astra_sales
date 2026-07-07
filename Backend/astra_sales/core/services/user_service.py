@@ -24,13 +24,33 @@ class UserService:
             raise
 
     @classmethod
-    def list_users(cls, requestor):
+    def list_users(cls, requestor, search=None, role=None, is_active=None):
         cls.policy.assert_can_list(requestor)
 
-        if requestor.role == RoleChoices.SUPERADMIN:
-            return User.objects.all().order_by("-date_joined")
+        if requestor.role not in (RoleChoices.SUPERADMIN, RoleChoices.ADMIN):
+            role = RoleChoices.SALES_REP
 
-        return User.objects.exclude(role=RoleChoices.SUPERADMIN).order_by("-date_joined")
+        if requestor.role == RoleChoices.SUPERADMIN:
+            queryset = User.objects.all().order_by("-date_joined")
+        elif requestor.role == RoleChoices.ADMIN:
+            queryset = User.objects.exclude(role=RoleChoices.SUPERADMIN).order_by("-date_joined")
+        else:
+            queryset = User.objects.filter(role=RoleChoices.SALES_REP).order_by("-date_joined")
+
+        if search:
+            from django.db.models import Q
+            queryset = queryset.filter(
+                Q(username__icontains=search) | 
+                Q(name__icontains=search)
+            )
+
+        if role:
+            queryset = queryset.filter(role=role)
+
+        if is_active is not None:
+            queryset = queryset.filter(is_active=is_active)
+
+        return queryset
 
     @classmethod
     def update_user(cls, requestor, user_id, data):
