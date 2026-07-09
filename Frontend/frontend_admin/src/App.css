@@ -5975,3 +5975,23 @@ button[type="submit"] .spinner,
     transform: translateY(-50%);
     z-index: 10;
 }
+
+.btn-action-delete {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(254, 84, 109, 0.08);
+    color: #fe546d;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-action-delete:hover {
+    background-color: #fe546d !important;
+    color: #fff !important;
+    transform: scale(1.08);
+    box-shadow: 0 4px 10px rgba(254, 84, 109, 0.35) !important;
+}

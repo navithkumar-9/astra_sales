@@ -5,6 +5,4 @@ class CoreConfig(AppConfig):
     name = 'core'
 
     def ready(self):
-        from core.metrics import register_collectors
-
-        register_collectors()
+        pass

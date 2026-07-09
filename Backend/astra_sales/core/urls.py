@@ -1,5 +1,8 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from core.metrics import register_collectors
+register_collectors()
+
 from core.views.auth_views import LoginView
 from core.views.user_views import UserListView, UserDetailView, ProfileView
 from core.views.master_data_views import (

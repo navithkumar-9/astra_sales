@@ -13,6 +13,9 @@ const TeamList = lazy(() => import('./pages/TeamList'));
 const CreateMember = lazy(() => import('./pages/CreateMember'));
 const Settings = lazy(() => import('./pages/Settings'));
 const Enquiries = lazy(() => import('./pages/Enquiries'));
+const PendingEngg = lazy(() => import('./pages/PendingEngg'));
+const PendingCosting = lazy(() => import('./pages/PendingCosting'));
+const SalesToQuote = lazy(() => import('./pages/SalesToQuote'));
 
 const LoadingFallback = () => (
     <div className="loading-fallback-container">
@@ -74,6 +77,36 @@ function App() {
                                     <ProtectedRoute>
                                         <Layout>
                                             <Enquiries />
+                                        </Layout>
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/pending-engg"
+                                element={
+                                    <ProtectedRoute>
+                                        <Layout>
+                                            <PendingEngg />
+                                        </Layout>
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/pending-costing"
+                                element={
+                                    <ProtectedRoute>
+                                        <Layout>
+                                            <PendingCosting />
+                                        </Layout>
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/sales-to-quote"
+                                element={
+                                    <ProtectedRoute>
+                                        <Layout>
+                                            <SalesToQuote />
                                         </Layout>
                                     </ProtectedRoute>
                                 }

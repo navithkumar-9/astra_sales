@@ -23,11 +23,20 @@ class Enquiry(TimeStampedModel):
     fg_type = models.ForeignKey(FG, on_delete=models.CASCADE, related_name='enquiries')
     sales_rep = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assigned_enquiries')
 
-    # Newly added fields for estimation tracking
-    ed_of_engg = models.DateField(null=True, blank=True)
-    ed_of_costing = models.DateField(null=True, blank=True)
-    ed_of_sales = models.DateField(null=True, blank=True)
-    status = models.CharField(max_length=50, default='Pending')
+    # Estimation tracking fields
+    ed_of_engg = models.DateField(null=True, blank=True) # Expected Date of Engineering
+    actual_date_of_engg = models.DateField(null=True, blank=True) # Actual Date of Engineering
+    engg_remarks = models.TextField(blank=True, default='') # Engineering Remarks
+    
+    ed_of_costing = models.DateField(null=True, blank=True) # Expected Date of Costing
+    actual_date_of_costing = models.DateField(null=True, blank=True) # Actual Date of Costing
+    costing_remarks = models.TextField(blank=True, default='') # Costing Remarks
+    
+    ed_of_sales = models.DateField(null=True, blank=True) # Expected Date of Sales
+    actual_date_of_sales = models.DateField(null=True, blank=True) # Actual Date of Sales
+    sales_remarks = models.TextField(blank=True, default='') # Sales Remarks
+    
+    status = models.CharField(max_length=50, default='Pending with Engg')
     clarification_to_cs = models.TextField(blank=True, default='')
     clarification_from_cs = models.TextField(blank=True, default='')
     remarks = models.TextField(blank=True, default='')

@@ -75,6 +75,77 @@ const Sidebar = () => {
         },
     ];
 
+    const canViewPendingEngg = isSuperAdmin || isAdmin || user?.role === 'RFQ_TRACKER';
+
+    if (canViewPendingEngg) {
+        navItems.push({
+            path: '/pending-engg',
+            label: 'Pending with Engg',
+            icon: (
+                <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+                    <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+                </svg>
+            )
+        });
+    }
+
+    const canViewPendingCosting = isSuperAdmin || isAdmin || user?.role === 'RFQ_TRACKER';
+
+    if (canViewPendingCosting) {
+        navItems.push({
+            path: '/pending-costing',
+            label: 'Pending with Costing',
+            icon: (
+                <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <line x1="12" y1="1" x2="12" y2="23" />
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+            )
+        });
+    }
+
+    const canViewSalesToQuote = isSuperAdmin || isAdmin || user?.role === 'RFQ_TRACKER';
+
+    if (canViewSalesToQuote) {
+        navItems.push({
+            path: '/sales-to-quote',
+            label: 'Sales to Quote',
+            icon: (
+                <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+            )
+        });
+    }
+
     if (canManageMembers) {
         navItems.push(
             {

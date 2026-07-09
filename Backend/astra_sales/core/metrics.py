@@ -1,7 +1,11 @@
+from django.db.models import Count
 from prometheus_client import Counter
 from prometheus_client.core import GaugeMetricFamily, REGISTRY
 
 from core.models.user import RoleChoices, User
+
+USER_METRICS_CACHE_KEY = "metrics:user_accounts_snapshot"
+USER_METRICS_CACHE_TTL = 60
 
 
 AUTH_LOGIN_ATTEMPTS = Counter(
@@ -25,12 +29,31 @@ class UserAccountsCollector:
             labels=["role", "is_active"],
         )
 
-        for role in RoleChoices.values:
-            for is_active in (True, False):
+        import sys
+        if any(cmd in sys.argv for cmd in ["migrate", "makemigrations", "check", "collectstatic"]):
+            yield metric
+            return
+
+        from django.core.cache import cache
+        from django.db.utils import OperationalError, ProgrammingError
+        
+        try:
+            snapshot = cache.get(USER_METRICS_CACHE_KEY)
+            if snapshot is None:
+                snapshot = list(
+                    User.objects.values("role", "is_active")
+                    .annotate(count=Count("id"))
+                    .values_list("role", "is_active", "count")
+                )
+                cache.set(USER_METRICS_CACHE_KEY, snapshot, USER_METRICS_CACHE_TTL)
+
+            for role, is_active, count in snapshot:
                 metric.add_metric(
                     [role, str(is_active).lower()],
-                    User.objects.filter(role=role, is_active=is_active).count(),
+                    count,
                 )
+        except (OperationalError, ProgrammingError, ImportError):
+            pass
 
         yield metric
 
@@ -44,6 +67,8 @@ def record_user_operation(operation, success):
         operation=operation,
         result="success" if success else "failure",
     ).inc()
+    from django.core.cache import cache
+    cache.delete(USER_METRICS_CACHE_KEY)
 
 
 def register_collectors():

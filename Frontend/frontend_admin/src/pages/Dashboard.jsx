@@ -51,6 +51,7 @@ const Dashboard = () => {
                     setDashboardData(res.data.data);
                 }
             } catch (error) {
+                // Endpoint may not exist yet; avoid blocking dashboard render
                 console.error('Error fetching dashboard data', error);
             } finally {
                 setLoading(false);

@@ -13,6 +13,7 @@ const Enquiries = () => {
     const isAdmin = user?.role === 'ADMIN';
     const isRfqTracker = user?.role === 'RFQ_TRACKER';
     const canCreate = isSuperAdmin || isAdmin || isRfqTracker;
+    const canDelete = isSuperAdmin || isAdmin || isRfqTracker;
 
     const today = new Date().toISOString().split('T')[0];
 
@@ -122,31 +123,28 @@ const Enquiries = () => {
         return () => clearTimeout(delayDebounce);
     }, [page, search]);
 
-    // Fetch dropdown data on mount
-    useEffect(() => {
-        const fetchDropdowns = async () => {
-            try {
-                const [custRes, sbuRes, divRes, rfqRes, fgRes, salesRes] = await Promise.all([
-                    API.get('/customers/?page_size=100'),
-                    API.get('/sbus/?page_size=100'),
-                    API.get('/divisions/?page_size=100'),
-                    API.get('/rfqs/?page_size=100'),
-                    API.get('/fgs/?page_size=100'),
-                    API.get('/users/?role=SALES_REP&page_size=100')
-                ]);
+    // Fetch dropdown data when create modal opens (not on every page load)
+    const fetchDropdowns = async () => {
+        try {
+            const [custRes, sbuRes, divRes, rfqRes, fgRes, salesRes] = await Promise.all([
+                API.get('/customers/?page_size=100'),
+                API.get('/sbus/?page_size=100'),
+                API.get('/divisions/?page_size=100'),
+                API.get('/rfqs/?page_size=100'),
+                API.get('/fgs/?page_size=100'),
+                API.get('/users/?role=SALES_REP&page_size=100')
+            ]);
 
-                setCustomers(custRes.data.success ? custRes.data.data.results || custRes.data.data : custRes.data.results || custRes.data);
-                setSbus(sbuRes.data.success ? sbuRes.data.data.results || sbuRes.data.data : sbuRes.data.results || sbuRes.data);
-                setDivisions(divRes.data.success ? divRes.data.data.results || divRes.data.data : divRes.data.results || divRes.data);
-                setRfqTypes(rfqRes.data.success ? rfqRes.data.data.results || rfqRes.data.data : rfqRes.data.results || rfqRes.data);
-                setFgTypes(fgRes.data.success ? fgRes.data.data.results || fgRes.data.data : fgRes.data.results || fgRes.data);
-                setSalesReps(salesRes.data.success ? salesRes.data.data.results || salesRes.data.data : salesRes.data.results || salesRes.data);
-            } catch (err) {
-                showToast('Failed to load lookup configurations.', 'error');
-            }
-        };
-        fetchDropdowns();
-    }, [showToast]);
+            setCustomers(custRes.data.success ? custRes.data.data.results || custRes.data.data : custRes.data.results || custRes.data);
+            setSbus(sbuRes.data.success ? sbuRes.data.data.results || sbuRes.data.data : sbuRes.data.results || sbuRes.data);
+            setDivisions(divRes.data.success ? divRes.data.data.results || divRes.data.data : divRes.data.results || divRes.data);
+            setRfqTypes(rfqRes.data.success ? rfqRes.data.data.results || rfqRes.data.data : rfqRes.data.results || rfqRes.data);
+            setFgTypes(fgRes.data.success ? fgRes.data.data.results || fgRes.data.data : fgRes.data.results || fgRes.data);
+            setSalesReps(salesRes.data.success ? salesRes.data.data.results || salesRes.data.data : salesRes.data.results || salesRes.data);
+        } catch (err) {
+            showToast('Failed to load lookup configurations.', 'error');
+        }
+    };
 
     // Add enquiry row
     const handleFgDetailChange = (index, field, value) => {
@@ -165,7 +163,20 @@ const Enquiries = () => {
         }
     };
 
+    const handleDeleteEnquiry = async (id) => {
+        if (window.confirm("Are you sure you want to delete this enquiry? All associated items will be deleted cascade.")) {
+            try {
+                await API.delete(`/enquiries/${id}/`);
+                showToast("Enquiry deleted successfully.", "success");
+                fetchEnquiries();
+            } catch (err) {
+                showToast("Failed to delete enquiry.", "error");
+            }
+        }
+    };
+
     const openCreateModal = () => {
+        fetchDropdowns();
         fetchLatestProjectNumber();
         setIsProjectNumEditable(false);
         setRfqDate(today);
@@ -383,16 +394,30 @@ const Enquiries = () => {
                                                 </span>
                                             </td>
                                             <td className="py-3 align-middle text-center pe-4">
-                                                <button
-                                                    className="btn btn-action-view rounded-circle shadow-sm"
-                                                    onClick={() => handleViewEnquiry(enq)}
-                                                    title="View Enquiry Details"
-                                                >
-                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                                        <circle cx="12" cy="12" r="3" />
-                                                    </svg>
-                                                </button>
+                                                <div className="d-flex gap-2 justify-content-center">
+                                                    <button
+                                                        className="btn btn-action-view rounded-circle shadow-sm"
+                                                        onClick={() => handleViewEnquiry(enq)}
+                                                        title="View Enquiry Details"
+                                                    >
+                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                                            <circle cx="12" cy="12" r="3" />
+                                                        </svg>
+                                                    </button>
+                                                    {canDelete && (
+                                                        <button
+                                                            className="btn btn-action-delete rounded-circle shadow-sm"
+                                                            onClick={() => handleDeleteEnquiry(enq.id)}
+                                                            title="Delete Enquiry"
+                                                        >
+                                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                                                <polyline points="3 6 5 6 21 6" />
+                                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                                            </svg>
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </td>
                                         </tr>
                                     ))
@@ -827,6 +852,60 @@ const Enquiries = () => {
                                     <div className="enq-details-label">Remarks / Description</div>
                                     <div className="enq-remarks-box">
                                         {selectedEnquiry.remarks || 'No remarks provided.'}
+                                    </div>
+                                </div>
+
+                                {/* Engineering Estimation Details */}
+                                <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom" style={{ fontSize: '0.95rem' }}>Engineering Estimation Details</h6>
+                                <div className="row g-3 mb-4">
+                                    <div className="col-md-6">
+                                        <div className="enq-details-card">
+                                            <div className="enq-details-label">Expected Date of Engineering</div>
+                                            <div className="enq-details-value" style={{ fontSize: '0.9rem' }}>
+                                                {selectedEnquiry.ed_of_engg || 'N/A'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="col-md-6">
+                                        <div className="enq-details-card">
+                                            <div className="enq-details-label">Actual Date of Engineering</div>
+                                            <div className="enq-details-value" style={{ fontSize: '0.9rem' }}>
+                                                {selectedEnquiry.actual_date_of_engg || 'N/A'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="mb-4">
+                                    <div className="enq-details-label">Engineering Remarks</div>
+                                    <div className="enq-remarks-box" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', color: '#4b5563' }}>
+                                        {selectedEnquiry.engg_remarks || 'No engineering remarks recorded.'}
+                                    </div>
+                                </div>
+
+                                {/* Costing Estimation Details */}
+                                <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom" style={{ fontSize: '0.95rem' }}>Costing Estimation Details</h6>
+                                <div className="row g-3 mb-4">
+                                    <div className="col-md-6">
+                                        <div className="enq-details-card">
+                                            <div className="enq-details-label">Expected Date of Costing</div>
+                                            <div className="enq-details-value" style={{ fontSize: '0.9rem' }}>
+                                                {selectedEnquiry.ed_of_costing || 'N/A'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="col-md-6">
+                                        <div className="enq-details-card">
+                                            <div className="enq-details-label">Actual Date of Costing</div>
+                                            <div className="enq-details-value" style={{ fontSize: '0.9rem' }}>
+                                                {selectedEnquiry.actual_date_of_costing || 'N/A'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="mb-4">
+                                    <div className="enq-details-label">Costing Remarks</div>
+                                    <div className="enq-remarks-box" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', color: '#4b5563' }}>
+                                        {selectedEnquiry.costing_remarks || 'No costing remarks recorded.'}
                                     </div>
                                 </div>
 
