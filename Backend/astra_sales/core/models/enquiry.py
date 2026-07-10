@@ -11,10 +11,10 @@ from core.models.customer import Customer
 class Enquiry(TimeStampedModel):
     project_number = models.CharField(max_length=50, unique=True)
     rfq_date = models.DateField()
-    rfq_no = models.CharField(max_length=100)
+    rfq_no = models.CharField(max_length=100, db_index=True)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='enquiries')
     sbu = models.ForeignKey(SBU, on_delete=models.CASCADE, related_name='enquiries')
-    project_name = models.CharField(max_length=255)
+    project_name = models.CharField(max_length=255, db_index=True)
     division = models.ForeignKey(Division, on_delete=models.CASCADE, related_name='enquiries')
     rfq_due_date = models.DateField()
     rfq_due_time = models.TimeField()
@@ -36,13 +36,33 @@ class Enquiry(TimeStampedModel):
     actual_date_of_sales = models.DateField(null=True, blank=True) # Actual Date of Sales
     sales_remarks = models.TextField(blank=True, default='') # Sales Remarks
     
-    status = models.CharField(max_length=50, default='Pending with Engg')
+    status = models.CharField(max_length=50, default='Pending with Engg', db_index=True)
     clarification_to_cs = models.TextField(blank=True, default='')
     clarification_from_cs = models.TextField(blank=True, default='')
     remarks = models.TextField(blank=True, default='')
 
+    # Quote tracking fields
+    quote_date = models.DateField(null=True, blank=True)
+    quote_value = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    open_l1_value = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    open_l1_date = models.DateField(null=True, blank=True)
+    lost_value = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    po_no = models.CharField(max_length=100, blank=True, default='')
+    po_receipt_date = models.DateField(null=True, blank=True)
+    po_value = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    
+    # Document tracking fields
+    rfq_document = models.FileField(upload_to='documents/rfq/', null=True, blank=True)
+    po_document = models.FileField(upload_to='documents/po/', null=True, blank=True)
+
     class Meta:
         db_table = 'enquiries'
+        constraints = [
+            models.CheckConstraint(condition=models.Q(quote_value__gte=0), name='check_quote_value_non_negative'),
+            models.CheckConstraint(condition=models.Q(open_l1_value__gte=0), name='check_open_l1_value_non_negative'),
+            models.CheckConstraint(condition=models.Q(lost_value__gte=0), name='check_lost_value_non_negative'),
+            models.CheckConstraint(condition=models.Q(po_value__gte=0), name='check_po_value_non_negative'),
+        ]
 
     @property
     def rfq_aging(self):
@@ -61,6 +81,9 @@ class EnquiryFGDetail(models.Model):
 
     class Meta:
         db_table = 'enquiry_fg_details'
+        constraints = [
+            models.CheckConstraint(condition=models.Q(qty__gte=0), name='check_fg_qty_non_negative'),
+        ]
 
     def __str__(self):
         return f"{self.fg_part_no} (Qty: {self.qty})"

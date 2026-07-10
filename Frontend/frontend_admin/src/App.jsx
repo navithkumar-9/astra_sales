@@ -16,6 +16,8 @@ const Enquiries = lazy(() => import('./pages/Enquiries'));
 const PendingEngg = lazy(() => import('./pages/PendingEngg'));
 const PendingCosting = lazy(() => import('./pages/PendingCosting'));
 const SalesToQuote = lazy(() => import('./pages/SalesToQuote'));
+const PendingSales = lazy(() => import('./pages/PendingSales'));
+const KanbanBoard = lazy(() => import('./pages/KanbanBoard'));
 
 const LoadingFallback = () => (
     <div className="loading-fallback-container">
@@ -111,6 +113,27 @@ function App() {
                                     </ProtectedRoute>
                                 }
                             />
+                            <Route
+                                path="/pending-sales"
+                                element={
+                                    <ProtectedRoute>
+                                        <Layout>
+                                            <PendingSales />
+                                        </Layout>
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/kanban"
+                                element={
+                                    <ProtectedRoute>
+                                        <Layout>
+                                            <KanbanBoard />
+                                        </Layout>
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route path="/" element={<Navigate to="/dashboard" replace />} />
                             <Route
                                 path="*"
                                 element={<Navigate to="/login" replace />}

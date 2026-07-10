@@ -6,7 +6,7 @@ import EnquiryTable from '../components/common/EnquiryTable';
 import { enquiryService } from '../services/enquiryService';
 import { userService } from '../services/userService';
 
-const PendingCosting = () => {
+const PendingSales = () => {
     const { user } = useAuth();
     const { showToast } = useToast();
 
@@ -28,23 +28,41 @@ const PendingCosting = () => {
     const [submitting, setSubmitting] = useState(false);
 
     // Edit form states
+    const [edOfEngg, setEdOfEngg] = useState('');
+    const [actualDateOfEngg, setActualDateOfEngg] = useState('');
+    const [enggRemarks, setEnggRemarks] = useState('');
+
     const [edOfCosting, setEdOfCosting] = useState('');
     const [actualDateOfCosting, setActualDateOfCosting] = useState('');
     const [costingRemarks, setCostingRemarks] = useState('');
-    const [selectedSalesRep, setSelectedSalesRep] = useState('');
-    const [status, setStatus] = useState('Pending with Costing');
 
-    // Fetch pending costing enquiries
+    const [edOfSales, setEdOfSales] = useState('');
+    const [actualDateOfSales, setActualDateOfSales] = useState('');
+    const [salesRemarks, setSalesRemarks] = useState('');
+    const [selectedSalesRep, setSelectedSalesRep] = useState('');
+    const [status, setStatus] = useState('Pending with Sales');
+
+    // Quote & PO fields
+    const [quoteDate, setQuoteDate] = useState('');
+    const [quoteValue, setQuoteValue] = useState('');
+    const [openL1Value, setOpenL1Value] = useState('');
+    const [openL1Date, setOpenL1Date] = useState('');
+    const [lostValue, setLostValue] = useState('');
+    const [poNo, setPoNo] = useState('');
+    const [poReceiptDate, setPoReceiptDate] = useState('');
+    const [poValue, setPoValue] = useState('');
+
+    // Fetch Pending with Sales enquiries
     const fetchEnquiries = async () => {
         try {
             const list = await enquiryService.getAll({ 
-                status: 'Pending with Costing', 
+                status: 'Pending with Sales', 
                 page_size: 100, 
                 search 
             });
             setEnquiries(list.results || list || []);
         } catch (err) {
-            showToast('Failed to fetch pending costing enquiries.', 'error');
+            showToast('Failed to fetch Pending with Sales enquiries.', 'error');
         } finally {
             setLoading(false);
         }
@@ -74,13 +92,48 @@ const PendingCosting = () => {
 
     const handleActionClick = (enq, viewOnlyMode = false) => {
         setSelectedEnq(enq);
+        
+        setEdOfEngg(enq.ed_of_engg || '');
+        setActualDateOfEngg(enq.actual_date_of_engg || '');
+        setEnggRemarks(enq.engg_remarks || '');
+
         setEdOfCosting(enq.ed_of_costing || '');
         setActualDateOfCosting(enq.actual_date_of_costing || '');
         setCostingRemarks(enq.costing_remarks || '');
+
+        setEdOfSales(enq.ed_of_sales || '');
+        setActualDateOfSales(enq.actual_date_of_sales || '');
+        setSalesRemarks(enq.sales_remarks || '');
         setSelectedSalesRep(enq.sales_rep?.id || '');
-        setStatus(enq.status || 'Pending with Costing');
+        setStatus(enq.status || 'Sales to Quote');
+        
+        setQuoteDate(enq.quote_date || '');
+        setQuoteValue(enq.quote_value || '');
+        setOpenL1Value(enq.open_l1_value || '');
+        setOpenL1Date(enq.open_l1_date || '');
+        setLostValue(enq.lost_value || '');
+        setPoNo(enq.po_no || '');
+        setPoReceiptDate(enq.po_receipt_date || '');
+        setPoValue(enq.po_value || '');
+
         setViewOnly(viewOnlyMode);
         setShowModal(true);
+    };
+
+    const handleStatusChange = (e) => {
+        const newStatus = e.target.value;
+        setStatus(newStatus);
+        
+        if (newStatus === 'Pending with Engg') {
+            setEdOfEngg('');
+            setActualDateOfEngg('');
+        } else if (newStatus === 'Pending with Costing') {
+            setEdOfCosting('');
+            setActualDateOfCosting('');
+        } else if (newStatus === 'Sales to Quote' || newStatus === 'Pending with Sales') {
+            setEdOfSales('');
+            setActualDateOfSales('');
+        }
     };
 
     const handleSave = async (e) => {
@@ -91,12 +144,6 @@ const PendingCosting = () => {
         }
 
         setSubmitting(true);
-        // Auto transition status to Sales to Quote if both expected date and actual date are filled
-        let targetStatus = status;
-        if (edOfCosting && actualDateOfCosting) {
-            targetStatus = 'Sales to Quote';
-        }
-
         const payload = {
             ...selectedEnq,
             customer: selectedEnq.customer?.id,
@@ -106,19 +153,33 @@ const PendingCosting = () => {
             fg_type: selectedEnq.fg_type?.id,
             fg_details: selectedEnq.fg_details || [],
             sales_rep: parseInt(selectedSalesRep),
+            ed_of_engg: edOfEngg || null,
+            actual_date_of_engg: actualDateOfEngg || null,
+            engg_remarks: enggRemarks || '',
             ed_of_costing: edOfCosting || null,
             actual_date_of_costing: actualDateOfCosting || null,
             costing_remarks: costingRemarks || '',
-            status: targetStatus
+            ed_of_sales: edOfSales || null,
+            actual_date_of_sales: actualDateOfSales || null,
+            sales_remarks: salesRemarks || '',
+            quote_date: quoteDate || null,
+            quote_value: quoteValue || null,
+            open_l1_value: openL1Value || null,
+            open_l1_date: openL1Date || null,
+            lost_value: lostValue || null,
+            po_no: poNo || '',
+            po_receipt_date: poReceiptDate || null,
+            po_value: poValue || null,
+            status: status
         };
 
         try {
             await enquiryService.update(selectedEnq.id, payload);
-            showToast('Costing details saved successfully!', 'success');
+            showToast('Sales details saved successfully!', 'success');
             setShowModal(false);
             fetchEnquiries();
         } catch (err) {
-            showToast(err.response?.data?.message || 'Failed to update costing details.', 'error');
+            showToast(err.response?.data?.message || 'Failed to update sales details.', 'error');
         } finally {
             setSubmitting(false);
         }
@@ -128,8 +189,8 @@ const PendingCosting = () => {
         <div className="page container-fluid px-4 py-4">
             <div className="page-header d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h1 className="page-title h3 font-weight-bold mb-1">Pending with Costing</h1>
-                    <p className="page-subtitle text-muted mb-0">Manage project enquiries pending costing details</p>
+                    <h1 className="page-title h3 font-weight-bold mb-1">Pending with Sales</h1>
+                    <p className="page-subtitle text-muted mb-0">Manage project enquiries in Pending with Sales stage</p>
                 </div>
             </div>
 
@@ -159,18 +220,18 @@ const PendingCosting = () => {
                 columns={[
                     { label: 'S.No', className: 'ps-4' },
                     { label: 'Project No' },
-                    { label: 'RFQ Date' },
                     { label: 'RFQ No' },
-                    { label: 'Customer Name' },
-                    { label: 'Division' },
-                    { label: 'Expected Date' },
-                    { label: 'Actual Date' },
-                    { label: 'Sales Rep' },
+                    { label: 'RFQ Due Date' },
+                    { label: 'RFQ Due Time' },
+                    { label: 'ED Of Engg' },
+                    { label: 'ED Of Costing' },
+                    { label: 'ED Of Sales' },
+                    { label: 'RFQ Type' },
                     { label: 'Action', className: 'text-center pe-4' }
                 ]}
                 data={enquiries}
                 loading={loading}
-                emptyMessage="No enquiries pending with Costing."
+                emptyMessage="No enquiries in Pending with Sales stage."
                 renderRow={(enq, idx) => (
                     <tr key={enq.id} className="modern-table-row">
                         <td className="ps-4 py-3 align-middle text-secondary font-weight-medium">
@@ -179,13 +240,13 @@ const PendingCosting = () => {
                             </span>
                         </td>
                         <td className="py-3 align-middle font-weight-bold text-dark">{enq.project_number}</td>
-                        <td className="py-3 align-middle">{enq.rfq_date}</td>
                         <td className="py-3 align-middle font-weight-medium text-dark">{enq.rfq_no}</td>
-                        <td className="py-3 align-middle font-weight-semibold text-dark">{enq.customer?.name || 'N/A'}</td>
-                        <td className="py-3 align-middle text-secondary font-weight-medium">{enq.division?.name || 'N/A'}</td>
+                        <td className="py-3 align-middle text-muted">{enq.rfq_due_date || 'N/A'}</td>
+                        <td className="py-3 align-middle text-muted">{enq.rfq_due_time?.substring(0, 5) || 'N/A'}</td>
+                        <td className="py-3 align-middle text-muted">{enq.ed_of_engg || 'N/A'}</td>
                         <td className="py-3 align-middle text-muted">{enq.ed_of_costing || 'N/A'}</td>
-                        <td className="py-3 align-middle text-muted">{enq.actual_date_of_costing || 'N/A'}</td>
-                        <td className="py-3 align-middle text-dark font-weight-medium">{enq.sales_rep?.name || enq.sales_rep?.username || 'N/A'}</td>
+                        <td className="py-3 align-middle text-muted">{enq.ed_of_sales || 'N/A'}</td>
+                        <td className="py-3 align-middle text-dark font-weight-medium">{enq.rfq_type?.name || 'N/A'}</td>
                         <td className="py-3 align-middle text-center pe-4">
                             <div className="d-flex gap-2 justify-content-center">
                                 <button
@@ -232,7 +293,7 @@ const PendingCosting = () => {
                                     </div>
                                     <div>
                                         <h5 className="modal-title font-weight-bold mb-0">
-                                            {canEdit && !viewOnly ? "Edit Costing Details" : "Costing Details Summary"}
+                                            {canEdit && !viewOnly ? "Edit Pending Sales Details" : "Pending Sales Summary"}
                                         </h5>
                                         <span className="small text-white-50">{selectedEnq.project_number} - {selectedEnq.project_name}</span>
                                     </div>
@@ -289,28 +350,62 @@ const PendingCosting = () => {
                                     </div>
                                 </div>
 
-                                {/* Costing Fields */}
-                                <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom">Costing Status & Action</h6>
+                                {/* Engineering Estimation */}
+                                <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom">Engineering Estimation</h6>
                                 <div className="row g-3 mb-4">
-                                    {/* Expected Date of Costing */}
+                                    <div className="col-md-6">
+                                        <label className="form-label font-weight-semibold">Expected Date of Engg</label>
+                                        <input type="date" className="form-control" value={edOfEngg} onChange={(e) => setEdOfEngg(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label font-weight-semibold">Actual Date of Engg</label>
+                                        <input type="date" className="form-control" value={actualDateOfEngg} onChange={(e) => setActualDateOfEngg(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                    <div className="col-12">
+                                        <label className="form-label font-weight-semibold">Engineering Remarks</label>
+                                        <textarea className="form-control" rows="2" value={enggRemarks} onChange={(e) => setEnggRemarks(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                </div>
+
+                                {/* Costing Estimation */}
+                                <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom">Costing Estimation</h6>
+                                <div className="row g-3 mb-4">
                                     <div className="col-md-6">
                                         <label className="form-label font-weight-semibold">Expected Date of Costing</label>
+                                        <input type="date" className="form-control" value={edOfCosting} onChange={(e) => setEdOfCosting(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label font-weight-semibold">Actual Date of Costing</label>
+                                        <input type="date" className="form-control" value={actualDateOfCosting} onChange={(e) => setActualDateOfCosting(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                    <div className="col-12">
+                                        <label className="form-label font-weight-semibold">Costing Remarks</label>
+                                        <textarea className="form-control" rows="2" value={costingRemarks} onChange={(e) => setCostingRemarks(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                </div>
+
+                                {/* Sales Fields */}
+                                <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom">Sales Estimation & Action</h6>
+                                <div className="row g-3 mb-4">
+                                    {/* Expected Date of Sales */}
+                                    <div className="col-md-6">
+                                        <label className="form-label font-weight-semibold">Expected Date of Sales</label>
                                         <input
                                             type="date"
                                             className="form-control"
-                                            value={edOfCosting}
-                                            onChange={(e) => setEdOfCosting(e.target.value)}
+                                            value={edOfSales}
+                                            onChange={(e) => setEdOfSales(e.target.value)}
                                             disabled={!canEdit || viewOnly}
                                         />
                                     </div>
-                                    {/* Actual Date of Costing */}
+                                    {/* Actual Date of Sales */}
                                     <div className="col-md-6">
-                                        <label className="form-label font-weight-semibold">Actual Date of Costing</label>
+                                        <label className="form-label font-weight-semibold">Actual Date of Sales</label>
                                         <input
                                             type="date"
                                             className="form-control"
-                                            value={actualDateOfCosting}
-                                            onChange={(e) => setActualDateOfCosting(e.target.value)}
+                                            value={actualDateOfSales}
+                                            onChange={(e) => setActualDateOfSales(e.target.value)}
                                             disabled={!canEdit || viewOnly}
                                         />
                                     </div>
@@ -339,27 +434,65 @@ const PendingCosting = () => {
                                         <select
                                             className="form-select"
                                             value={status}
-                                            onChange={(e) => setStatus(e.target.value)}
+                                            onChange={handleStatusChange}
                                             disabled={!canEdit || viewOnly}
                                         >
                                             <option value="Pending with Engg">Pending with Engg</option>
                                             <option value="Pending with Costing">Pending with Costing</option>
                                             <option value="Pending with Sales">Pending with Sales</option>
+                                            <option value="Sales to Quote">Sales to Quote</option>
                                         </select>
                                     </div>
                                 </div>
 
-                                {/* Costing Remarks */}
+                                {/* Sales Remarks */}
                                 <div className="mb-4">
-                                    <label className="form-label font-weight-semibold">Costing Team Remarks</label>
+                                    <label className="form-label font-weight-semibold">Sales Team Remarks</label>
                                     <textarea
                                         className="form-control"
                                         rows="3"
-                                        placeholder="Add costing remarks / notes"
-                                        value={costingRemarks}
-                                        onChange={(e) => setCostingRemarks(e.target.value)}
+                                        placeholder="Add sales remarks / notes"
+                                        value={salesRemarks}
+                                        onChange={(e) => setSalesRemarks(e.target.value)}
                                         disabled={!canEdit || viewOnly}
                                     />
+                                </div>
+
+                                {/* Quote & PO Details */}
+                                <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom">Quote & PO Tracking</h6>
+                                <div className="row g-3 mb-4">
+                                    <div className="col-md-4">
+                                        <label className="form-label font-weight-semibold">Quote Date</label>
+                                        <input type="date" className="form-control" value={quoteDate} onChange={(e) => setQuoteDate(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label font-weight-semibold">Quote Value</label>
+                                        <input type="number" className="form-control" value={quoteValue} onChange={(e) => setQuoteValue(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label font-weight-semibold">Open-L1 Value</label>
+                                        <input type="number" className="form-control" value={openL1Value} onChange={(e) => setOpenL1Value(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label font-weight-semibold">Open-L1 Date</label>
+                                        <input type="date" className="form-control" value={openL1Date} onChange={(e) => setOpenL1Date(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label font-weight-semibold">Lost Value</label>
+                                        <input type="number" className="form-control" value={lostValue} onChange={(e) => setLostValue(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label font-weight-semibold">PO No</label>
+                                        <input type="text" className="form-control" value={poNo} onChange={(e) => setPoNo(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label font-weight-semibold">PO Receipt Date</label>
+                                        <input type="date" className="form-control" value={poReceiptDate} onChange={(e) => setPoReceiptDate(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label font-weight-semibold">PO Value</label>
+                                        <input type="number" className="form-control" value={poValue} onChange={(e) => setPoValue(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
                                 </div>
 
                                 {/* Dynamic FG details sub-table (Read-only reference) */}
@@ -418,4 +551,4 @@ const PendingCosting = () => {
     );
 };
 
-export default PendingCosting;
+export default PendingSales;

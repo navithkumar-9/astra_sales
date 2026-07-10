@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getAvatarStyle } from '../utils/avatar';
+import { hasPermission, PERMISSIONS, ROLES } from '../config/permissions';
 
 const Sidebar = () => {
     const { user, logout } = useAuth();
@@ -19,9 +20,8 @@ const Sidebar = () => {
         localStorage.setItem('sidebar_collapsed', String(nextState));
     };
 
-    const isSuperAdmin = user?.role === 'SUPERADMIN';
-    const isAdmin = user?.role === 'ADMIN';
-    const canManageMembers = isSuperAdmin || isAdmin;
+    const userRole = user?.role;
+    const canManageMembers = hasPermission(userRole, PERMISSIONS.CAN_MANAGE_USERS);
 
     const displayName = user?.name || user?.username || 'User';
     const profilePic = user?.profile_picture || null;
@@ -73,9 +73,29 @@ const Sidebar = () => {
                 </svg>
             ),
         },
+        {
+            path: '/kanban',
+            label: 'Kanban Board',
+            icon: (
+                <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <line x1="9" y1="3" x2="9" y2="21" />
+                    <line x1="15" y1="3" x2="15" y2="21" />
+                </svg>
+            ),
+        },
     ];
 
-    const canViewPendingEngg = isSuperAdmin || isAdmin || user?.role === 'RFQ_TRACKER';
+    const canViewPendingEngg = hasPermission(userRole, [ROLES.SUPERADMIN, ROLES.ADMIN, ROLES.RFQ_TRACKER]);
 
     if (canViewPendingEngg) {
         navItems.push({
@@ -99,7 +119,7 @@ const Sidebar = () => {
         });
     }
 
-    const canViewPendingCosting = isSuperAdmin || isAdmin || user?.role === 'RFQ_TRACKER';
+    const canViewPendingCosting = hasPermission(userRole, [ROLES.SUPERADMIN, ROLES.ADMIN, ROLES.RFQ_TRACKER]);
 
     if (canViewPendingCosting) {
         navItems.push({
@@ -123,7 +143,7 @@ const Sidebar = () => {
         });
     }
 
-    const canViewSalesToQuote = isSuperAdmin || isAdmin || user?.role === 'RFQ_TRACKER';
+    const canViewSalesToQuote = hasPermission(userRole, [ROLES.SUPERADMIN, ROLES.ADMIN, ROLES.RFQ_TRACKER]);
 
     if (canViewSalesToQuote) {
         navItems.push({
@@ -141,6 +161,30 @@ const Sidebar = () => {
                     strokeLinejoin="round"
                 >
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+            )
+        });
+    }
+
+    const canViewPendingSales = hasPermission(userRole, [ROLES.SUPERADMIN, ROLES.ADMIN, ROLES.RFQ_TRACKER]);
+
+    if (canViewPendingSales) {
+        navItems.push({
+            path: '/pending-sales',
+            label: 'Pending with Sales',
+            icon: (
+                <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <rect x="2" y="4" width="20" height="16" rx="2" />
+                    <path d="M7 15h0M2 9.5h20" />
                 </svg>
             )
         });

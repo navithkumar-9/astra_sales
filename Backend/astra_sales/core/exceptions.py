@@ -29,6 +29,6 @@ def custom_exception_handler(exc, context):
     logger.exception("Unhandled server exception: %s", str(exc))
 
     return error_response(
-        message=str(exc) or "Internal Server Error",
+        message="Internal Server Error",
         status_code=500
     )

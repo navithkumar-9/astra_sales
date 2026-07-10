@@ -67,8 +67,6 @@ def record_user_operation(operation, success):
         operation=operation,
         result="success" if success else "failure",
     ).inc()
-    from django.core.cache import cache
-    cache.delete(USER_METRICS_CACHE_KEY)
 
 
 def register_collectors():

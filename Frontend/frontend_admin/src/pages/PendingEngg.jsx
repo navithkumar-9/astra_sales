@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import API from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { getAvatarStyle } from '../utils/avatar';
+import EnquiryTable from '../components/common/EnquiryTable';
+import { enquiryService } from '../services/enquiryService';
+import { userService } from '../services/userService';
 
 const PendingEngg = () => {
     const { user } = useAuth();
@@ -35,11 +37,12 @@ const PendingEngg = () => {
     // Fetch pending engineering enquiries
     const fetchEnquiries = async () => {
         try {
-            // Fetch all enquiries with search, then filter client-side for status 'Pending with Engg'
-            const res = await API.get(`/enquiries/?status=${encodeURIComponent('Pending with Engg')}&page_size=100&search=${encodeURIComponent(search)}`);
-            const responseData = res.data.success ? res.data.data : res.data;
-            const list = responseData.results || responseData || [];
-            setEnquiries(list);
+            const list = await enquiryService.getAll({ 
+                status: 'Pending with Engg', 
+                page_size: 100, 
+                search 
+            });
+            setEnquiries(list.results || list || []);
         } catch (err) {
             showToast('Failed to fetch pending engineering enquiries.', 'error');
         } finally {
@@ -50,9 +53,8 @@ const PendingEngg = () => {
     // Load sales reps lookup
     const fetchSalesReps = async () => {
         try {
-            const res = await API.get('/users/?role=SALES_REP&page_size=100');
-            const data = res.data.success ? res.data.data : res.data;
-            setSalesReps(data.results || data || []);
+            const list = await userService.getSalesReps();
+            setSalesReps(list.results || list || []);
         } catch (err) {
             showToast('Failed to load Sales Representatives.', 'error');
         }
@@ -111,7 +113,7 @@ const PendingEngg = () => {
         };
 
         try {
-            await API.put(`/enquiries/${selectedEnq.id}/`, payload);
+            await enquiryService.update(selectedEnq.id, payload);
             showToast('Engineering details saved successfully!', 'success');
             setShowModal(false);
             fetchEnquiries();
@@ -153,87 +155,67 @@ const PendingEngg = () => {
             </div>
 
             {/* Table Listing */}
-            {loading && enquiries.length === 0 ? (
-                <div className="d-flex flex-column align-items-center justify-content-center min-vh-50 mt-5">
-                    <div className="page-loader-spinner mb-3"></div>
-                    <div className="text-muted font-weight-bold">Loading enquiries...</div>
-                </div>
-            ) : (
-                <div className="card shadow border-0 overflow-hidden" style={{ borderRadius: '16px' }}>
-                    <div className="table-responsive">
-                        <table className="table table-hover align-middle mb-0" style={{ borderCollapse: 'separate', borderSpacing: '0 8px' }}>
-                            <thead style={{ background: '#f8fafc', borderBottom: '1px solid #edf2f7' }}>
-                                <tr>
-                                    <th className="text-uppercase text-secondary font-weight-bold py-3 ps-4" style={{ fontSize: '0.72rem', letterSpacing: '0.8px' }}>S.No</th>
-                                    <th className="text-uppercase text-secondary font-weight-bold py-3" style={{ fontSize: '0.72rem', letterSpacing: '0.8px' }}>Project No</th>
-                                    <th className="text-uppercase text-secondary font-weight-bold py-3" style={{ fontSize: '0.72rem', letterSpacing: '0.8px' }}>RFQ Date</th>
-                                    <th className="text-uppercase text-secondary font-weight-bold py-3" style={{ fontSize: '0.72rem', letterSpacing: '0.8px' }}>RFQ No</th>
-                                    <th className="text-uppercase text-secondary font-weight-bold py-3" style={{ fontSize: '0.72rem', letterSpacing: '0.8px' }}>Customer Name</th>
-                                    <th className="text-uppercase text-secondary font-weight-bold py-3" style={{ fontSize: '0.72rem', letterSpacing: '0.8px' }}>Division</th>
-                                    <th className="text-uppercase text-secondary font-weight-bold py-3" style={{ fontSize: '0.72rem', letterSpacing: '0.8px' }}>Expected Date</th>
-                                    <th className="text-uppercase text-secondary font-weight-bold py-3" style={{ fontSize: '0.72rem', letterSpacing: '0.8px' }}>Actual Date</th>
-                                    <th className="text-uppercase text-secondary font-weight-bold py-3" style={{ fontSize: '0.72rem', letterSpacing: '0.8px' }}>Sales Rep</th>
-                                    <th className="text-uppercase text-secondary font-weight-bold text-center py-3 pe-4" style={{ fontSize: '0.72rem', letterSpacing: '0.8px' }}>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody style={{ background: '#fff' }}>
-                                {enquiries.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="10" className="text-center p-5 text-muted">
-                                            No enquiries pending with Engineering.
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    enquiries.map((enq, idx) => (
-                                        <tr key={enq.id} className="modern-table-row">
-                                            <td className="ps-4 py-3 align-middle text-secondary font-weight-medium">
-                                                <span className="badge bg-light text-secondary rounded-circle p-2" style={{ width: '26px', height: '26px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    {idx + 1}
-                                                </span>
-                                            </td>
-                                            <td className="py-3 align-middle font-weight-bold text-dark">{enq.project_number}</td>
-                                            <td className="py-3 align-middle">{enq.rfq_date}</td>
-                                            <td className="py-3 align-middle font-weight-medium text-dark">{enq.rfq_no}</td>
-                                            <td className="py-3 align-middle font-weight-semibold text-dark">{enq.customer?.name || 'N/A'}</td>
-                                            <td className="py-3 align-middle text-secondary font-weight-medium">{enq.division?.name || 'N/A'}</td>
-                                            <td className="py-3 align-middle text-muted">{enq.ed_of_engg || 'N/A'}</td>
-                                            <td className="py-3 align-middle text-muted">{enq.actual_date_of_engg || 'N/A'}</td>
-                                            <td className="py-3 align-middle text-dark font-weight-medium">{enq.sales_rep?.name || enq.sales_rep?.username || 'N/A'}</td>
-                                            <td className="py-3 align-middle text-center pe-4">
-                                                <div className="d-flex gap-2 justify-content-center">
-                                                    <button
-                                                        className="btn btn-action-view rounded-circle shadow-sm"
-                                                        onClick={() => handleActionClick(enq, true)}
-                                                        title="View Details"
-                                                    >
-                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                                            <circle cx="12" cy="12" r="3" />
-                                                        </svg>
-                                                    </button>
-                                                    {canEdit && (
-                                                        <button
-                                                            className="btn btn-action-view rounded-circle shadow-sm"
-                                                            style={{ background: 'rgba(154, 85, 255, 0.08)', color: '#9a55ff' }}
-                                                            onClick={() => handleActionClick(enq, false)}
-                                                            title="Edit Details"
-                                                        >
-                                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                                                <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                                                            </svg>
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
+            <EnquiryTable 
+                columns={[
+                    { label: 'S.No', className: 'ps-4' },
+                    { label: 'Project No' },
+                    { label: 'RFQ Date' },
+                    { label: 'RFQ No' },
+                    { label: 'Customer Name' },
+                    { label: 'Division' },
+                    { label: 'Expected Date' },
+                    { label: 'Actual Date' },
+                    { label: 'Sales Rep' },
+                    { label: 'Action', className: 'text-center pe-4' }
+                ]}
+                data={enquiries}
+                loading={loading}
+                emptyMessage="No enquiries pending with Engineering."
+                renderRow={(enq, idx) => (
+                    <tr key={enq.id} className="modern-table-row">
+                        <td className="ps-4 py-3 align-middle text-secondary font-weight-medium">
+                            <span className="badge bg-light text-secondary rounded-circle p-2" style={{ width: '26px', height: '26px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                {idx + 1}
+                            </span>
+                        </td>
+                        <td className="py-3 align-middle font-weight-bold text-dark">{enq.project_number}</td>
+                        <td className="py-3 align-middle">{enq.rfq_date}</td>
+                        <td className="py-3 align-middle font-weight-medium text-dark">{enq.rfq_no}</td>
+                        <td className="py-3 align-middle font-weight-semibold text-dark">{enq.customer?.name || 'N/A'}</td>
+                        <td className="py-3 align-middle text-secondary font-weight-medium">{enq.division?.name || 'N/A'}</td>
+                        <td className="py-3 align-middle text-muted">{enq.ed_of_engg || 'N/A'}</td>
+                        <td className="py-3 align-middle text-muted">{enq.actual_date_of_engg || 'N/A'}</td>
+                        <td className="py-3 align-middle text-dark font-weight-medium">{enq.sales_rep?.name || enq.sales_rep?.username || 'N/A'}</td>
+                        <td className="py-3 align-middle text-center pe-4">
+                            <div className="d-flex gap-2 justify-content-center">
+                                <button
+                                    className="btn btn-action-view rounded-circle shadow-sm"
+                                    onClick={() => handleActionClick(enq, true)}
+                                    title="View Details"
+                                >
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                </button>
+                                {canEdit && (
+                                    <button
+                                        className="btn btn-action-view rounded-circle shadow-sm"
+                                        style={{ background: 'rgba(154, 85, 255, 0.08)', color: '#9a55ff' }}
+                                        onClick={() => handleActionClick(enq, false)}
+                                        title="Edit Details"
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                            <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                        </svg>
+                                    </button>
                                 )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
+                            </div>
+                        </td>
+                    </tr>
+                )}
+            />
 
             {/* Edit / View Modal */}
             {showModal && selectedEnq && (

@@ -14,6 +14,7 @@ from core.views.master_data_views import (
     MailViewSet,
 )
 from core.views.enquiry_views import EnquiryViewSet
+from core.views.activity_views import ActivityViewSet
 
 router = DefaultRouter()
 router.register('sbus', SBUViewSet, basename='sbu')
@@ -23,6 +24,7 @@ router.register('rfqs', RFQViewSet, basename='rfq')
 router.register('customers', CustomerViewSet, basename='customer')
 router.register('mails', MailViewSet, basename='mail')
 router.register('enquiries', EnquiryViewSet, basename='enquiry')
+router.register('activities', ActivityViewSet, basename='activity')
 
 urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),

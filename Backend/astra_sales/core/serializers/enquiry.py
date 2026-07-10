@@ -1,6 +1,9 @@
 from rest_framework import serializers
 from core.models.enquiry import Enquiry, EnquiryFGDetail
+from core.services.enquiry_service import EnquiryService
 from core.serializers.user import UserSerializer
+from core.serializers.audit import EnquiryAuditLogSerializer
+from core.serializers.activity import ActivitySerializer
 from core.serializers.master_data import (
     SBUSerializer,
     DivisionSerializer,
@@ -10,6 +13,7 @@ from core.serializers.master_data import (
 )
 
 class EnquiryFGDetailSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
     class Meta:
         model = EnquiryFGDetail
         fields = ['id', 'fg_part_no', 'description', 'qty']
@@ -50,34 +54,27 @@ class EnquirySerializer(serializers.ModelSerializer):
             'clarification_to_cs',
             'clarification_from_cs',
             'remarks',
+            'quote_date',
+            'quote_value',
+            'open_l1_value',
+            'open_l1_date',
+            'lost_value',
+            'po_no',
+            'po_receipt_date',
+            'po_value',
+            'rfq_document',
+            'po_document',
             'rfq_aging',
             'created_at',
             'updated_at',
         ]
 
     def create(self, validated_data):
-        fg_details_data = validated_data.pop('fg_details', [])
-        enquiry = Enquiry.objects.create(**validated_data)
-        for detail_data in fg_details_data:
-            EnquiryFGDetail.objects.create(enquiry=enquiry, **detail_data)
-        return enquiry
+        return EnquiryService.create_enquiry(validated_data)
 
     def update(self, instance, validated_data):
-        fg_details_data = validated_data.pop('fg_details', None)
-        
-        # Update Enquiry fields
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-
-        # Update FG details if provided
-        if fg_details_data is not None:
-            # Delete old details and recreate
-            instance.fg_details.all().delete()
-            for detail_data in fg_details_data:
-                EnquiryFGDetail.objects.create(enquiry=instance, **detail_data)
-
-        return instance
+        user = self.context.get('request').user if self.context.get('request') else None
+        return EnquiryService.update_enquiry(instance, validated_data, user)
 
 
 class EnquiryReadSerializer(serializers.ModelSerializer):
@@ -88,6 +85,8 @@ class EnquiryReadSerializer(serializers.ModelSerializer):
     fg_type = FGSerializer(read_only=True)
     sales_rep = UserSerializer(read_only=True)
     fg_details = EnquiryFGDetailSerializer(many=True, read_only=True)
+    audit_logs = EnquiryAuditLogSerializer(many=True, read_only=True)
+    activities = ActivitySerializer(many=True, read_only=True)
     rfq_aging = serializers.ReadOnlyField()
 
     class Meta:
@@ -121,7 +120,19 @@ class EnquiryReadSerializer(serializers.ModelSerializer):
             'clarification_to_cs',
             'clarification_from_cs',
             'remarks',
+            'quote_date',
+            'quote_value',
+            'open_l1_value',
+            'open_l1_date',
+            'lost_value',
+            'po_no',
+            'po_receipt_date',
+            'po_value',
+            'rfq_document',
+            'po_document',
             'rfq_aging',
+            'audit_logs',
+            'activities',
             'created_at',
             'updated_at',
         ]

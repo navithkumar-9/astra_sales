@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
-import API from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { getAvatarStyle } from '../utils/avatar';
+import EnquiryTable from '../components/common/EnquiryTable';
+import { enquiryService } from '../services/enquiryService';
+import { userService } from '../services/userService';
 
 const SalesToQuote = () => {
     const { user } = useAuth();
@@ -25,19 +28,29 @@ const SalesToQuote = () => {
     const [submitting, setSubmitting] = useState(false);
 
     // Edit form states
-    const [edOfSales, setEdOfSales] = useState('');
-    const [actualDateOfSales, setActualDateOfSales] = useState('');
     const [salesRemarks, setSalesRemarks] = useState('');
     const [selectedSalesRep, setSelectedSalesRep] = useState('');
     const [status, setStatus] = useState('Sales to Quote');
 
+    // Quote & PO fields
+    const [quoteDate, setQuoteDate] = useState('');
+    const [quoteValue, setQuoteValue] = useState('');
+    const [openL1Value, setOpenL1Value] = useState('');
+    const [openL1Date, setOpenL1Date] = useState('');
+    const [lostValue, setLostValue] = useState('');
+    const [poNo, setPoNo] = useState('');
+    const [poReceiptDate, setPoReceiptDate] = useState('');
+    const [poValue, setPoValue] = useState('');
+
     // Fetch Sales to Quote enquiries
     const fetchEnquiries = async () => {
         try {
-            const res = await API.get(`/enquiries/?status=${encodeURIComponent('Sales to Quote')}&page_size=100&search=${encodeURIComponent(search)}`);
-            const responseData = res.data.success ? res.data.data : res.data;
-            const list = responseData.results || responseData || [];
-            setEnquiries(list);
+            const list = await enquiryService.getAll({ 
+                status: 'Sales to Quote', 
+                page_size: 100, 
+                search 
+            });
+            setEnquiries(list.results || list || []);
         } catch (err) {
             showToast('Failed to fetch Sales to Quote enquiries.', 'error');
         } finally {
@@ -48,9 +61,8 @@ const SalesToQuote = () => {
     // Load sales reps lookup
     const fetchSalesReps = async () => {
         try {
-            const res = await API.get('/users/?role=SALES_REP&page_size=100');
-            const data = res.data.success ? res.data.data : res.data;
-            setSalesReps(data.results || data || []);
+            const list = await userService.getSalesReps();
+            setSalesReps(list.results || list || []);
         } catch (err) {
             showToast('Failed to load Sales Representatives.', 'error');
         }
@@ -70,11 +82,19 @@ const SalesToQuote = () => {
 
     const handleActionClick = (enq, viewOnlyMode = false) => {
         setSelectedEnq(enq);
-        setEdOfSales(enq.ed_of_sales || '');
-        setActualDateOfSales(enq.actual_date_of_sales || '');
         setSalesRemarks(enq.sales_remarks || '');
         setSelectedSalesRep(enq.sales_rep?.id || '');
         setStatus(enq.status || 'Sales to Quote');
+        
+        setQuoteDate(enq.quote_date || '');
+        setQuoteValue(enq.quote_value || '');
+        setOpenL1Value(enq.open_l1_value || '');
+        setOpenL1Date(enq.open_l1_date || '');
+        setLostValue(enq.lost_value || '');
+        setPoNo(enq.po_no || '');
+        setPoReceiptDate(enq.po_receipt_date || '');
+        setPoValue(enq.po_value || '');
+
         setViewOnly(viewOnlyMode);
         setShowModal(true);
     };
@@ -87,6 +107,11 @@ const SalesToQuote = () => {
         }
 
         setSubmitting(true);
+        let newStatus = status;
+        if (quoteDate && quoteValue) {
+            newStatus = 'Pending with Sales';
+        }
+
         const payload = {
             ...selectedEnq,
             customer: selectedEnq.customer?.id,
@@ -96,14 +121,20 @@ const SalesToQuote = () => {
             fg_type: selectedEnq.fg_type?.id,
             fg_details: selectedEnq.fg_details || [],
             sales_rep: parseInt(selectedSalesRep),
-            ed_of_sales: edOfSales || null,
-            actual_date_of_sales: actualDateOfSales || null,
             sales_remarks: salesRemarks || '',
-            status: status
+            quote_date: quoteDate || null,
+            quote_value: quoteValue || null,
+            open_l1_value: openL1Value || null,
+            open_l1_date: openL1Date || null,
+            lost_value: lostValue || null,
+            po_no: poNo || '',
+            po_receipt_date: poReceiptDate || null,
+            po_value: poValue || null,
+            status: newStatus
         };
 
         try {
-            await API.put(`/enquiries/${selectedEnq.id}/`, payload);
+            await enquiryService.update(selectedEnq.id, payload);
             showToast('Sales details saved successfully!', 'success');
             setShowModal(false);
             fetchEnquiries();
@@ -145,87 +176,63 @@ const SalesToQuote = () => {
             </div>
 
             {/* Table Listing */}
-            {loading && enquiries.length === 0 ? (
-                <div className="d-flex flex-column align-items-center justify-content-center min-vh-50 mt-5">
-                    <div className="page-loader-spinner mb-3"></div>
-                    <div className="text-muted font-weight-bold">Loading enquiries...</div>
-                </div>
-            ) : (
-                <div className="card shadow border-0 overflow-hidden" style={{ borderRadius: '16px' }}>
-                    <div className="table-responsive">
-                        <table className="table table-hover align-middle mb-0" style={{ borderCollapse: 'separate', borderSpacing: '0 8px' }}>
-                            <thead style={{ background: '#f8fafc', borderBottom: '1px solid #edf2f7' }}>
-                                <tr>
-                                    <th className="text-uppercase text-secondary font-weight-bold py-3 ps-4" style={{ fontSize: '0.72rem', letterSpacing: '0.8px' }}>S.No</th>
-                                    <th className="text-uppercase text-secondary font-weight-bold py-3" style={{ fontSize: '0.72rem', letterSpacing: '0.8px' }}>Project No</th>
-                                    <th className="text-uppercase text-secondary font-weight-bold py-3" style={{ fontSize: '0.72rem', letterSpacing: '0.8px' }}>RFQ Date</th>
-                                    <th className="text-uppercase text-secondary font-weight-bold py-3" style={{ fontSize: '0.72rem', letterSpacing: '0.8px' }}>RFQ No</th>
-                                    <th className="text-uppercase text-secondary font-weight-bold py-3" style={{ fontSize: '0.72rem', letterSpacing: '0.8px' }}>Customer Name</th>
-                                    <th className="text-uppercase text-secondary font-weight-bold py-3" style={{ fontSize: '0.72rem', letterSpacing: '0.8px' }}>Division</th>
-                                    <th className="text-uppercase text-secondary font-weight-bold py-3" style={{ fontSize: '0.72rem', letterSpacing: '0.8px' }}>Expected Date</th>
-                                    <th className="text-uppercase text-secondary font-weight-bold py-3" style={{ fontSize: '0.72rem', letterSpacing: '0.8px' }}>Actual Date</th>
-                                    <th className="text-uppercase text-secondary font-weight-bold py-3" style={{ fontSize: '0.72rem', letterSpacing: '0.8px' }}>Sales Rep</th>
-                                    <th className="text-uppercase text-secondary font-weight-bold text-center py-3 pe-4" style={{ fontSize: '0.72rem', letterSpacing: '0.8px' }}>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody style={{ background: '#fff' }}>
-                                {enquiries.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="10" className="text-center p-5 text-muted">
-                                            No enquiries in Sales to Quote stage.
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    enquiries.map((enq, idx) => (
-                                        <tr key={enq.id} className="modern-table-row">
-                                            <td className="ps-4 py-3 align-middle text-secondary font-weight-medium">
-                                                <span className="badge bg-light text-secondary rounded-circle p-2" style={{ width: '26px', height: '26px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    {idx + 1}
-                                                </span>
-                                            </td>
-                                            <td className="py-3 align-middle font-weight-bold text-dark">{enq.project_number}</td>
-                                            <td className="py-3 align-middle">{enq.rfq_date}</td>
-                                            <td className="py-3 align-middle font-weight-medium text-dark">{enq.rfq_no}</td>
-                                            <td className="py-3 align-middle font-weight-semibold text-dark">{enq.customer?.name || 'N/A'}</td>
-                                            <td className="py-3 align-middle text-secondary font-weight-medium">{enq.division?.name || 'N/A'}</td>
-                                            <td className="py-3 align-middle text-muted">{enq.ed_of_sales || 'N/A'}</td>
-                                            <td className="py-3 align-middle text-muted">{enq.actual_date_of_sales || 'N/A'}</td>
-                                            <td className="py-3 align-middle text-dark font-weight-medium">{enq.sales_rep?.name || enq.sales_rep?.username || 'N/A'}</td>
-                                            <td className="py-3 align-middle text-center pe-4">
-                                                <div className="d-flex gap-2 justify-content-center">
-                                                    <button
-                                                        className="btn btn-action-view rounded-circle shadow-sm"
-                                                        onClick={() => handleActionClick(enq, true)}
-                                                        title="View Details"
-                                                    >
-                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                                            <circle cx="12" cy="12" r="3" />
-                                                        </svg>
-                                                    </button>
-                                                    {canEdit && (
-                                                        <button
-                                                            className="btn btn-action-view rounded-circle shadow-sm"
-                                                            style={{ background: 'rgba(154, 85, 255, 0.08)', color: '#9a55ff' }}
-                                                            onClick={() => handleActionClick(enq, false)}
-                                                            title="Edit Details"
-                                                        >
-                                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                                                <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                                                            </svg>
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
+            <EnquiryTable 
+                columns={[
+                    { label: 'S.No', className: 'ps-4' },
+                    { label: 'Project No' },
+                    { label: 'RFQ Date' },
+                    { label: 'RFQ No' },
+                    { label: 'Customer Name' },
+                    { label: 'Division' },
+                    { label: 'Sales Rep' },
+                    { label: 'Action', className: 'text-center pe-4' }
+                ]}
+                data={enquiries}
+                loading={loading}
+                emptyMessage="No enquiries in Sales to Quote stage."
+                renderRow={(enq, idx) => (
+                    <tr key={enq.id} className="modern-table-row">
+                        <td className="ps-4 py-3 align-middle text-secondary font-weight-medium">
+                            <span className="badge bg-light text-secondary rounded-circle p-2" style={{ width: '26px', height: '26px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                {idx + 1}
+                            </span>
+                        </td>
+                        <td className="py-3 align-middle font-weight-bold text-dark">{enq.project_number}</td>
+                        <td className="py-3 align-middle">{enq.rfq_date}</td>
+                        <td className="py-3 align-middle font-weight-medium text-dark">{enq.rfq_no}</td>
+                        <td className="py-3 align-middle font-weight-semibold text-dark">{enq.customer?.name || 'N/A'}</td>
+                        <td className="py-3 align-middle text-secondary font-weight-medium">{enq.division?.name || 'N/A'}</td>
+                        <td className="py-3 align-middle text-dark font-weight-medium">{enq.sales_rep?.name || enq.sales_rep?.username || 'N/A'}</td>
+                        <td className="py-3 align-middle text-center pe-4">
+                            <div className="d-flex gap-2 justify-content-center">
+                                <button
+                                    className="btn btn-action-view rounded-circle shadow-sm"
+                                    onClick={() => handleActionClick(enq, true)}
+                                    title="View Details"
+                                >
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                </button>
+                                {canEdit && (
+                                    <button
+                                        className="btn btn-action-view rounded-circle shadow-sm"
+                                        style={{ background: 'rgba(154, 85, 255, 0.08)', color: '#9a55ff' }}
+                                        onClick={() => handleActionClick(enq, false)}
+                                        title="Edit Details"
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                            <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                        </svg>
+                                    </button>
                                 )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
+                            </div>
+                        </td>
+                    </tr>
+                )}
+            />
 
             {/* Edit / View Modal */}
             {showModal && selectedEnq && (
@@ -302,31 +309,6 @@ const SalesToQuote = () => {
                                 {/* Sales Fields */}
                                 <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom">Sales Estimation & Action</h6>
                                 <div className="row g-3 mb-4">
-                                    {/* Expected Date of Sales */}
-                                    <div className="col-md-6">
-                                        <label className="form-label font-weight-semibold">Expected Date of Sales</label>
-                                        <input
-                                            type="date"
-                                            className="form-control"
-                                            value={edOfSales}
-                                            onChange={(e) => setEdOfSales(e.target.value)}
-                                            disabled={!canEdit || viewOnly}
-                                        />
-                                    </div>
-                                    {/* Actual Date of Sales */}
-                                    <div className="col-md-6">
-                                        <label className="form-label font-weight-semibold">Actual Date of Sales</label>
-                                        <input
-                                            type="date"
-                                            className="form-control"
-                                            value={actualDateOfSales}
-                                            onChange={(e) => setActualDateOfSales(e.target.value)}
-                                            disabled={!canEdit || viewOnly}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="row g-3 mb-4">
                                     {/* Sales Representative */}
                                     <div className="col-md-6">
                                         <label className="form-label font-weight-semibold">Sales Representative <span className="text-danger">*</span></label>
@@ -371,6 +353,43 @@ const SalesToQuote = () => {
                                         onChange={(e) => setSalesRemarks(e.target.value)}
                                         disabled={!canEdit || viewOnly}
                                     />
+                                </div>
+
+                                {/* Quote & PO Details */}
+                                <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom">Quote & PO Tracking</h6>
+                                <div className="row g-3 mb-4">
+                                    <div className="col-md-4">
+                                        <label className="form-label font-weight-semibold">Quote Date</label>
+                                        <input type="date" className="form-control" value={quoteDate} onChange={(e) => setQuoteDate(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label font-weight-semibold">Quote Value</label>
+                                        <input type="number" className="form-control" value={quoteValue} onChange={(e) => setQuoteValue(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label font-weight-semibold">Open-L1 Value</label>
+                                        <input type="number" className="form-control" value={openL1Value} onChange={(e) => setOpenL1Value(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label font-weight-semibold">Open-L1 Date</label>
+                                        <input type="date" className="form-control" value={openL1Date} onChange={(e) => setOpenL1Date(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label font-weight-semibold">Lost Value</label>
+                                        <input type="number" className="form-control" value={lostValue} onChange={(e) => setLostValue(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label font-weight-semibold">PO No</label>
+                                        <input type="text" className="form-control" value={poNo} onChange={(e) => setPoNo(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label font-weight-semibold">PO Receipt Date</label>
+                                        <input type="date" className="form-control" value={poReceiptDate} onChange={(e) => setPoReceiptDate(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label font-weight-semibold">PO Value</label>
+                                        <input type="number" className="form-control" value={poValue} onChange={(e) => setPoValue(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
                                 </div>
 
                                 {/* Dynamic FG details sub-table (Read-only reference) */}

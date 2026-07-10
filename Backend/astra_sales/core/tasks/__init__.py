@@ -1,4 +1,10 @@
 # Celery tasks package
+from .sla_tasks import check_sla_violations
+
+__all__ = [
+    'check_sla_violations'
+]
+
 # Define async tasks here. Celery autodiscover_tasks() will find them.
 #
 # Example:

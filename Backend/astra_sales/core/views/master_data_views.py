@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
+from core.permissions import IsAdminOrReadOnly
 
 from core.models.sbu import SBU
 from core.models.division import Division
@@ -18,7 +19,7 @@ from core.serializers.master_data import (
 )
 
 class BaseModelViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
 
 class SBUViewSet(BaseModelViewSet):
     queryset = SBU.objects.all()

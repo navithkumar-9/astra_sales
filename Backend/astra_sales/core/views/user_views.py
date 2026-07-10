@@ -1,7 +1,7 @@
 from rest_framework import status, permissions
 from rest_framework.views import APIView
 from core.services.user_service import UserService
-from core.serializers.user import UserCreateSerializer, UserSerializer
+from core.serializers.user import UserCreateSerializer, UserSerializer, UserUpdateSerializer
 from core.response import success_response, error_response
 from core.pagination import CustomPagination
 
@@ -67,16 +67,23 @@ class UserDetailView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def put(self, request, pk):
-        try:
-            user = UserService.update_user(
-                requestor=request.user,
-                user_id=pk,
-                data=request.data
-            )
-            serializer = UserSerializer(user)
-            return success_response(data=serializer.data, message="User updated successfully.")
-        except Exception as e:
-            return error_response(message=str(e), status_code=status.HTTP_400_BAD_REQUEST)
+        serializer = UserUpdateSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                user = UserService.update_user(
+                    requestor=request.user,
+                    user_id=pk,
+                    data=serializer.validated_data
+                )
+                response_serializer = UserSerializer(user)
+                return success_response(data=response_serializer.data, message="User updated successfully.")
+            except Exception as e:
+                return error_response(message=str(e), status_code=status.HTTP_400_BAD_REQUEST)
+        return error_response(
+            message="Invalid data provided.",
+            errors=serializer.errors,
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
 
     def delete(self, request, pk):
         try:

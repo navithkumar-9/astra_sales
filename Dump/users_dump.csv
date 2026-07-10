@@ -1,0 +1,5 @@
+id,password,last_login,is_superuser,created_at,updated_at,username,name,role,is_active,is_staff,date_joined
+1,pbkdf2_sha256$1200000$QvZbhx5GmqykbZ7M7Se8mX$03cs26zjgmfaxljZNyL3+5jZrGtlufmMGVU3D4EGTSE=,NULL,1,"2026-07-10 06:25:00.592373","2026-07-10 06:25:00.592436",superadmin,"Super Admin",SUPERADMIN,1,1,"2026-07-10 06:25:00.454344"
+2,pbkdf2_sha256$1200000$sfJP0ww8n0yNtoudYgNV20$IUAPWK2jPMkXQc2P/kA6P+7PNvHBH/28/fHUbd+c/Cw=,NULL,0,"2026-07-10 06:25:00.755035","2026-07-10 06:25:00.755049",admin,"Admin User",ADMIN,1,1,"2026-07-10 06:25:00.608710"
+3,pbkdf2_sha256$1200000$mB4hTp9WkxGfFcpJTypMfr$F7A2QJL0vX9CW+b5Za5AlqCzWTn6HV7V6CREj7sa9Ss=,NULL,0,"2026-07-10 06:25:00.899801","2026-07-10 06:25:00.899817",salesrep,"Sales Representative",SALES_REP,1,0,"2026-07-10 06:25:00.764122"
+4,pbkdf2_sha256$1200000$i851FX67cw57PmnPmEXoWc$z5cyT8Do65207Bi88//1HVN9y7aRb7yKcYg5/yfjZ2A=,NULL,0,"2026-07-10 06:25:01.050068","2026-07-10 06:25:01.050083",rfqtracker,"RFQ Tracker User",RFQ_TRACKER,1,0,"2026-07-10 06:25:00.908769"
