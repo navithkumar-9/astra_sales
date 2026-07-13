@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useToast } from '../../context/ToastContext';
 import { enquiryService } from '../../services/enquiryService';
 import { userService } from '../../services/userService';
+import { masterDataService } from '../../services/masterDataService';
 import DocumentsTab from './DocumentsTab';
 import AuditHistoryTab from './AuditHistoryTab';
 import ActivityFeedTab from './ActivityFeedTab';
 
-const EditSalesModal = ({ enq, show, onClose, onSuccess, canEdit, viewOnly }) => {
+const EditSalesModal = ({ enq, show, onClose, onSuccess, onRefresh, canEdit, viewOnly }) => {
     const { showToast } = useToast();
     const [activeTab, setActiveTab] = useState('details');
     
@@ -14,8 +15,30 @@ const EditSalesModal = ({ enq, show, onClose, onSuccess, canEdit, viewOnly }) =>
     const [rfqFile, setRfqFile] = useState(null);
     const [poFile, setPoFile] = useState(null);
     const [submitting, setSubmitting] = useState(false);
+    
+    // Master Data States
     const [salesReps, setSalesReps] = useState([]);
+    const [customers, setCustomers] = useState([]);
+    const [sbus, setSbus] = useState([]);
+    const [divisions, setDivisions] = useState([]);
 
+    // Core Project Info States
+    const [selectedCustomer, setSelectedCustomer] = useState('');
+    const [selectedSbu, setSelectedSbu] = useState('');
+    const [selectedDivision, setSelectedDivision] = useState('');
+    const [rfqNo, setRfqNo] = useState('');
+    const [rfqDate, setRfqDate] = useState('');
+    const [rfqDueDate, setRfqDueDate] = useState('');
+
+    // Engineering & Costing States
+    const [edOfEngg, setEdOfEngg] = useState('');
+    const [actualDateOfEngg, setActualDateOfEngg] = useState('');
+    const [enggRemarks, setEnggRemarks] = useState('');
+    const [edOfCosting, setEdOfCosting] = useState('');
+    const [actualDateOfCosting, setActualDateOfCosting] = useState('');
+    const [costingRemarks, setCostingRemarks] = useState('');
+
+    // Sales States
     const [salesRemarks, setSalesRemarks] = useState('');
     const [selectedSalesRep, setSelectedSalesRep] = useState('');
     const [status, setStatus] = useState(enq?.status || 'Sales to Quote');
@@ -29,8 +52,33 @@ const EditSalesModal = ({ enq, show, onClose, onSuccess, canEdit, viewOnly }) =>
     const [poReceiptDate, setPoReceiptDate] = useState('');
     const [poValue, setPoValue] = useState('');
 
+    const [wasOpen, setWasOpen] = useState(false);
+
     useEffect(() => {
         if (enq && show) {
+            if (!wasOpen) {
+                setActiveTab('details');
+                setRfqFile(null);
+                setPoFile(null);
+                setWasOpen(true);
+            }
+            
+            // Core
+            setSelectedCustomer(enq.customer?.id || '');
+            setSelectedSbu(enq.sbu?.id || '');
+            setSelectedDivision(enq.division?.id || '');
+            setRfqNo(enq.rfq_no || '');
+            setRfqDate(enq.rfq_date || '');
+            setRfqDueDate(enq.rfq_due_date || '');
+
+            // Engg & Costing
+            setEdOfEngg(enq.ed_of_engg || '');
+            setActualDateOfEngg(enq.actual_date_of_engg || '');
+            setEnggRemarks(enq.engg_remarks || '');
+            setEdOfCosting(enq.ed_of_costing || '');
+            setActualDateOfCosting(enq.actual_date_of_costing || '');
+            setCostingRemarks(enq.costing_remarks || '');
+
             setSalesRemarks(enq.sales_remarks || '');
             setSelectedSalesRep(enq.sales_rep?.id || '');
             setStatus(enq.status || 'Sales to Quote');
@@ -43,19 +91,25 @@ const EditSalesModal = ({ enq, show, onClose, onSuccess, canEdit, viewOnly }) =>
             setPoNo(enq.po_no || '');
             setPoReceiptDate(enq.po_receipt_date || '');
             setPoValue(enq.po_value || '');
-            
-            setActiveTab('details');
-            setRfqFile(null);
-            setPoFile(null);
 
-            fetchSalesReps();
+            fetchMasterData();
+        } else if (!show) {
+            setWasOpen(false);
         }
-    }, [enq, show]);
+    }, [enq, show, wasOpen]);
 
-    const fetchSalesReps = async () => {
+    const fetchMasterData = async () => {
         try {
-            const list = await userService.getSalesReps();
-            setSalesReps(list.results || list || []);
+            const [salesRes, custRes, sbuRes, divRes] = await Promise.all([
+                userService.getSalesReps(),
+                masterDataService.getCustomers({ page_size: 100 }),
+                masterDataService.getSBUs({ page_size: 100 }),
+                masterDataService.getDivisions({ page_size: 100 })
+            ]);
+            setSalesReps(salesRes.results || salesRes || []);
+            setCustomers(custRes.results || custRes || []);
+            setSbus(sbuRes.results || sbuRes || []);
+            setDivisions(divRes.results || divRes || []);
         } catch (err) {
             console.error(err);
         }
@@ -70,19 +124,24 @@ const EditSalesModal = ({ enq, show, onClose, onSuccess, canEdit, viewOnly }) =>
 
         setSubmitting(true);
         let newStatus = status;
-        // If they enter quote values and it's currently Sales to Quote, auto transition
-        if (quoteDate && quoteValue && status === 'Sales to Quote') {
-            newStatus = 'Pending with Sales';
-        }
 
         const payload = {
             ...enq,
-            customer: enq.customer?.id,
-            sbu: enq.sbu?.id,
-            division: enq.division?.id,
+            customer: parseInt(selectedCustomer) || enq.customer?.id,
+            sbu: parseInt(selectedSbu) || enq.sbu?.id,
+            division: parseInt(selectedDivision) || enq.division?.id,
+            rfq_no: rfqNo || enq.rfq_no,
+            rfq_date: rfqDate || enq.rfq_date,
+            rfq_due_date: rfqDueDate || enq.rfq_due_date,
             rfq_type: enq.rfq_type?.id,
             fg_type: enq.fg_type?.id,
             fg_details: enq.fg_details || [],
+            ed_of_engg: edOfEngg || null,
+            actual_date_of_engg: actualDateOfEngg || null,
+            engg_remarks: enggRemarks || '',
+            ed_of_costing: edOfCosting || null,
+            actual_date_of_costing: actualDateOfCosting || null,
+            costing_remarks: costingRemarks || '',
             sales_rep: parseInt(selectedSalesRep),
             sales_remarks: salesRemarks || '',
             quote_date: quoteDate || null,
@@ -166,29 +225,73 @@ const EditSalesModal = ({ enq, show, onClose, onSuccess, canEdit, viewOnly }) =>
                         <div style={{ display: activeTab === 'details' ? 'block' : 'none' }}>
                             <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom">Project Information</h6>
                         <div className="row g-3 mb-4">
-                            <div className="col-md-2">
-                                <div className="enq-details-label text-muted small">Customer Name</div>
-                                <div className="enq-details-value font-weight-semibold">{enq.customer?.name || 'N/A'}</div>
+                            <div className="col-md-4">
+                                <label className="form-label font-weight-semibold">Customer Name</label>
+                                <select className="form-select" value={selectedCustomer} onChange={(e) => setSelectedCustomer(e.target.value)} disabled={!canEdit || viewOnly}>
+                                    <option value="">Select Customer</option>
+                                    {customers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                </select>
                             </div>
-                            <div className="col-md-2">
-                                <div className="enq-details-label text-muted small">SBU</div>
-                                <div className="enq-details-value font-weight-semibold">{enq.sbu?.name || 'N/A'}</div>
+                            <div className="col-md-4">
+                                <label className="form-label font-weight-semibold">SBU</label>
+                                <select className="form-select" value={selectedSbu} onChange={(e) => setSelectedSbu(e.target.value)} disabled={!canEdit || viewOnly}>
+                                    <option value="">Select SBU</option>
+                                    {sbus.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                                </select>
                             </div>
-                            <div className="col-md-2">
-                                <div className="enq-details-label text-muted small">Division</div>
-                                <div className="enq-details-value font-weight-semibold">{enq.division?.name || 'N/A'}</div>
+                            <div className="col-md-4">
+                                <label className="form-label font-weight-semibold">Division</label>
+                                <select className="form-select" value={selectedDivision} onChange={(e) => setSelectedDivision(e.target.value)} disabled={!canEdit || viewOnly}>
+                                    <option value="">Select Division</option>
+                                    {divisions.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                                </select>
                             </div>
-                            <div className="col-md-2">
-                                <div className="enq-details-label text-muted small">RFQ No</div>
-                                <div className="enq-details-value font-weight-semibold">{enq.rfq_no}</div>
+                        </div>
+
+                        <div className="row g-3 mb-4">
+                            <div className="col-md-4">
+                                <label className="form-label font-weight-semibold">RFQ No</label>
+                                <input type="text" className="form-control" value={rfqNo} onChange={(e) => setRfqNo(e.target.value)} disabled={!canEdit || viewOnly} />
                             </div>
-                            <div className="col-md-2">
-                                <div className="enq-details-label text-muted small">RFQ Date</div>
-                                <div className="enq-details-value font-weight-semibold">{enq.rfq_date}</div>
+                            <div className="col-md-4">
+                                <label className="form-label font-weight-semibold">RFQ Date</label>
+                                <input type="date" className="form-control" value={rfqDate} onChange={(e) => setRfqDate(e.target.value)} disabled={!canEdit || viewOnly} />
                             </div>
-                            <div className="col-md-2">
-                                <div className="enq-details-label text-muted small">RFQ Due Date</div>
-                                <div className="enq-details-value font-weight-semibold">{enq.rfq_due_date}</div>
+                            <div className="col-md-4">
+                                <label className="form-label font-weight-semibold">RFQ Due Date</label>
+                                <input type="date" className="form-control" value={rfqDueDate} onChange={(e) => setRfqDueDate(e.target.value)} disabled={!canEdit || viewOnly} />
+                            </div>
+                        </div>
+
+                        <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom">Engineering Tracking</h6>
+                        <div className="row g-3 mb-4">
+                            <div className="col-md-4">
+                                <label className="form-label font-weight-semibold">Expected Date of Engg</label>
+                                <input type="date" className="form-control" value={edOfEngg} onChange={(e) => setEdOfEngg(e.target.value)} disabled={!canEdit || viewOnly} />
+                            </div>
+                            <div className="col-md-4">
+                                <label className="form-label font-weight-semibold">Actual Date of Engg</label>
+                                <input type="date" className="form-control" value={actualDateOfEngg} onChange={(e) => setActualDateOfEngg(e.target.value)} disabled={!canEdit || viewOnly} />
+                            </div>
+                            <div className="col-md-4">
+                                <label className="form-label font-weight-semibold">Engg Remarks</label>
+                                <input type="text" className="form-control" value={enggRemarks} onChange={(e) => setEnggRemarks(e.target.value)} disabled={!canEdit || viewOnly} />
+                            </div>
+                        </div>
+
+                        <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom">Costing Tracking</h6>
+                        <div className="row g-3 mb-4">
+                            <div className="col-md-4">
+                                <label className="form-label font-weight-semibold">Expected Date of Costing</label>
+                                <input type="date" className="form-control" value={edOfCosting} onChange={(e) => setEdOfCosting(e.target.value)} disabled={!canEdit || viewOnly} />
+                            </div>
+                            <div className="col-md-4">
+                                <label className="form-label font-weight-semibold">Actual Date of Costing</label>
+                                <input type="date" className="form-control" value={actualDateOfCosting} onChange={(e) => setActualDateOfCosting(e.target.value)} disabled={!canEdit || viewOnly} />
+                            </div>
+                            <div className="col-md-4">
+                                <label className="form-label font-weight-semibold">Costing Remarks</label>
+                                <input type="text" className="form-control" value={costingRemarks} onChange={(e) => setCostingRemarks(e.target.value)} disabled={!canEdit || viewOnly} />
                             </div>
                         </div>
 
@@ -206,11 +309,23 @@ const EditSalesModal = ({ enq, show, onClose, onSuccess, canEdit, viewOnly }) =>
                             <div className="col-md-6">
                                 <label className="form-label font-weight-semibold">Status</label>
                                 <select className="form-select" value={status} onChange={(e) => setStatus(e.target.value)} disabled={!canEdit || viewOnly}>
-                                    <option value="Pending with Engg">Pending with Engg</option>
-                                    <option value="Pending with Costing">Pending with Costing</option>
-                                    <option value="Pending with Sales">Pending with Sales</option>
-                                    <option value="Sales to Quote">Sales to Quote</option>
-                                    <option value="Quote Submitted">Quote Submitted</option>
+                                    {enq?.status === 'Pending with Sales' ? (
+                                        <>
+                                            <option value="Pending with Sales">Pending with Sales</option>
+                                            <option value="Pending with Costing">Pending with Costing</option>
+                                            <option value="Pending with Engg">Pending with Engg</option>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <option value="Sales to Quote">Sales to Quote</option>
+                                            <option value="On Hold">On Hold</option>
+                                            <option value="Regretted">Regretted</option>
+                                            <option value="Open - L1">Open - L1</option>
+                                            <option value="Won">Won</option>
+                                            <option value="Lost">Lost</option>
+                                            <option value="Quote Regretted">Quote Regretted</option>
+                                        </>
+                                    )}
                                 </select>
                             </div>
                         </div>
@@ -273,7 +388,7 @@ const EditSalesModal = ({ enq, show, onClose, onSuccess, canEdit, viewOnly }) =>
                         )}
 
                         {activeTab === 'activities' && (
-                            <ActivityFeedTab enq={enq} onSuccess={onSuccess} />
+                            <ActivityFeedTab enq={enq} onSuccess={onRefresh} />
                         )}
 
                         <div className="d-flex gap-2 justify-content-end mt-4 pt-3 border-top">

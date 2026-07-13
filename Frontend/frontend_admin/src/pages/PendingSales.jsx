@@ -5,6 +5,7 @@ import { getAvatarStyle } from '../utils/avatar';
 import EnquiryTable from '../components/common/EnquiryTable';
 import { enquiryService } from '../services/enquiryService';
 import { userService } from '../services/userService';
+import { masterDataService } from '../services/masterDataService';
 
 const PendingSales = () => {
     const { user } = useAuth();
@@ -19,13 +20,26 @@ const PendingSales = () => {
     const [enquiries, setEnquiries] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    
+    // Master data
     const [salesReps, setSalesReps] = useState([]);
+    const [customers, setCustomers] = useState([]);
+    const [sbus, setSbus] = useState([]);
+    const [divisions, setDivisions] = useState([]);
 
     // Modal state
     const [showModal, setShowModal] = useState(false);
     const [viewOnly, setViewOnly] = useState(false);
     const [selectedEnq, setSelectedEnq] = useState(null);
     const [submitting, setSubmitting] = useState(false);
+
+    // Editable Core Details
+    const [selectedCustomer, setSelectedCustomer] = useState('');
+    const [selectedSbu, setSelectedSbu] = useState('');
+    const [selectedDivision, setSelectedDivision] = useState('');
+    const [rfqNo, setRfqNo] = useState('');
+    const [rfqDate, setRfqDate] = useState('');
+    const [rfqDueDate, setRfqDueDate] = useState('');
 
     // Edit form states
     const [edOfEngg, setEdOfEngg] = useState('');
@@ -68,18 +82,26 @@ const PendingSales = () => {
         }
     };
 
-    // Load sales reps lookup
-    const fetchSalesReps = async () => {
+    // Load master data
+    const fetchMasterData = async () => {
         try {
-            const list = await userService.getSalesReps();
-            setSalesReps(list.results || list || []);
+            const [salesRes, custRes, sbuRes, divRes] = await Promise.all([
+                userService.getSalesReps(),
+                masterDataService.getCustomers({ page_size: 100 }),
+                masterDataService.getSBUs({ page_size: 100 }),
+                masterDataService.getDivisions({ page_size: 100 })
+            ]);
+            setSalesReps(salesRes.results || salesRes || []);
+            setCustomers(custRes.results || custRes || []);
+            setSbus(sbuRes.results || sbuRes || []);
+            setDivisions(divRes.results || divRes || []);
         } catch (err) {
-            showToast('Failed to load Sales Representatives.', 'error');
+            showToast('Failed to load master data.', 'error');
         }
     };
 
     useEffect(() => {
-        fetchSalesReps();
+        fetchMasterData();
     }, []);
 
     useEffect(() => {
@@ -93,6 +115,13 @@ const PendingSales = () => {
     const handleActionClick = (enq, viewOnlyMode = false) => {
         setSelectedEnq(enq);
         
+        setSelectedCustomer(enq.customer?.id || '');
+        setSelectedSbu(enq.sbu?.id || '');
+        setSelectedDivision(enq.division?.id || '');
+        setRfqNo(enq.rfq_no || '');
+        setRfqDate(enq.rfq_date || '');
+        setRfqDueDate(enq.rfq_due_date || '');
+
         setEdOfEngg(enq.ed_of_engg || '');
         setActualDateOfEngg(enq.actual_date_of_engg || '');
         setEnggRemarks(enq.engg_remarks || '');
@@ -146,9 +175,12 @@ const PendingSales = () => {
         setSubmitting(true);
         const payload = {
             ...selectedEnq,
-            customer: selectedEnq.customer?.id,
-            sbu: selectedEnq.sbu?.id,
-            division: selectedEnq.division?.id,
+            customer: parseInt(selectedCustomer) || selectedEnq.customer?.id,
+            sbu: parseInt(selectedSbu) || selectedEnq.sbu?.id,
+            division: parseInt(selectedDivision) || selectedEnq.division?.id,
+            rfq_no: rfqNo || selectedEnq.rfq_no,
+            rfq_date: rfqDate || selectedEnq.rfq_date,
+            rfq_due_date: rfqDueDate || selectedEnq.rfq_due_date,
             rfq_type: selectedEnq.rfq_type?.id,
             fg_type: selectedEnq.fg_type?.id,
             fg_details: selectedEnq.fg_details || [],
@@ -310,43 +342,79 @@ const PendingSales = () => {
                                 <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom">Project Information</h6>
                                 <div className="row g-3 mb-4">
                                     <div className="col-md-4">
-                                        <div className="enq-details-card">
-                                            <div className="enq-details-label">Customer Name</div>
-                                            <div className="enq-details-value" style={{ fontSize: '0.9rem' }}>{selectedEnq.customer?.name || 'N/A'}</div>
-                                        </div>
+                                        <label className="form-label font-weight-semibold">Customer Name</label>
+                                        <select
+                                            className="form-select"
+                                            value={selectedCustomer}
+                                            onChange={(e) => setSelectedCustomer(e.target.value)}
+                                            disabled={!canEdit || viewOnly}
+                                        >
+                                            <option value="">Select Customer</option>
+                                            {customers.map((c) => (
+                                                <option key={c.id} value={c.id}>{c.name}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                     <div className="col-md-4">
-                                        <div className="enq-details-card">
-                                            <div className="enq-details-label">SBU</div>
-                                            <div className="enq-details-value" style={{ fontSize: '0.9rem' }}>{selectedEnq.sbu?.name || 'N/A'}</div>
-                                        </div>
+                                        <label className="form-label font-weight-semibold">SBU</label>
+                                        <select
+                                            className="form-select"
+                                            value={selectedSbu}
+                                            onChange={(e) => setSelectedSbu(e.target.value)}
+                                            disabled={!canEdit || viewOnly}
+                                        >
+                                            <option value="">Select SBU</option>
+                                            {sbus.map((s) => (
+                                                <option key={s.id} value={s.id}>{s.name}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                     <div className="col-md-4">
-                                        <div className="enq-details-card">
-                                            <div className="enq-details-label">Division</div>
-                                            <div className="enq-details-value" style={{ fontSize: '0.9rem' }}>{selectedEnq.division?.name || 'N/A'}</div>
-                                        </div>
+                                        <label className="form-label font-weight-semibold">Division</label>
+                                        <select
+                                            className="form-select"
+                                            value={selectedDivision}
+                                            onChange={(e) => setSelectedDivision(e.target.value)}
+                                            disabled={!canEdit || viewOnly}
+                                        >
+                                            <option value="">Select Division</option>
+                                            {divisions.map((d) => (
+                                                <option key={d.id} value={d.id}>{d.name}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                 </div>
 
                                 <div className="row g-3 mb-4">
                                     <div className="col-md-4">
-                                        <div className="enq-details-card">
-                                            <div className="enq-details-label">RFQ No</div>
-                                            <div className="enq-details-value" style={{ fontSize: '0.9rem' }}>{selectedEnq.rfq_no}</div>
-                                        </div>
+                                        <label className="form-label font-weight-semibold">RFQ No</label>
+                                        <input 
+                                            type="text" 
+                                            className="form-control" 
+                                            value={rfqNo} 
+                                            onChange={(e) => setRfqNo(e.target.value)} 
+                                            disabled={!canEdit || viewOnly} 
+                                        />
                                     </div>
                                     <div className="col-md-4">
-                                        <div className="enq-details-card">
-                                            <div className="enq-details-label">RFQ Date</div>
-                                            <div className="enq-details-value" style={{ fontSize: '0.9rem' }}>{selectedEnq.rfq_date}</div>
-                                        </div>
+                                        <label className="form-label font-weight-semibold">RFQ Date</label>
+                                        <input 
+                                            type="date" 
+                                            className="form-control" 
+                                            value={rfqDate} 
+                                            onChange={(e) => setRfqDate(e.target.value)} 
+                                            disabled={!canEdit || viewOnly} 
+                                        />
                                     </div>
                                     <div className="col-md-4">
-                                        <div className="enq-details-card">
-                                            <div className="enq-details-label">RFQ Due Date</div>
-                                            <div className="enq-details-value" style={{ fontSize: '0.9rem' }}>{selectedEnq.rfq_due_date} ({selectedEnq.rfq_due_time?.substring(0, 5)})</div>
-                                        </div>
+                                        <label className="form-label font-weight-semibold">RFQ Due Date</label>
+                                        <input 
+                                            type="date" 
+                                            className="form-control" 
+                                            value={rfqDueDate} 
+                                            onChange={(e) => setRfqDueDate(e.target.value)} 
+                                            disabled={!canEdit || viewOnly} 
+                                        />
                                     </div>
                                 </div>
 
@@ -440,7 +508,6 @@ const PendingSales = () => {
                                             <option value="Pending with Engg">Pending with Engg</option>
                                             <option value="Pending with Costing">Pending with Costing</option>
                                             <option value="Pending with Sales">Pending with Sales</option>
-                                            <option value="Sales to Quote">Sales to Quote</option>
                                         </select>
                                     </div>
                                 </div>

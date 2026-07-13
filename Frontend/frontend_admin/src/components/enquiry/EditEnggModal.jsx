@@ -6,7 +6,7 @@ import DocumentsTab from './DocumentsTab';
 import AuditHistoryTab from './AuditHistoryTab';
 import ActivityFeedTab from './ActivityFeedTab';
 
-const EditEnggModal = ({ enq, show, onClose, onSuccess, canEdit, viewOnly }) => {
+const EditEnggModal = ({ enq, show, onClose, onSuccess, onRefresh, canEdit, viewOnly }) => {
     const { showToast } = useToast();
     const [activeTab, setActiveTab] = useState('details');
     
@@ -22,19 +22,26 @@ const EditEnggModal = ({ enq, show, onClose, onSuccess, canEdit, viewOnly }) => 
     const [selectedSalesRep, setSelectedSalesRep] = useState('');
     const [status, setStatus] = useState('Pending with Engg');
 
+    const [wasOpen, setWasOpen] = useState(false);
+
     useEffect(() => {
         if (enq && show) {
+            if (!wasOpen) {
+                setActiveTab('details');
+                setRfqFile(null);
+                setPoFile(null);
+                setWasOpen(true);
+            }
             setEdOfEngg(enq.ed_of_engg || '');
             setActualDateOfEngg(enq.actual_date_of_engg || '');
             setEnggRemarks(enq.engg_remarks || '');
             setSelectedSalesRep(enq.sales_rep?.id || '');
             setStatus(enq.status || 'Pending with Engg');
-            setActiveTab('details');
-            setRfqFile(null);
-            setPoFile(null);
             fetchSalesReps();
+        } else if (!show) {
+            setWasOpen(false);
         }
-    }, [enq, show]);
+    }, [enq, show, wasOpen]);
 
     const fetchSalesReps = async () => {
         try {
@@ -253,7 +260,7 @@ const EditEnggModal = ({ enq, show, onClose, onSuccess, canEdit, viewOnly }) => 
                         )}
 
                         {activeTab === 'activities' && (
-                            <ActivityFeedTab enq={enq} onSuccess={onSuccess} />
+                            <ActivityFeedTab enq={enq} onSuccess={onRefresh} />
                         )}
 
                         <div className="d-flex gap-2 justify-content-end mt-4 pt-3 border-top">

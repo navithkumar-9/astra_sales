@@ -1,652 +1,382 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import {
-    Bar,
-    BarChart,
-    CartesianGrid,
-    Cell,
-    Legend,
-    Pie,
-    PieChart,
-    Tooltip as RechartsTooltip,
-    ResponsiveContainer,
-    XAxis,
-    YAxis,
+    Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart,
+    Tooltip, ResponsiveContainer, XAxis, YAxis, LineChart, Line, AreaChart, Area
 } from 'recharts';
 import API from '../api/axios';
-import { useAuth } from '../context/AuthContext';
-import { getAvatarStyle } from '../utils/avatar';
+import { useToast } from '../context/ToastContext';
 
-const COLORS = ['#49CCF9', '#ffb946', '#7B68EE', '#4bcf82', '#ff6b6b'];
+// Harmonious, premium color palette for charts
+const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#f97316', '#64748b', '#06b6d4'];
+
+const KpiCard = ({ title, value, gradient, shadowColor, icon, subtitle }) => (
+    <div className="card border-0 h-100 text-white shadow-sm" style={{ 
+        background: gradient, 
+        borderRadius: '12px',
+        boxShadow: `0 6px 20px ${shadowColor}`,
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        cursor: 'pointer',
+        position: 'relative',
+        overflow: 'hidden'
+    }}
+    onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-4px)';
+        e.currentTarget.style.boxShadow = `0 10px 25px ${shadowColor}`;
+    }}
+    onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'none';
+        e.currentTarget.style.boxShadow = `0 6px 20px ${shadowColor}`;
+    }}
+    >
+        {/* Background Decorative Circles like Purple Admin */}
+        <div style={{
+            position: 'absolute',
+            top: '-30px',
+            right: '-30px',
+            width: '130px',
+            height: '130px',
+            borderRadius: '50%',
+            background: 'rgba(255, 255, 255, 0.13)'
+        }} />
+        <div style={{
+            position: 'absolute',
+            top: '30px',
+            right: '-60px',
+            width: '130px',
+            height: '130px',
+            borderRadius: '50%',
+            background: 'rgba(255, 255, 255, 0.13)'
+        }} />
+
+        <div className="card-body p-4 position-relative" style={{ zIndex: 2 }}>
+            <div className="d-flex justify-content-between align-items-start">
+                <div>
+                    <div className="small font-weight-bold text-uppercase tracking-wider mb-2" style={{ fontSize: '0.8rem', opacity: 0.85 }}>{title}</div>
+                    <h2 className="mb-2 font-weight-bold" style={{ fontSize: '1.8rem', textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>{value}</h2>
+                    {subtitle && <div className="small mt-2" style={{ opacity: 0.8, fontSize: '0.75rem' }}>{subtitle}</div>}
+                </div>
+                <div style={{ opacity: 0.85 }}>
+                    {icon}
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
+const ChartCard = ({ title, children }) => (
+    <div className="card border-0 h-100 shadow-sm" style={{ borderRadius: '16px', backgroundColor: '#ffffff' }}>
+        <div className="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex align-items-center justify-content-between">
+            <h6 className="font-weight-bold mb-0 text-dark" style={{ letterSpacing: '0.5px' }}>{title}</h6>
+        </div>
+        <div className="card-body px-4 pb-4 pt-3" style={{ minHeight: '320px' }}>
+            {children}
+        </div>
+    </div>
+);
 
 const Dashboard = () => {
-    const { user } = useAuth();
-
-    const [profile, setProfile] = useState(null);
-
-    const [dashboardData, setDashboardData] = useState(null);
-
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(true);
-
-    const isAdmin = user?.role === 'ADMIN';
+    const [data, setData] = useState({
+        kpis: {
+            totalEnquiryCount: 0,
+            overallPendingCount: 0,
+            quoted90Days: 0,
+            budgetaryCount: 0,
+            openL1Count: 0,
+            wonCount: 0,
+            regrettedCount: 0,
+            lostCount: 0,
+            holdCount: 0,
+            quotedValue: 0,
+            budgetaryValue: 0,
+            poValue: 0,
+            openL1Value: 0,
+            lostValue: 0,
+            todaysDue: 0,
+            tomorrowDue: 0
+        },
+        charts: {
+            statusDistribution: [],
+            monthlyTrend: [],
+            pipeline: [],
+            winLossTrend: [],
+            salesPerformance: [],
+            ageing: [],
+            openOpportunities: [],
+            monthlyQuoteValue: [],
+            revenueForecast: [],
+            topCustomers: [],
+            followupTimeline: [],
+            tatData: [],
+            pendingByDept: []
+        }
+    });
 
     useEffect(() => {
-        API.get('/profile/')
-
-            .then((res) => {
-                if (res.data.success) setProfile(res.data.data);
-            })
-
-            .catch(console.error);
-    }, []);
-
-    useEffect(() => {
-        const fetchDashboardData = async () => {
-            setLoading(true);
-
-            try {
-                const res = await API.get('/dashboard/stats/');
-
-                if (res.data.success) {
-                    setDashboardData(res.data.data);
-                }
-            } catch (error) {
-                // Endpoint may not exist yet; avoid blocking dashboard render
-                console.error('Error fetching dashboard data', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchDashboardData();
     }, []);
 
-    // Data Processing for Header Metrics
-
-    const headerMetrics = useMemo(() => {
-        return (
-            dashboardData?.metrics || {
-                totalActive: 0,
-                overdue: 0,
-                progress: 0,
+    const fetchDashboardData = async () => {
+        setLoading(true);
+        try {
+            const res = await API.get('/dashboard/stats/');
+            if (res.data.success && res.data.data) {
+                setData({
+                    kpis: { ...data.kpis, ...res.data.data.kpis },
+                    charts: { ...data.charts, ...res.data.data.charts }
+                });
             }
-        );
-    }, [dashboardData]);
-
-    // Data Processing for Charts
-
-    const workloadData = useMemo(() => {
-        return dashboardData?.workloadData || [];
-    }, [dashboardData]);
-
-    const statusData = useMemo(() => {
-        return dashboardData?.statusData || [];
-    }, [dashboardData]);
-
-    // Data Processing for Bottom Section
-
-    const topCriticalTasks = useMemo(() => {
-        return dashboardData?.topCriticalTasks || [];
-    }, [dashboardData]);
-
-    const recentActivity = useMemo(() => {
-        if (!dashboardData?.recentActivity) return [];
-
-        return dashboardData.recentActivity.map((act) => ({
-            ...act,
-
-            date: new Date(act.date),
-        }));
-    }, [dashboardData]);
-
-    const getPriorityColor = (priority) => {
-        switch (priority) {
-            case 'HIGH':
-                return '#ff6b6b';
-
-            case 'MEDIUM':
-                return '#ffb946';
-
-            case 'LOW':
-                return '#4bcf82';
-
-            default:
-                return 'var(--text-muted)';
-        }
-    };
-
-    const getStatusColor = (statusName) => {
-        switch (statusName) {
-            case 'To-do':
-                return '#49CCF9';
-
-            case 'In Progress':
-                return '#ffb946';
-
-            case 'In Review':
-                return '#7B68EE';
-
-            case 'Completed':
-                return '#4bcf82';
-
-            case 'Hold':
-                return '#ff6b6b';
-
-            default:
-                return '#ccc';
+        } catch (err) {
+            showToast('Failed to load dashboard data', 'error');
+            console.error(err);
+        } finally {
+            setLoading(false);
         }
     };
 
     if (loading) {
         return (
-            <div className="page ext-dashboard-131">
-                <div className="page-loader">
-                    <div className="page-loader-spinner"></div>
-                    <div className="page-loader-text">Loading dashboard...</div>
-                </div>
+            <div className="d-flex flex-column align-items-center justify-content-center vh-100 bg-light">
+                <div className="spinner-border text-primary" style={{ width: '3rem', height: '3rem' }} role="status"></div>
+                <div className="mt-3 font-weight-bold text-muted" style={{ letterSpacing: '1px' }}>LOADING ANALYTICS...</div>
             </div>
         );
     }
 
+    const { kpis, charts } = data;
+
+    const formatCurrency = (val) => {
+        const num = Number(val);
+        if (isNaN(num)) return '₹0';
+        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumSignificantDigits: 3 }).format(num);
+    };
+
+    // Premium custom SVGs for Purple style boxes
+    const icons = {
+        chart: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>,
+        diamond: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 3h12l4 6-10 13L2 9z"/></svg>,
+        bookmark: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>,
+        cash: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
+        trending: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
+        clock: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+        alert: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
+        award: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+    };
+
     return (
-        <div className="page">
-            {/* Page Header */}
-
-            <div className="page-header ext-completed-tasks-84">
+        <div className="container-fluid py-4 px-4 bg-light" style={{ minHeight: '100vh', overflowY: 'auto' }}>
+            {/* Upper Header */}
+            <div className="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
                 <div>
-                    <h1 className="page-title">Dashboard</h1>
-
-                    <p className="page-subtitle">
-                        Welcome back,{' '}
-                        <span className="text-accent">
-                            {profile?.username || user?.username || 'User'}
-                        </span>
-                    </p>
+                    <h2 className="font-weight-bold mb-1 text-dark" style={{ letterSpacing: '-0.5px' }}>CRM Enterprise Dashboard</h2>
+                    <p className="text-muted mb-0 small">Executive performance metrics and real-time pipeline status</p>
+                </div>
+                <div className="d-flex gap-3">
+                    <button className="btn btn-white border shadow-sm btn-sm rounded-pill px-3 d-flex align-items-center gap-1 bg-white" onClick={fetchDashboardData}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+                        Sync Data
+                    </button>
                 </div>
             </div>
 
-            {/* Top Header: High-Level Health Counter Cards */}
-
-            <div className="ext-dashboard-132">
-                <div className="stat-card stat-blue">
-                    <div className="ext-dashboard-133">
-                        <svg
-                            width="28"
-                            height="28"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                            <polyline points="14 2 14 8 20 8" />
-                            <line x1="16" y1="13" x2="8" y2="13" />
-                            <line x1="16" y1="17" x2="8" y2="17" />
-                            <polyline points="10 9 9 9 8 9" />
-                        </svg>
-                    </div>
-
-                    <div className="stat-info">
-                        <div className="stat-label">Total Active Tasks</div>
-
-                        <div className="stat-value">
-                            {headerMetrics.totalActive}
-                        </div>
-                    </div>
+            {/* KPIs Grid */}
+            <div className="row g-3 mb-4">
+                <div className="col-xl-3 col-md-4 col-sm-6">
+                    <KpiCard title="Total Enquiries" value={kpis.totalEnquiryCount} gradient="linear-gradient(to right, #ffbf96, #fe7096)" shadowColor="rgba(254, 112, 150, 0.25)" icon={icons.chart} subtitle="Increased by 60%" />
                 </div>
-
-                <div className="stat-card stat-amber">
-                    <div className="ext-dashboard-134">
-                        <svg
-                            width="28"
-                            height="28"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                        </svg>
-                    </div>
-
-                    <div className="stat-info">
-                        <div className="stat-label">Overdue Tasks</div>
-
-                        <div className="stat-value ext-dashboard-135">
-                            {headerMetrics.overdue}
-                        </div>
-                    </div>
+                <div className="col-xl-3 col-md-4 col-sm-6">
+                    <KpiCard title="Overall Pending" value={kpis.overallPendingCount} gradient="linear-gradient(to right, #90caf9, #047edf 99%)" shadowColor="rgba(4, 126, 223, 0.25)" icon={icons.clock} subtitle="Decreased by 10%" />
                 </div>
-
-                <div className="stat-card stat-green">
-                    <div className="ext-dashboard-136">
-                        <svg
-                            width="28"
-                            height="28"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                            <polyline points="22 4 12 14.01 9 11.01" />
-                        </svg>
-                    </div>
-
-                    <div className="stat-info ext-dashboard-137">
-                        <div className="stat-label">Project Progress</div>
-
-                        <div className="stat-value">
-                            {headerMetrics.progress}%
-                        </div>
-
-                        <div className="ext-dashboard-138">
-                            <div
-                                className="progress-bar-fill"
-                                style={{ width: `${headerMetrics.progress}%` }}
-                            ></div>
-                        </div>
-                    </div>
+                <div className="col-xl-3 col-md-4 col-sm-6">
+                    <KpiCard title="Quoted (>90 Days)" value={kpis.quoted90Days} gradient="linear-gradient(to right, #84d9d2, #07cdae)" shadowColor="rgba(7, 205, 174, 0.25)" icon={icons.alert} subtitle="Stuck Enquiries" />
+                </div>
+                <div className="col-xl-3 col-md-4 col-sm-6">
+                    <KpiCard title="Budgetary Quotes" value={kpis.budgetaryCount} gradient="linear-gradient(to right, #c3a1ff, #7f39fb)" shadowColor="rgba(127, 57, 251, 0.25)" icon={icons.bookmark} subtitle="Budgetary RFQs" />
+                </div>
+                
+                <div className="col-xl-3 col-md-4 col-sm-6">
+                    <KpiCard title="Open - L1" value={kpis.openL1Count} gradient="linear-gradient(to right, #ffbf96, #fe7096)" shadowColor="rgba(254, 112, 150, 0.25)" icon={icons.award} subtitle="Opportunities at L1" />
+                </div>
+                <div className="col-xl-3 col-md-4 col-sm-6">
+                    <KpiCard title="Won" value={kpis.wonCount} gradient="linear-gradient(to right, #84d9d2, #07cdae)" shadowColor="rgba(7, 205, 174, 0.25)" icon={icons.diamond} subtitle="Increased by 5%" />
+                </div>
+                <div className="col-xl-3 col-md-4 col-sm-6">
+                    <KpiCard title="Lost" value={kpis.lostCount} gradient="linear-gradient(to right, #64748b, #475569)" shadowColor="rgba(100, 116, 139, 0.25)" icon={icons.clock} subtitle="Lost opportunities" />
+                </div>
+                <div className="col-xl-3 col-md-4 col-sm-6">
+                    <KpiCard title="On Hold" value={kpis.holdCount} gradient="linear-gradient(to right, #ffbf96, #fe7096)" shadowColor="rgba(254, 112, 150, 0.25)" icon={icons.bookmark} subtitle="Delayed registrations" />
+                </div>
+                
+                <div className="col-xl-3 col-md-4 col-sm-6">
+                    <KpiCard title="Quoted Value" value={formatCurrency(kpis.quotedValue)} gradient="linear-gradient(to right, #90caf9, #047edf 99%)" shadowColor="rgba(4, 126, 223, 0.25)" icon={icons.cash} subtitle="Total quoted pipeline" />
+                </div>
+                <div className="col-xl-3 col-md-4 col-sm-6">
+                    <KpiCard title="PO Value" value={formatCurrency(kpis.poValue)} gradient="linear-gradient(to right, #84d9d2, #07cdae)" shadowColor="rgba(7, 205, 174, 0.25)" icon={icons.trending} subtitle="Total PO registered value" />
+                </div>
+                <div className="col-xl-3 col-md-4 col-sm-6">
+                    <KpiCard title="Open L1 Value" value={formatCurrency(kpis.openL1Value)} gradient="linear-gradient(to right, #c3a1ff, #7f39fb)" shadowColor="rgba(127, 57, 251, 0.25)" icon={icons.cash} subtitle="Active L1 value" />
+                </div>
+                <div className="col-xl-3 col-md-4 col-sm-6">
+                    <KpiCard title="Lost Value" value={formatCurrency(kpis.lostValue)} gradient="linear-gradient(to right, #64748b, #475569)" shadowColor="rgba(100, 116, 139, 0.25)" icon={icons.cash} subtitle="Failed quote value" />
                 </div>
             </div>
 
-            {/* Middle Section: Visual Charts */}
-
-            <div className="ext-dashboard-139">
-                {/* Workload per Person (Bar Chart) */}
-
-                <div className="content-card">
-                    <h2 className="content-card-title ext-completed-tasks-84">
-                        Workload Distribution
-                    </h2>
-
-                    <div className="ext-dashboard-140">
-                        {workloadData.length > 0 ? (
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart
-                                    data={workloadData}
-                                    margin={{
-                                        top: 10,
-                                        right: 10,
-                                        left: -20,
-                                        bottom: 0,
-                                    }}
-                                >
-                                    <CartesianGrid
-                                        strokeDasharray="3 3"
-                                        vertical={false}
-                                        stroke="var(--border-light)"
-                                    />
-
-                                    <XAxis
-                                        dataKey="name"
-                                        axisLine={false}
-                                        tickLine={false}
-                                        tick={{
-                                            fontSize: 12,
-                                            fill: 'var(--text-muted)',
-                                        }}
-                                    />
-
-                                    <YAxis
-                                        axisLine={false}
-                                        tickLine={false}
-                                        tick={{
-                                            fontSize: 12,
-                                            fill: 'var(--text-muted)',
-                                        }}
-                                        allowDecimals={false}
-                                    />
-
-                                    <RechartsTooltip
-                                        cursor={{ fill: 'var(--bg-body)' }}
-                                        contentStyle={{
-                                            borderRadius: '12px',
-                                            border: 'none',
-                                            boxShadow:
-                                                '0 10px 30px rgba(0,0,0,0.1)',
-                                        }}
-                                    />
-
-                                    <Bar
-                                        dataKey="tasks"
-                                        fill="var(--primary)"
-                                        radius={[6, 6, 0, 0]}
-                                        maxBarSize={50}
-                                    />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        ) : (
-                            <div className="ext-dashboard-141">
-                                No workload data available
-                            </div>
-                        )}
-                    </div>
+            {/* Charts Grid */}
+            <div className="row g-4">
+                {/* 1. Enquiry Status Distribution */}
+                <div className="col-lg-4 col-md-6">
+                    <ChartCard title="Status Distribution">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie data={charts.statusDistribution} cx="50%" cy="50%" innerRadius={60} outerRadius={85} paddingAngle={4} dataKey="value">
+                                    {charts.statusDistribution?.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
+                                </Pie>
+                                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }} />
+                                <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </ChartCard>
                 </div>
 
-                {/* Tasks by Current Status (Pie Chart) */}
-
-                <div className="content-card">
-                    <h2 className="content-card-title ext-completed-tasks-84">
-                        Tasks by Status
-                    </h2>
-
-                    <div className="ext-dashboard-142">
-                        {statusData.length > 0 ? (
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={statusData}
-                                        cx="50%"
-                                        cy="45%"
-                                        innerRadius={60}
-                                        outerRadius={90}
-                                        paddingAngle={5}
-                                        dataKey="value"
-                                    >
-                                        {statusData.map((entry, index) => (
-                                            <Cell
-                                                key={`cell-${index}`}
-                                                fill={getStatusColor(
-                                                    entry.name,
-                                                )}
-                                            />
-                                        ))}
-                                    </Pie>
-
-                                    <RechartsTooltip
-                                        contentStyle={{
-                                            borderRadius: '12px',
-                                            border: 'none',
-                                            boxShadow:
-                                                '0 10px 30px rgba(0,0,0,0.1)',
-                                        }}
-                                    />
-
-                                    <Legend
-                                        verticalAlign="bottom"
-                                        height={36}
-                                        iconType="circle"
-                                        wrapperStyle={{ fontSize: '12px' }}
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        ) : (
-                            <div className="ext-dashboard-141">
-                                No status data available
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* Bottom Section: Actionable Detail */}
-
-            <div className="ext-dashboard-143">
-                {/* Top 5 Critical/Urgent Tasks */}
-
-                <div className="content-card">
-                    <div className="ext-dashboard-144">
-                        <h2 className="content-card-title ext-dashboard-145">
-                            Top 5 Critical Tasks
-                        </h2>
-
-                        <Link to="/tasks" className="ext-dashboard-146">
-                            View All
-                        </Link>
-                    </div>
-
-                    {topCriticalTasks.length > 0 ? (
-                        <div className="ext-dashboard-147">
-                            <table className="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Task Name</th>
-
-                                        <th>Priority</th>
-
-                                        <th>Due Date</th>
-
-                                        <th>Assignee</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-                                    {topCriticalTasks.map((task, idx) => {
-                                        const effectiveDue =
-                                            task.revised_due_date ||
-                                            task.due_date;
-
-                                        const isOverdue =
-                                            effectiveDue &&
-                                            new Date(effectiveDue) <
-                                                new Date(
-                                                    new Date().toDateString(),
-                                                );
-
-                                        const assigneeName =
-                                            task.assignees?.[0]?.username || '';
-
-                                        const avStyle =
-                                            getAvatarStyle(assigneeName);
-
-                                        return (
-                                            <tr key={task.id || idx}>
-                                                <td className="ext-dashboard-148">
-                                                    {task.task_name}
-
-                                                    <div className="ext-dashboard-149">
-                                                        {task.project_name}
-                                                    </div>
-                                                </td>
-
-                                                <td>
-                                                    <span
-                                                        className={`badge badge-${task.priority.toLowerCase()}`}
-                                                    >
-                                                        {task.priority}
-                                                    </span>
-                                                </td>
-
-                                                <td className={isOverdue ? "text-danger fw-bold" : "text-secondary fw-medium"}>
-                                                    {task.revised_due_date ? (
-                                                        <div className="ext-dashboard-150">
-                                                            <span className="ext-dashboard-151">
-                                                                {new Date(
-                                                                    task.due_date,
-                                                                ).toLocaleDateString()}
-                                                            </span>
-
-                                                            <span className={isOverdue ? "text-danger fw-bold" : "text-dark fw-bold"}>
-                                                                {new Date(
-                                                                    task.revised_due_date,
-                                                                ).toLocaleDateString()}
-
-                                                                <span className="ext-dashboard-152">
-                                                                    REVISED
-                                                                </span>
-                                                            </span>
-                                                        </div>
-                                                    ) : task.due_date ? (
-                                                        <>
-                                                            {new Date(
-                                                                task.due_date,
-                                                            ).toLocaleDateString()}
-
-                                                            {isOverdue && (
-                                                                <span className="ext-dashboard-153">
-                                                                    OVERDUE
-                                                                </span>
-                                                            )}
-                                                        </>
-                                                    ) : (
-                                                        'N/A'
-                                                    )}
-                                                </td>
-
-                                                <td>
-                                                    <div className="ext-announcements-16">
-                                                        {assigneeName ? (
-                                                            task.assignees?.[0]
-                                                                ?.profile_picture ? (
-                                                                <img
-                                                                    src={
-                                                                        task
-                                                                            .assignees[0]
-                                                                            .profile_picture
-                                                                    }
-                                                                    alt="Avatar"
-                                                                    className="ext-dashboard-154"
-                                                                />
-                                                            ) : (
-                                                                <div
-                                                                    className="avatar-circle shadow-sm"
-                                                                    style={{
-                                                                        background: avStyle.bg,
-                                                                        color: avStyle.text
-                                                                    }}
-                                                                >
-                                                                    {assigneeName
-                                                                        .charAt(
-                                                                            0,
-                                                                        )
-                                                                        .toUpperCase()}
-                                                                </div>
-                                                            )
-                                                        ) : (
-                                                            <div className="ext-dashboard-155">
-                                                                ?
-                                                            </div>
-                                                        )}
-
-                                                        <span className="ext-dashboard-156">
-                                                            {assigneeName ||
-                                                                'Unassigned'}
-                                                            {task.assignees
-                                                                ?.length > 1
-                                                                ? ` +${task.assignees.length - 1}`
-                                                                : ''}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    ) : (
-                        <div className="ext-dashboard-157">
-                            No active critical tasks.
-                        </div>
-                    )}
+                {/* 2. Monthly Trend */}
+                <div className="col-lg-8 col-md-6">
+                    <ChartCard title="Monthly Enquiry Trend">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={charts.monthlyTrend}>
+                                <defs>
+                                    <linearGradient id="lineColor" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.1}/>
+                                        <stop offset="95%" stopColor="#4f46e5" stopOpacity={0}/>
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }} />
+                                <Line type="monotone" dataKey="value" stroke="#4f46e5" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: '#fff' }} activeDot={{ r: 7 }} />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </ChartCard>
                 </div>
 
-                {/* Recent Activity Feed */}
+                {/* 3. RFQ Pipeline */}
+                <div className="col-lg-6 col-md-6">
+                    <ChartCard title="RFQ Pipeline Funnel">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={charts.pipeline} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 11 }} width={120} />
+                                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} />
+                                <Bar dataKey="value" fill="#8b5cf6" radius={[0, 6, 6, 0]}>
+                                    {charts.pipeline?.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </ChartCard>
+                </div>
 
-                <div className="content-card">
-                    <h2 className="content-card-title ext-completed-tasks-84">
-                        Recent Activity
-                    </h2>
+                {/* 4. Win/Loss Trend */}
+                <div className="col-lg-6 col-md-6">
+                    <ChartCard title="Win vs Loss Trend">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={charts.winLossTrend}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} />
+                                <Legend verticalAlign="top" height={36} iconType="circle" />
+                                <Bar dataKey="Won" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} />
+                                <Bar dataKey="Lost" stackId="a" fill="#ef4444" radius={[6, 6, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </ChartCard>
+                </div>
 
-                    <div className="ext-dashboard-158">
-                        {recentActivity.length > 0 ? (
-                            recentActivity.map((activity, idx) => (
-                                <div
-                                    key={activity.id || idx}
-                                    className="ext-dashboard-159"
-                                >
-                                    {idx !== recentActivity.length - 1 && (
-                                        <div className="ext-dashboard-160"></div>
-                                    )}
+                {/* 5. Sales Performance */}
+                <div className="col-lg-6 col-md-6">
+                    <ChartCard title="Sales Performance by Rep">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={charts.salesPerformance} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 11 }} width={100} />
+                                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} />
+                                <Bar dataKey="count" fill="#3b82f6" radius={[0, 6, 6, 0]}>
+                                    {charts.salesPerformance?.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </ChartCard>
+                </div>
 
-                                    <div
-                                        className={`activity-icon-wrapper ${activity.type === 'TASK' ? 'activity-task' : 'activity-other'}`}
-                                    >
-                                        {activity.type === 'TASK' ? (
-                                            <svg
-                                                width="20"
-                                                height="20"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth="2"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                            >
-                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                                <polyline points="14 2 14 8 20 8" />
-                                                <line
-                                                    x1="16"
-                                                    y1="13"
-                                                    x2="8"
-                                                    y2="13"
-                                                />
-                                                <line
-                                                    x1="16"
-                                                    y1="17"
-                                                    x2="8"
-                                                    y2="17"
-                                                />
-                                                <polyline points="10 9 9 9 8 9" />
-                                            </svg>
-                                        ) : (
-                                            <svg
-                                                width="20"
-                                                height="20"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth="2"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                            >
-                                                <circle
-                                                    cx="12"
-                                                    cy="12"
-                                                    r="10"
-                                                />
-                                                <polyline points="12 6 12 12 16 14" />
-                                            </svg>
-                                        )}
-                                    </div>
+                {/* 8. Monthly Quote Value (Area) */}
+                <div className="col-lg-6 col-md-6">
+                    <ChartCard title="Monthly Quote Value">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={charts.monthlyQuoteValue}>
+                                <defs>
+                                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4}/>
+                                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} formatter={(val) => formatCurrency(val)} />
+                                <Area type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={2} fillOpacity={1} fill="url(#colorValue)" />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </ChartCard>
+                </div>
 
-                                    <div className="ext-dashboard-161">
-                                        <div className="ext-dashboard-162">
-                                            <div className="ext-dashboard-163">
-                                                {activity.title}
-                                            </div>
+                {/* 6. Ageing */}
+                <div className="col-lg-4 col-md-6">
+                    <ChartCard title="Enquiry Ageing">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={charts.ageing}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} />
+                                <Bar dataKey="value" fill="#f59e0b" radius={[6, 6, 0, 0]}>
+                                    {charts.ageing?.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </ChartCard>
+                </div>
 
-                                            <div className="ext-dashboard-164">
-                                                {activity.date.toLocaleDateString(
-                                                    [],
-                                                    {
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                    },
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <div className="ext-dashboard-165">
-                                            {activity.desc}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="ext-dashboard-166">
-                                No recent activity found.
-                            </div>
-                        )}
-                    </div>
+                {/* 16. Pending by Dept */}
+                <div className="col-lg-4 col-md-6">
+                    <ChartCard title="Pending by Department">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie data={charts.pendingByDept} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" labelLine={false} label>
+                                    {charts.pendingByDept?.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
+                                </Pie>
+                                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} />
+                                <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </ChartCard>
+                </div>
+                
+                {/* 13. Follow-up Timeline */}
+                <div className="col-lg-4 col-md-6">
+                    <ChartCard title="Next 7 Days Timeline">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={charts.followupTimeline}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} />
+                                <Bar dataKey="value" fill="#ef4444" radius={[6, 6, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </ChartCard>
                 </div>
             </div>
         </div>
@@ -654,3 +384,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

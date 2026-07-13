@@ -57,6 +57,13 @@ class Enquiry(TimeStampedModel):
 
     class Meta:
         db_table = 'enquiries'
+        indexes = [
+            models.Index(fields=['-created_at'], name='enq_created_at_desc_idx'),
+            models.Index(fields=['status', '-created_at'], name='enq_status_created_idx'),
+            models.Index(fields=['rfq_date'], name='enq_rfq_date_idx'),
+            models.Index(fields=['rfq_due_date'], name='enq_rfq_due_date_idx'),
+            models.Index(fields=['quote_date'], name='enq_quote_date_idx'),
+        ]
         constraints = [
             models.CheckConstraint(condition=models.Q(quote_value__gte=0), name='check_quote_value_non_negative'),
             models.CheckConstraint(condition=models.Q(open_l1_value__gte=0), name='check_open_l1_value_non_negative'),

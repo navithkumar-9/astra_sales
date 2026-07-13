@@ -48,5 +48,10 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['role', '-date_joined'], name='user_role_joined_idx'),
+        ]
+
     def __str__(self):
         return f"{self.username} ({self.role})"

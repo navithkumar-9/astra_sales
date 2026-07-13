@@ -6,7 +6,7 @@ import DocumentsTab from './DocumentsTab';
 import AuditHistoryTab from './AuditHistoryTab';
 import ActivityFeedTab from './ActivityFeedTab';
 
-const EditCostingModal = ({ enq, show, onClose, onSuccess, canEdit, viewOnly }) => {
+const EditCostingModal = ({ enq, show, onClose, onSuccess, onRefresh, canEdit, viewOnly }) => {
     const { showToast } = useToast();
     const [activeTab, setActiveTab] = useState('details');
     
@@ -22,19 +22,26 @@ const EditCostingModal = ({ enq, show, onClose, onSuccess, canEdit, viewOnly }) 
     const [selectedSalesRep, setSelectedSalesRep] = useState('');
     const [status, setStatus] = useState('Pending with Costing');
 
+    const [wasOpen, setWasOpen] = useState(false);
+
     useEffect(() => {
         if (enq && show) {
+            if (!wasOpen) {
+                setActiveTab('details');
+                setRfqFile(null);
+                setPoFile(null);
+                setWasOpen(true);
+            }
             setEdOfCosting(enq.ed_of_costing || '');
             setActualDateOfCosting(enq.actual_date_of_costing || '');
             setCostingRemarks(enq.costing_remarks || '');
             setSelectedSalesRep(enq.sales_rep?.id || '');
             setStatus(enq.status || 'Pending with Costing');
-            setActiveTab('details');
-            setRfqFile(null);
-            setPoFile(null);
             fetchSalesReps();
+        } else if (!show) {
+            setWasOpen(false);
         }
-    }, [enq, show]);
+    }, [enq, show, wasOpen]);
 
     const fetchSalesReps = async () => {
         try {
@@ -252,7 +259,7 @@ const EditCostingModal = ({ enq, show, onClose, onSuccess, canEdit, viewOnly }) 
                         )}
 
                         {activeTab === 'activities' && (
-                            <ActivityFeedTab enq={enq} onSuccess={onSuccess} />
+                            <ActivityFeedTab enq={enq} onSuccess={onRefresh} />
                         )}
 
                         <div className="d-flex gap-2 justify-content-end mt-4 pt-3 border-top">

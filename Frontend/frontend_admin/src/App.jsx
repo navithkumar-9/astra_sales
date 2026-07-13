@@ -18,6 +18,11 @@ const PendingCosting = lazy(() => import('./pages/PendingCosting'));
 const SalesToQuote = lazy(() => import('./pages/SalesToQuote'));
 const PendingSales = lazy(() => import('./pages/PendingSales'));
 const KanbanBoard = lazy(() => import('./pages/KanbanBoard'));
+const OpenL1 = lazy(() => import('./pages/OpenL1'));
+const Won = lazy(() => import('./pages/Won'));
+const Regretted = lazy(() => import('./pages/Regretted'));
+const Lost = lazy(() => import('./pages/Lost'));
+const Hold = lazy(() => import('./pages/Hold'));
 
 const LoadingFallback = () => (
     <div className="loading-fallback-container">
@@ -129,6 +134,56 @@ function App() {
                                     <ProtectedRoute>
                                         <Layout>
                                             <KanbanBoard />
+                                        </Layout>
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/pipeline/open-l1"
+                                element={
+                                    <ProtectedRoute>
+                                        <Layout>
+                                            <OpenL1 />
+                                        </Layout>
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/pipeline/won"
+                                element={
+                                    <ProtectedRoute>
+                                        <Layout>
+                                            <Won />
+                                        </Layout>
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/pipeline/regretted"
+                                element={
+                                    <ProtectedRoute>
+                                        <Layout>
+                                            <Regretted />
+                                        </Layout>
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/pipeline/lost"
+                                element={
+                                    <ProtectedRoute>
+                                        <Layout>
+                                            <Lost />
+                                        </Layout>
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/pipeline/hold"
+                                element={
+                                    <ProtectedRoute>
+                                        <Layout>
+                                            <Hold />
                                         </Layout>
                                     </ProtectedRoute>
                                 }

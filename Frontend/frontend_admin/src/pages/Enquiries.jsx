@@ -95,6 +95,18 @@ const Enquiries = () => {
         setShowViewModal(true);
     };
 
+    const handleRefreshEnquiry = async () => {
+        if (selectedEnquiry) {
+            try {
+                const updatedEnq = await enquiryService.getById(selectedEnquiry.id);
+                setSelectedEnquiry(updatedEnq);
+                setEnquiries(prev => prev.map(e => e.id === selectedEnquiry.id ? updatedEnq : e));
+            } catch (err) {
+                console.error("Failed to refresh enquiry details", err);
+            }
+        }
+    };
+
     const getStatusClass = (status) => {
         switch (status?.toLowerCase()) {
             case 'completed':
@@ -308,6 +320,7 @@ const Enquiries = () => {
                 show={showViewModal} 
                 onClose={() => setShowViewModal(false)} 
                 selectedEnquiry={selectedEnquiry} 
+                onRefresh={handleRefreshEnquiry}
             />
         </div>
     );

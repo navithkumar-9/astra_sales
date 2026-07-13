@@ -12,7 +12,11 @@ const Sidebar = () => {
         return localStorage.getItem('sidebar_collapsed') === 'true';
     });
 
-    const [isCreateTypesOpen, setIsCreateTypesOpen] = useState(false);
+    const [openMenus, setOpenMenus] = useState({ 'Sales Pipeline': true });
+
+    const toggleMenu = (label) => {
+        setOpenMenus(prev => ({ ...prev, [label]: !prev[label] }));
+    };
 
     const toggleSidebar = () => {
         const nextState = !isCollapsed;
@@ -93,102 +97,33 @@ const Sidebar = () => {
                 </svg>
             ),
         },
+        {
+            label: 'Sales Pipeline',
+            icon: (
+                <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                    <line x1="12" y1="22.08" x2="12" y2="12" />
+                </svg>
+            ),
+            children: [
+                { path: '/pipeline/open-l1', label: 'Open L1' },
+                { path: '/pipeline/won', label: 'Won' },
+                { path: '/pipeline/regretted', label: 'Regretted' },
+                { path: '/pipeline/lost', label: 'Lost' },
+                { path: '/pipeline/hold', label: 'On Hold' },
+            ]
+        },
     ];
-
-    const canViewPendingEngg = hasPermission(userRole, [ROLES.SUPERADMIN, ROLES.ADMIN, ROLES.RFQ_TRACKER]);
-
-    if (canViewPendingEngg) {
-        navItems.push({
-            path: '/pending-engg',
-            label: 'Pending with Engg',
-            icon: (
-                <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                >
-                    <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
-                    <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
-                </svg>
-            )
-        });
-    }
-
-    const canViewPendingCosting = hasPermission(userRole, [ROLES.SUPERADMIN, ROLES.ADMIN, ROLES.RFQ_TRACKER]);
-
-    if (canViewPendingCosting) {
-        navItems.push({
-            path: '/pending-costing',
-            label: 'Pending with Costing',
-            icon: (
-                <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                >
-                    <line x1="12" y1="1" x2="12" y2="23" />
-                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                </svg>
-            )
-        });
-    }
-
-    const canViewSalesToQuote = hasPermission(userRole, [ROLES.SUPERADMIN, ROLES.ADMIN, ROLES.RFQ_TRACKER]);
-
-    if (canViewSalesToQuote) {
-        navItems.push({
-            path: '/sales-to-quote',
-            label: 'Sales to Quote',
-            icon: (
-                <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                >
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                </svg>
-            )
-        });
-    }
-
-    const canViewPendingSales = hasPermission(userRole, [ROLES.SUPERADMIN, ROLES.ADMIN, ROLES.RFQ_TRACKER]);
-
-    if (canViewPendingSales) {
-        navItems.push({
-            path: '/pending-sales',
-            label: 'Pending with Sales',
-            icon: (
-                <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                >
-                    <rect x="2" y="4" width="20" height="16" rx="2" />
-                    <path d="M7 15h0M2 9.5h20" />
-                </svg>
-            )
-        });
-    }
 
     if (canManageMembers) {
         navItems.push(
@@ -338,7 +273,7 @@ const Sidebar = () => {
                             return (
                                 <div key={item.label} className="nav-item-group">
                                     <button
-                                        onClick={() => setIsCreateTypesOpen(!isCreateTypesOpen)}
+                                        onClick={() => toggleMenu(item.label)}
                                         className="nav-item nav-item-parent w-100 text-start bg-transparent border-0 d-flex align-items-center justify-content-between cursor-pointer"
                                     >
                                         <div className="d-flex align-items-center gap-3">
@@ -355,13 +290,13 @@ const Sidebar = () => {
                                                 fill="none"
                                                 stroke="currentColor"
                                                 strokeWidth="2.5"
-                                                className={`submenu-arrow ${isCreateTypesOpen ? 'rotated' : ''}`}
+                                                className={`submenu-arrow ${openMenus[item.label] ? 'rotated' : ''}`}
                                             >
                                                 <polyline points="6 9 12 15 18 9" />
                                             </svg>
                                         )}
                                     </button>
-                                    {!isCollapsed && isCreateTypesOpen && (
+                                    {!isCollapsed && openMenus[item.label] && (
                                         <div className="sidebar-submenu">
                                             {item.children.map((sub) => (
                                                 <NavLink

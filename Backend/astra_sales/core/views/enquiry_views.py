@@ -1,8 +1,10 @@
 from rest_framework import permissions
+from rest_framework.response import Response
 from core.views.master_data_views import BaseModelViewSet
 from core.models.enquiry import Enquiry
 from core.serializers.enquiry import EnquirySerializer, EnquiryReadSerializer
 from core.permissions import CanEditEnquiry
+from core.services.cache_service import CacheService
 
 ENQUIRY_SELECT_RELATED = (
     'customer',
@@ -38,3 +40,25 @@ class EnquiryViewSet(BaseModelViewSet):
         if self.action in ['list', 'retrieve']:
             return EnquiryReadSerializer
         return EnquirySerializer
+
+    def list(self, request, *args, **kwargs):
+        # Cache-Aside Pattern
+        cache_key = CacheService.make_enquiries_key(request.query_params)
+        cached_data = CacheService.get_enquiries(cache_key)
+        if cached_data is not None:
+            return Response(cached_data)
+
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            # Fetch default paginated response
+            response = self.get_paginated_response(serializer.data)
+            CacheService.set_enquiries(cache_key, response.data)
+            return response
+
+        serializer = self.get_serializer(queryset, many=True)
+        response_data = serializer.data
+        CacheService.set_enquiries(cache_key, response_data)
+        return Response(response_data)
+

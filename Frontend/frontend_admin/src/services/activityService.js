@@ -11,5 +11,15 @@ export const activityService = {
     create: async (payload) => {
         const res = await API.post('/activities/', payload);
         return res.data;
+    },
+
+    update: async (id, payload) => {
+        const res = await API.patch(`/activities/${id}/`, payload);
+        return res.data;
+    },
+
+    delete: async (id) => {
+        const res = await API.delete(`/activities/${id}/`);
+        return res.data;
     }
 };

@@ -6,7 +6,7 @@ import EnquiryTable from '../components/common/EnquiryTable';
 import { enquiryService } from '../services/enquiryService';
 import { userService } from '../services/userService';
 
-const SalesToQuote = () => {
+const Lost = () => {
     const { user } = useAuth();
     const { showToast } = useToast();
 
@@ -46,7 +46,7 @@ const SalesToQuote = () => {
     const fetchEnquiries = async () => {
         try {
             const list = await enquiryService.getAll({ 
-                status: 'Sales to Quote', 
+                status: 'Lost', 
                 page_size: 100, 
                 search 
             });
@@ -146,8 +146,8 @@ const SalesToQuote = () => {
         <div className="page container-fluid px-4 py-4">
             <div className="page-header d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h1 className="page-title h3 font-weight-bold mb-1">Sales to Quote</h1>
-                    <p className="page-subtitle text-muted mb-0">Manage project enquiries in Sales to Quote stage</p>
+                    <h1 className="page-title h3 font-weight-bold mb-1">Lost</h1>
+                    <p className="page-subtitle text-muted mb-0">Manage project enquiries in Lost stage</p>
                 </div>
             </div>
 
@@ -186,7 +186,7 @@ const SalesToQuote = () => {
                 ]}
                 data={enquiries}
                 loading={loading}
-                emptyMessage="No enquiries in Sales to Quote stage."
+                emptyMessage="No enquiries in Lost stage."
                 renderRow={(enq, idx) => (
                     <tr key={enq.id} className="modern-table-row">
                         <td className="ps-4 py-3 align-middle text-secondary font-weight-medium">
@@ -331,7 +331,7 @@ const SalesToQuote = () => {
                                             onChange={(e) => setStatus(e.target.value)}
                                             disabled={!canEdit || viewOnly}
                                         >
-                                            <option value="Sales to Quote">Sales to Quote</option>
+                                            <option value="Sales to Quote">Lost</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Regretted">Regretted</option>
                                             <option value="Open - L1">Open - L1</option>
@@ -448,4 +448,4 @@ const SalesToQuote = () => {
     );
 };
 
-export default SalesToQuote;
+export default Lost;

@@ -1,6 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
+import DocumentsTab from './DocumentsTab';
+import AuditHistoryTab from './AuditHistoryTab';
+import ActivityFeedTab from './ActivityFeedTab';
 
-const ViewEnquiryModal = ({ show, onClose, selectedEnquiry }) => {
+const ViewEnquiryModal = ({ show, onClose, selectedEnquiry, onRefresh }) => {
+    const [activeTab, setActiveTab] = useState('details');
+
     if (!show || !selectedEnquiry) return null;
 
     return (
@@ -27,7 +32,35 @@ const ViewEnquiryModal = ({ show, onClose, selectedEnquiry }) => {
                             </svg>
                         </button>
                     </div>
+
+                    {/* Tabs Navigation */}
+                    <div className="bg-light border-bottom px-4 pt-3">
+                        <ul className="nav nav-tabs border-0" style={{ gap: '10px' }}>
+                            <li className="nav-item">
+                                <button type="button" className={`nav-link border-0 ${activeTab === 'details' ? 'active bg-white text-primary font-weight-bold shadow-sm rounded-top' : 'text-muted'}`} onClick={() => { setActiveTab('details'); }} style={{ padding: '0.75rem 1.25rem' }}>
+                                    Details
+                                </button>
+                            </li>
+                            <li className="nav-item">
+                                <button type="button" className={`nav-link border-0 ${activeTab === 'documents' ? 'active bg-white text-primary font-weight-bold shadow-sm rounded-top' : 'text-muted'}`} onClick={() => { setActiveTab('documents'); }} style={{ padding: '0.75rem 1.25rem' }}>
+                                    Documents
+                                </button>
+                            </li>
+                            <li className="nav-item">
+                                <button type="button" className={`nav-link border-0 ${activeTab === 'history' ? 'active bg-white text-primary font-weight-bold shadow-sm rounded-top' : 'text-muted'}`} onClick={() => { setActiveTab('history'); }} style={{ padding: '0.75rem 1.25rem' }}>
+                                    Audit History
+                                </button>
+                            </li>
+                            <li className="nav-item">
+                                <button type="button" className={`nav-link border-0 ${activeTab === 'activities' ? 'active bg-white text-primary font-weight-bold shadow-sm rounded-top' : 'text-muted'}`} onClick={() => { setActiveTab('activities'); }} style={{ padding: '0.75rem 1.25rem' }}>
+                                    Activity Feed
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+
                     <div className="modal-body p-4" style={{ maxHeight: '65vh', overflowY: 'auto' }}>
+                        <div style={{ display: activeTab === 'details' ? 'block' : 'none' }}>
                         {/* Top Info Cards (2 Columns) */}
                         <div className="row g-3 mb-4">
                             <div className="col-md-6">
@@ -253,14 +286,26 @@ const ViewEnquiryModal = ({ show, onClose, selectedEnquiry }) => {
                             </div>
                         </div>
 
-                        {/* Logged date footer */}
-                        <div className="enq-footer-time mb-2">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="12" cy="12" r="10" />
-                                <polyline points="12 6 12 12 16 14" />
-                            </svg>
-                            <span>Enquiry registered at {new Date(selectedEnquiry.created_at).toLocaleString()}</span>
                         </div>
+
+                        {activeTab === 'documents' && (
+                            <DocumentsTab 
+                                enq={selectedEnquiry} 
+                                canEdit={false} 
+                                rfqFile={null} 
+                                setRfqFile={() => {}} 
+                                poFile={null} 
+                                setPoFile={() => {}} 
+                            />
+                        )}
+
+                        {activeTab === 'history' && (
+                            <AuditHistoryTab auditLogs={selectedEnquiry.audit_logs} />
+                        )}
+
+                        {activeTab === 'activities' && (
+                            <ActivityFeedTab enq={selectedEnquiry} onSuccess={onRefresh} />
+                        )}
                     </div>
                     <div className="modal-footer border-0 p-3 bg-light d-flex justify-content-end">
                         <button type="button" className="enq-modal-btn-close shadow-sm" onClick={onClose}>

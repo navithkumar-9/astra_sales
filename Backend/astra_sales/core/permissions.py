@@ -33,3 +33,22 @@ class CanEditEnquiry(permissions.BasePermission):
             return obj.sales_rep == request.user
             
         return False
+
+class IsActivityOwnerOrAdmin(permissions.BasePermission):
+    """
+    Custom permission for Activity.
+    Admins and Superadmins can edit/delete any activity.
+    Users can only edit/delete their own activities.
+    SYSTEM activities cannot be modified by anyone.
+    """
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        if obj.activity_type == 'SYSTEM':
+            return False
+
+        if request.user.role in [RoleChoices.SUPERADMIN, RoleChoices.ADMIN]:
+            return True
+            
+        return obj.user == request.user

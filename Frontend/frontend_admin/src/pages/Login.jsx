@@ -32,8 +32,10 @@ const Login = () => {
             const errData = err.response?.data;
             if (errData?.errors?.non_field_errors) {
                 setError(errData.errors.non_field_errors[0]);
+            } else if (errData?.detail) {
+                setError(errData.detail); // Django REST Framework default error key
             } else {
-                setError(errData?.message || 'Login failed. Please try again.');
+                setError(errData?.message || 'Invalid credentials. Please try again.');
             }
         } finally {
             setLoading(false);

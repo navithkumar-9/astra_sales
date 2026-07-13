@@ -26,10 +26,13 @@ router.register('mails', MailViewSet, basename='mail')
 router.register('enquiries', EnquiryViewSet, basename='enquiry')
 router.register('activities', ActivityViewSet, basename='activity')
 
+from core.views.dashboard_views import DashboardStatsView
+
 urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('users/', UserListView.as_view(), name='users_list_create'),
     path('users/<int:pk>/', UserDetailView.as_view(), name='users_detail'),
     path('profile/', ProfileView.as_view(), name='profile'),
+    path('dashboard/stats/', DashboardStatsView.as_view(), name='dashboard_stats'),
     path('', include(router.urls)),
 ]

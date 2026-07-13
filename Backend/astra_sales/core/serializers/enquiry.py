@@ -70,7 +70,8 @@ class EnquirySerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        return EnquiryService.create_enquiry(validated_data)
+        user = self.context.get('request').user if self.context.get('request') else None
+        return EnquiryService.create_enquiry(validated_data, user)
 
     def update(self, instance, validated_data):
         user = self.context.get('request').user if self.context.get('request') else None

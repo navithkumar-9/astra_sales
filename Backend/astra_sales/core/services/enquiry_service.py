@@ -6,12 +6,27 @@ from core.services.audit_service import AuditService
 class EnquiryService:
     @staticmethod
     @transaction.atomic
-    def create_enquiry(validated_data):
+    def create_enquiry(validated_data, user=None):
         fg_details_data = validated_data.pop('fg_details', [])
         enquiry = Enquiry.objects.create(**validated_data)
         for detail_data in fg_details_data:
             detail_data.pop('id', None)
             EnquiryFGDetail.objects.create(enquiry=enquiry, **detail_data)
+            
+        # Log default creation activity
+        from core.models.activity import Activity
+        creator_name = user.name or user.username if user else 'System'
+        Activity.objects.create(
+            enquiry=enquiry,
+            user=user,
+            activity_type='SYSTEM',
+            description=f"🚨 Project registered and created by {creator_name}."
+        )
+
+        # Trigger background cache refresh
+        from core.tasks.cache_tasks import refresh_all_caches
+        transaction.on_commit(lambda: refresh_all_caches.delay())
+
         return enquiry
 
     @staticmethod
@@ -76,5 +91,9 @@ class EnquiryService:
             for fg_id, fg in existing_fgs.items():
                 if fg_id not in sent_ids:
                     fg.delete()
+
+        # Trigger background cache refresh
+        from core.tasks.cache_tasks import refresh_all_caches
+        transaction.on_commit(lambda: refresh_all_caches.delay())
 
         return instance
