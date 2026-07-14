@@ -50,4 +50,11 @@ export const masterDataService = {
     getDivisions: (params) => fetchWithCache('divisions', divisionService.getAll, params),
     getRFQs: (params) => fetchWithCache('rfqs', rfqService.getAll, params),
     getFGs: (params) => fetchWithCache('fgs', fgService.getAll, params),
+    invalidate: (key) => {
+        if (key) {
+            delete cache[key];
+            return;
+        }
+        Object.keys(cache).forEach((cacheKey) => delete cache[cacheKey]);
+    },
 };

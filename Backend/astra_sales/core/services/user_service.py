@@ -1,6 +1,7 @@
 from core.models.user import User, RoleChoices
 from core.metrics import record_user_operation
 from core.policies import UserAuthorizationPolicy
+from core.services.enquiry_service import refresh_enquiry_caches_after_commit
 
 class UserService:
     policy = UserAuthorizationPolicy()
@@ -18,6 +19,7 @@ class UserService:
                 name=name,
             )
             record_user_operation("create", True)
+            refresh_enquiry_caches_after_commit()
             return user
         except Exception:
             record_user_operation("create", False)
@@ -60,6 +62,7 @@ class UserService:
             cls._apply_updates(target_user, data)
             target_user.save()
             record_user_operation("update", True)
+            refresh_enquiry_caches_after_commit()
             return target_user
         except Exception:
             record_user_operation("update", False)
@@ -72,6 +75,7 @@ class UserService:
             cls.policy.assert_can_delete(requestor, target_user)
             target_user.delete()
             record_user_operation("delete", True)
+            refresh_enquiry_caches_after_commit()
             return True
         except Exception:
             record_user_operation("delete", False)

@@ -8,24 +8,49 @@ const ViewEnquiryModal = ({ show, onClose, selectedEnquiry, onRefresh }) => {
 
     if (!show || !selectedEnquiry) return null;
 
+    // Helper for status styling mapping
+    const getStatusStyle = (status) => {
+        const s = (status || '').toLowerCase();
+        if (s.includes('won')) return { bg: 'rgba(16, 185, 129, 0.1)', color: '#10b981' };
+        if (s.includes('lost') || s.includes('regretted')) return { bg: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' };
+        if (s.includes('hold')) return { bg: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b' };
+        return { bg: 'rgba(154, 85, 255, 0.1)', color: '#9a55ff' };
+    };
+
+    const statusStyle = getStatusStyle(selectedEnquiry.status);
+
     return (
-        <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.55)', zIndex: 1050 }}>
+        <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(15, 23, 42, 0.45)', backdropFilter: 'blur(4px)', zIndex: 1050 }}>
             <div className="modal-dialog modal-lg modal-dialog-centered">
-                <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '12px', overflow: 'hidden' }}>
-                    <div className="enq-modal-header text-white d-flex align-items-center justify-content-between">
+                <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+                    
+                    {/* Header with signature Purple Admin gradient */}
+                    <div className="enq-modal-header text-white d-flex align-items-center justify-content-between" style={{ 
+                        background: 'linear-gradient(to right, #da8cff, #9a55ff)',
+                        padding: '1.5rem 2rem'
+                    }}>
                         <div className="d-flex align-items-center gap-3">
-                            <div className="enq-modal-icon-wrap shadow-sm">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                    <polyline points="14 2 14 8 20 8" />
+                            <div className="enq-modal-icon-wrap shadow-sm" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
                                 </svg>
                             </div>
                             <div>
-                                <h5 className="modal-title font-weight-bold mb-0">Enquiry Details</h5>
-                                <span className="small text-white-50">{selectedEnquiry.project_number} - {selectedEnquiry.project_name}</span>
+                                <h5 className="modal-title font-weight-bold mb-0" style={{ letterSpacing: '0.5px' }}>Enquiry Details</h5>
+                                <span className="small text-white-50" style={{ fontSize: '0.85rem' }}>{selectedEnquiry.project_number} — {selectedEnquiry.project_name}</span>
                             </div>
                         </div>
-                        <button type="button" className="enq-modal-close-icon" onClick={onClose}>
+                        <button type="button" className="enq-modal-close-icon border-0" onClick={onClose} style={{ 
+                            background: 'rgba(255, 255, 255, 0.2)', 
+                            borderRadius: '50%',
+                            width: '32px',
+                            height: '32px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#fff'
+                        }}>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                 <line x1="18" y1="6" x2="6" y2="18" />
                                 <line x1="6" y1="6" x2="18" y2="18" />
@@ -33,46 +58,43 @@ const ViewEnquiryModal = ({ show, onClose, selectedEnquiry, onRefresh }) => {
                         </button>
                     </div>
 
-                    {/* Tabs Navigation */}
+                    {/* Tabs Navigation styled with Purple Admin branding */}
                     <div className="bg-light border-bottom px-4 pt-3">
-                        <ul className="nav nav-tabs border-0" style={{ gap: '10px' }}>
-                            <li className="nav-item">
-                                <button type="button" className={`nav-link border-0 ${activeTab === 'details' ? 'active bg-white text-primary font-weight-bold shadow-sm rounded-top' : 'text-muted'}`} onClick={() => { setActiveTab('details'); }} style={{ padding: '0.75rem 1.25rem' }}>
-                                    Details
-                                </button>
-                            </li>
-                            <li className="nav-item">
-                                <button type="button" className={`nav-link border-0 ${activeTab === 'documents' ? 'active bg-white text-primary font-weight-bold shadow-sm rounded-top' : 'text-muted'}`} onClick={() => { setActiveTab('documents'); }} style={{ padding: '0.75rem 1.25rem' }}>
-                                    Documents
-                                </button>
-                            </li>
-                            <li className="nav-item">
-                                <button type="button" className={`nav-link border-0 ${activeTab === 'history' ? 'active bg-white text-primary font-weight-bold shadow-sm rounded-top' : 'text-muted'}`} onClick={() => { setActiveTab('history'); }} style={{ padding: '0.75rem 1.25rem' }}>
-                                    Audit History
-                                </button>
-                            </li>
-                            <li className="nav-item">
-                                <button type="button" className={`nav-link border-0 ${activeTab === 'activities' ? 'active bg-white text-primary font-weight-bold shadow-sm rounded-top' : 'text-muted'}`} onClick={() => { setActiveTab('activities'); }} style={{ padding: '0.75rem 1.25rem' }}>
-                                    Activity Feed
-                                </button>
-                            </li>
+                        <ul className="nav nav-tabs border-0" style={{ gap: '6px' }}>
+                            {['details', 'documents', 'history', 'activities'].map(tab => (
+                                <li className="nav-item" key={tab}>
+                                    <button 
+                                        type="button" 
+                                        className={`nav-link border-0 px-4 py-2 font-weight-bold ${activeTab === tab ? 'active bg-white text-dark shadow-sm' : 'text-muted'}`} 
+                                        onClick={() => setActiveTab(tab)} 
+                                        style={{ 
+                                            borderRadius: '8px 8px 0 0',
+                                            borderBottom: activeTab === tab ? '3px solid #9a55ff' : 'none',
+                                            color: activeTab === tab ? '#9a55ff' : '#64748b'
+                                        }}
+                                    >
+                                        {tab.charAt(0).toUpperCase() + tab.slice(1).replace('activities', 'activity feed').replace('history', 'audit history')}
+                                    </button>
+                                </li>
+                            ))}
                         </ul>
                     </div>
 
-                    <div className="modal-body p-4" style={{ maxHeight: '65vh', overflowY: 'auto' }}>
+                    <div className="modal-body p-4" style={{ maxHeight: '65vh', overflowY: 'auto', backgroundColor: '#f8fafc' }}>
                         <div style={{ display: activeTab === 'details' ? 'block' : 'none' }}>
+                        
                         {/* Top Info Cards (2 Columns) */}
                         <div className="row g-3 mb-4">
                             <div className="col-md-6">
-                                <div className="enq-details-card">
-                                    <div className="enq-details-label">Customer Name</div>
-                                    <div className="enq-details-value">{selectedEnquiry.customer?.name || 'N/A'}</div>
+                                <div className="enq-details-card bg-white border-0 shadow-sm" style={{ borderLeft: '4px solid #da8cff' }}>
+                                    <div className="enq-details-label" style={{ color: '#9a55ff' }}>Customer Name</div>
+                                    <div className="enq-details-value text-dark">{selectedEnquiry.customer?.name || 'N/A'}</div>
                                 </div>
                             </div>
                             <div className="col-md-6">
-                                <div className="enq-details-card">
-                                    <div className="enq-details-label">SBU</div>
-                                    <div className="enq-details-value">{selectedEnquiry.sbu?.name || 'N/A'}</div>
+                                <div className="enq-details-card bg-white border-0 shadow-sm" style={{ borderLeft: '4px solid #9a55ff' }}>
+                                    <div className="enq-details-label" style={{ color: '#7f39fb' }}>SBU</div>
+                                    <div className="enq-details-value text-dark">{selectedEnquiry.sbu?.name || 'N/A'}</div>
                                 </div>
                             </div>
                         </div>
@@ -81,15 +103,19 @@ const ViewEnquiryModal = ({ show, onClose, selectedEnquiry, onRefresh }) => {
                         <div className="d-flex flex-wrap gap-4 mb-4 font-weight-semibold" style={{ fontSize: '0.85rem' }}>
                             <div>
                                 <span className="text-secondary">Division: </span>
-                                <span className="enq-inline-badge">{selectedEnquiry.division?.name || 'N/A'}</span>
+                                <span className="badge bg-white text-dark shadow-sm border px-3 py-2 rounded-pill">{selectedEnquiry.division?.name || 'N/A'}</span>
                             </div>
                             <div>
                                 <span className="text-secondary">RFQ Type: </span>
-                                <span className="enq-inline-badge">{selectedEnquiry.rfq_type?.name || 'N/A'}</span>
+                                <span className="badge bg-white text-dark shadow-sm border px-3 py-2 rounded-pill">{selectedEnquiry.rfq_type?.name || 'N/A'}</span>
                             </div>
                             <div>
                                 <span className="text-secondary">Status: </span>
-                                <span className={`enq-inline-badge ${selectedEnquiry.status?.toLowerCase() === 'completed' ? 'status-completed' : 'priority-medium'}`}>
+                                <span className="badge px-3 py-2 rounded-pill shadow-sm" style={{ 
+                                    backgroundColor: statusStyle.bg, 
+                                    color: statusStyle.color,
+                                    fontWeight: 'bold'
+                                }}>
                                     {selectedEnquiry.status}
                                 </span>
                             </div>
@@ -98,8 +124,8 @@ const ViewEnquiryModal = ({ show, onClose, selectedEnquiry, onRefresh }) => {
                         {/* Time Blocks (3 Columns) */}
                         <div className="row g-3 mb-4">
                             <div className="col-md-4">
-                                <div className="enq-time-block start shadow-sm">
-                                    <div className="enq-time-block-label">RFQ Date</div>
+                                <div className="enq-time-block shadow-sm border-0" style={{ background: 'linear-gradient(to right, #84d9d2, #07cdae)', color: '#fff', padding: '1.25rem' }}>
+                                    <div className="enq-time-block-label" style={{ opacity: 0.85 }}>RFQ Date</div>
                                     <div className="enq-time-block-value">
                                         {new Date(selectedEnquiry.rfq_date).toLocaleDateString(undefined, {
                                             month: 'short', day: 'numeric', year: '2-digit'
@@ -108,9 +134,9 @@ const ViewEnquiryModal = ({ show, onClose, selectedEnquiry, onRefresh }) => {
                                 </div>
                             </div>
                             <div className="col-md-4">
-                                <div className="enq-time-block end shadow-sm">
-                                    <div className="enq-time-block-label">RFQ Due Date</div>
-                                    <div className="enq-time-block-value" style={{ fontSize: '0.85rem' }}>
+                                <div className="enq-time-block shadow-sm border-0" style={{ background: 'linear-gradient(to right, #ffbf96, #fe7096)', color: '#fff', padding: '1.25rem' }}>
+                                    <div className="enq-time-block-label" style={{ opacity: 0.85 }}>RFQ Due Date</div>
+                                    <div className="enq-time-block-value" style={{ fontSize: '0.9rem' }}>
                                         {new Date(selectedEnquiry.rfq_due_date).toLocaleDateString(undefined, {
                                             month: 'short', day: 'numeric', year: '2-digit'
                                         })}, {selectedEnquiry.rfq_due_time?.substring(0, 5) || ''}
@@ -118,8 +144,8 @@ const ViewEnquiryModal = ({ show, onClose, selectedEnquiry, onRefresh }) => {
                                 </div>
                             </div>
                             <div className="col-md-4">
-                                <div className="enq-time-block total shadow-sm">
-                                    <div className="enq-time-block-label">RFQ Aging</div>
+                                <div className="enq-time-block shadow-sm border-0" style={{ background: 'linear-gradient(to right, #90caf9, #047edf)', color: '#fff', padding: '1.25rem' }}>
+                                    <div className="enq-time-block-label" style={{ opacity: 0.85 }}>RFQ Aging</div>
                                     <div className="enq-time-block-value">
                                         {selectedEnquiry.rfq_aging} Days
                                     </div>
@@ -130,17 +156,17 @@ const ViewEnquiryModal = ({ show, onClose, selectedEnquiry, onRefresh }) => {
                         {/* Clarifications */}
                         <div className="row g-3 mb-4">
                             <div className="col-md-6">
-                                <div className="enq-details-card">
-                                    <div className="enq-details-label">Clarification To CS</div>
-                                    <div className="enq-details-value text-wrap" style={{ fontSize: '0.9rem', fontWeight: 'normal' }}>
+                                <div className="enq-details-card bg-white border-0 shadow-sm">
+                                    <div className="enq-details-label" style={{ color: '#e056fd' }}>Clarification To CS</div>
+                                    <div className="enq-details-value text-wrap text-secondary" style={{ fontSize: '0.9rem', fontWeight: 'normal' }}>
                                         {selectedEnquiry.clarification_to_cs || 'No clarification requested.'}
                                     </div>
                                 </div>
                             </div>
                             <div className="col-md-6">
-                                <div className="enq-details-card">
-                                    <div className="enq-details-label">Clarification From CS</div>
-                                    <div className="enq-details-value text-wrap" style={{ fontSize: '0.9rem', fontWeight: 'normal' }}>
+                                <div className="enq-details-card bg-white border-0 shadow-sm">
+                                    <div className="enq-details-label" style={{ color: '#e056fd' }}>Clarification From CS</div>
+                                    <div className="enq-details-value text-wrap text-secondary" style={{ fontSize: '0.9rem', fontWeight: 'normal' }}>
                                         {selectedEnquiry.clarification_from_cs || 'No response received.'}
                                     </div>
                                 </div>
@@ -149,27 +175,27 @@ const ViewEnquiryModal = ({ show, onClose, selectedEnquiry, onRefresh }) => {
 
                         {/* Remarks */}
                         <div className="mb-4">
-                            <div className="enq-details-label">Remarks / Description</div>
-                            <div className="enq-remarks-box">
+                            <div className="enq-details-label" style={{ color: '#64748b' }}>Remarks / Description</div>
+                            <div className="enq-remarks-box bg-white border-0 shadow-sm rounded-lg" style={{ minHeight: '80px', color: '#475569' }}>
                                 {selectedEnquiry.remarks || 'No remarks provided.'}
                             </div>
                         </div>
 
                         {/* Engineering Estimation Details */}
-                        <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom" style={{ fontSize: '0.95rem' }}>Engineering Estimation Details</h6>
+                        <h6 className="font-weight-bold mb-3 pb-2 border-bottom" style={{ fontSize: '0.95rem', color: '#9a55ff' }}>Engineering Estimation Details</h6>
                         <div className="row g-3 mb-4">
                             <div className="col-md-6">
-                                <div className="enq-details-card">
+                                <div className="enq-details-card bg-white border-0 shadow-sm">
                                     <div className="enq-details-label">Expected Date of Engineering</div>
-                                    <div className="enq-details-value" style={{ fontSize: '0.9rem' }}>
+                                    <div className="enq-details-value text-secondary" style={{ fontSize: '0.9rem' }}>
                                         {selectedEnquiry.ed_of_engg || 'N/A'}
                                     </div>
                                 </div>
                             </div>
                             <div className="col-md-6">
-                                <div className="enq-details-card">
+                                <div className="enq-details-card bg-white border-0 shadow-sm">
                                     <div className="enq-details-label">Actual Date of Engineering</div>
-                                    <div className="enq-details-value" style={{ fontSize: '0.9rem' }}>
+                                    <div className="enq-details-value text-secondary" style={{ fontSize: '0.9rem' }}>
                                         {selectedEnquiry.actual_date_of_engg || 'N/A'}
                                     </div>
                                 </div>
@@ -177,26 +203,26 @@ const ViewEnquiryModal = ({ show, onClose, selectedEnquiry, onRefresh }) => {
                         </div>
                         <div className="mb-4">
                             <div className="enq-details-label">Engineering Remarks</div>
-                            <div className="enq-remarks-box" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', color: '#4b5563' }}>
+                            <div className="enq-remarks-box bg-white border-0 shadow-sm rounded-lg" style={{ color: '#475569' }}>
                                 {selectedEnquiry.engg_remarks || 'No engineering remarks recorded.'}
                             </div>
                         </div>
 
                         {/* Costing Estimation Details */}
-                        <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom" style={{ fontSize: '0.95rem' }}>Costing Estimation Details</h6>
+                        <h6 className="font-weight-bold mb-3 pb-2 border-bottom" style={{ fontSize: '0.95rem', color: '#9a55ff' }}>Costing Estimation Details</h6>
                         <div className="row g-3 mb-4">
                             <div className="col-md-6">
-                                <div className="enq-details-card">
+                                <div className="enq-details-card bg-white border-0 shadow-sm">
                                     <div className="enq-details-label">Expected Date of Costing</div>
-                                    <div className="enq-details-value" style={{ fontSize: '0.9rem' }}>
+                                    <div className="enq-details-value text-secondary" style={{ fontSize: '0.9rem' }}>
                                         {selectedEnquiry.ed_of_costing || 'N/A'}
                                     </div>
                                 </div>
                             </div>
                             <div className="col-md-6">
-                                <div className="enq-details-card">
+                                <div className="enq-details-card bg-white border-0 shadow-sm">
                                     <div className="enq-details-label">Actual Date of Costing</div>
-                                    <div className="enq-details-value" style={{ fontSize: '0.9rem' }}>
+                                    <div className="enq-details-value text-secondary" style={{ fontSize: '0.9rem' }}>
                                         {selectedEnquiry.actual_date_of_costing || 'N/A'}
                                     </div>
                                 </div>
@@ -204,7 +230,7 @@ const ViewEnquiryModal = ({ show, onClose, selectedEnquiry, onRefresh }) => {
                         </div>
                         <div className="mb-4">
                             <div className="enq-details-label">Costing Remarks</div>
-                            <div className="enq-remarks-box" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', color: '#4b5563' }}>
+                            <div className="enq-remarks-box bg-white border-0 shadow-sm rounded-lg" style={{ color: '#475569' }}>
                                 {selectedEnquiry.costing_remarks || 'No costing remarks recorded.'}
                             </div>
                         </div>
@@ -212,13 +238,13 @@ const ViewEnquiryModal = ({ show, onClose, selectedEnquiry, onRefresh }) => {
                         {/* Finished Goods sub-table */}
                         <div className="mb-4">
                             <div className="enq-details-label">Finished Goods (FG) Details</div>
-                            <div className="table-responsive bg-light rounded shadow-sm border">
-                                <table className="table table-sm table-hover mb-0">
-                                    <thead>
+                            <div className="table-responsive bg-white rounded-lg shadow-sm border-0">
+                                <table className="table table-hover mb-0">
+                                    <thead style={{ backgroundColor: 'rgba(154, 85, 255, 0.05)' }}>
                                         <tr>
-                                            <th className="ps-3 text-secondary py-2">FG Part No</th>
-                                            <th className="text-secondary py-2">Description</th>
-                                            <th className="text-secondary pe-3 text-end py-2">Quantity</th>
+                                            <th className="ps-3 text-secondary py-2 border-0" style={{ fontSize: '0.75rem' }}>FG Part No</th>
+                                            <th className="text-secondary py-2 border-0" style={{ fontSize: '0.75rem' }}>Description</th>
+                                            <th className="text-secondary pe-3 text-end py-2 border-0" style={{ fontSize: '0.75rem' }}>Quantity</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -229,9 +255,9 @@ const ViewEnquiryModal = ({ show, onClose, selectedEnquiry, onRefresh }) => {
                                         ) : (
                                             selectedEnquiry.fg_details?.map((detail, idx) => (
                                                 <tr key={detail.id || idx}>
-                                                    <td className="ps-3 font-weight-semibold text-dark py-2">{detail.fg_part_no}</td>
-                                                    <td className="text-muted py-2">{detail.description || 'N/A'}</td>
-                                                    <td className="pe-3 text-end font-weight-bold py-2">{detail.qty}</td>
+                                                    <td className="ps-3 font-weight-semibold text-dark py-2 border-0" style={{ fontSize: '0.85rem' }}>{detail.fg_part_no}</td>
+                                                    <td className="text-muted py-2 border-0" style={{ fontSize: '0.85rem' }}>{detail.description || 'N/A'}</td>
+                                                    <td className="pe-3 text-end font-weight-bold py-2 border-0" style={{ fontSize: '0.85rem' }}>{detail.qty}</td>
                                                 </tr>
                                             ))
                                         )}

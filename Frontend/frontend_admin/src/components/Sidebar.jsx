@@ -79,7 +79,7 @@ const Sidebar = () => {
         },
         {
             path: '/kanban',
-            label: 'Kanban Board',
+            label: 'RFQ Pipeline',
             icon: (
                 <svg
                     width="20"

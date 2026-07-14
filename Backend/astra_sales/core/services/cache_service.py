@@ -53,3 +53,16 @@ class CacheService:
     def invalidate_dashboard():
         """Invalidate dashboard cache."""
         cache.delete(CacheService.DASHBOARD_CACHE_KEY)
+
+    @staticmethod
+    def invalidate_enquiry_dependencies():
+        """Invalidate caches whose data can change when enquiry-related records change."""
+        CacheService.invalidate_dashboard()
+        CacheService.invalidate_all_enquiries()
+
+    @staticmethod
+    def refresh_enquiry_dependencies_async():
+        """Refresh common enquiry/dashboard caches in the background after invalidation."""
+        from core.tasks.cache_tasks import refresh_all_caches
+
+        refresh_all_caches.delay()

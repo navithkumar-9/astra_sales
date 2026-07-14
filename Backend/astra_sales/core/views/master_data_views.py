@@ -1,6 +1,10 @@
 from rest_framework import viewsets
+from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import ProtectedError
 from core.permissions import IsAdminOrReadOnly
+from core.services.enquiry_service import refresh_enquiry_caches_after_commit
 
 from core.models.sbu import SBU
 from core.models.division import Division
@@ -20,6 +24,32 @@ from core.serializers.master_data import (
 
 class BaseModelViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            self.perform_destroy(instance)
+        except ProtectedError:
+            return Response(
+                {
+                    "success": False,
+                    "error": "This record is in use and cannot be deleted.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_create(self, serializer):
+        serializer.save()
+        refresh_enquiry_caches_after_commit()
+
+    def perform_update(self, serializer):
+        serializer.save()
+        refresh_enquiry_caches_after_commit()
+
+    def perform_destroy(self, instance):
+        instance.delete()
+        refresh_enquiry_caches_after_commit()
 
 class SBUViewSet(BaseModelViewSet):
     queryset = SBU.objects.all()

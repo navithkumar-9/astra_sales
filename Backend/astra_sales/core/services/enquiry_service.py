@@ -1,7 +1,20 @@
 from django.db import transaction
+import logging
 from rest_framework.exceptions import PermissionDenied
 from core.models.enquiry import Enquiry, EnquiryFGDetail
 from core.services.audit_service import AuditService
+from core.services.cache_service import CacheService
+
+
+logger = logging.getLogger(__name__)
+
+
+def refresh_enquiry_caches_after_commit():
+    CacheService.invalidate_enquiry_dependencies()
+    try:
+        CacheService.refresh_enquiry_dependencies_async()
+    except Exception:
+        logger.exception("Unable to queue enquiry cache refresh task.")
 
 class EnquiryService:
     @staticmethod
@@ -23,9 +36,7 @@ class EnquiryService:
             description=f"🚨 Project registered and created by {creator_name}."
         )
 
-        # Trigger background cache refresh
-        from core.tasks.cache_tasks import refresh_all_caches
-        transaction.on_commit(lambda: refresh_all_caches.delay())
+        transaction.on_commit(refresh_enquiry_caches_after_commit)
 
         return enquiry
 
@@ -92,8 +103,6 @@ class EnquiryService:
                 if fg_id not in sent_ids:
                     fg.delete()
 
-        # Trigger background cache refresh
-        from core.tasks.cache_tasks import refresh_all_caches
-        transaction.on_commit(lambda: refresh_all_caches.delay())
+        transaction.on_commit(refresh_enquiry_caches_after_commit)
 
         return instance

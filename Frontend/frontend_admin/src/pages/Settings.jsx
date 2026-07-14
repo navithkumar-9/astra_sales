@@ -4,6 +4,7 @@ import API from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { getAvatarStyle } from '../utils/avatar';
+import { masterDataService } from '../services/masterDataService';
 
 const Settings = () => {
     const { user } = useAuth();
@@ -15,11 +16,11 @@ const Settings = () => {
     const canManage = isSuperAdmin || isAdmin;
 
     const tabs = useMemo(() => [
-        { id: 'sbu', label: 'SBU', endpoint: '/sbus/', field: 'name', displayField: 'SBU Name' },
-        { id: 'division', label: 'Division', endpoint: '/divisions/', field: 'name', displayField: 'Division Name' },
-        { id: 'fg', label: 'FG Type', endpoint: '/fgs/', field: 'fg_type', displayField: 'FG Type' },
-        { id: 'rfq', label: 'RFQ', endpoint: '/rfqs/', field: 'name', displayField: 'RFQ Name' },
-        { id: 'customer', label: 'Customer', endpoint: '/customers/', field: 'name', displayField: 'RFQ Customer Name' },
+        { id: 'sbu', label: 'SBU', endpoint: '/sbus/', field: 'name', displayField: 'SBU Name', cacheKey: 'sbus' },
+        { id: 'division', label: 'Division', endpoint: '/divisions/', field: 'name', displayField: 'Division Name', cacheKey: 'divisions' },
+        { id: 'fg', label: 'FG Type', endpoint: '/fgs/', field: 'fg_type', displayField: 'FG Type', cacheKey: 'fgs' },
+        { id: 'rfq', label: 'RFQ', endpoint: '/rfqs/', field: 'name', displayField: 'RFQ Name', cacheKey: 'rfqs' },
+        { id: 'customer', label: 'Customer', endpoint: '/customers/', field: 'name', displayField: 'RFQ Customer Name', cacheKey: 'customers' },
         { id: 'mail', label: 'Notification Mail', endpoint: '/mails/', field: 'email', displayField: 'Mail Id' },
     ], []);
 
@@ -99,6 +100,7 @@ const Settings = () => {
             if (res.status === 201 || res.data.success) {
                 showToast(`${currentTab.label} added successfully.`, 'success');
                 setIsAddOpen(false);
+                masterDataService.invalidate(currentTab.cacheKey);
                 fetchItems();
             }
         } catch (err) {
@@ -121,6 +123,7 @@ const Settings = () => {
             if (res.status === 200 || res.data.success) {
                 showToast(`${currentTab.label} updated successfully.`, 'success');
                 setEditingItem(null);
+                masterDataService.invalidate(currentTab.cacheKey);
                 fetchItems();
             }
         } catch (err) {
@@ -140,6 +143,7 @@ const Settings = () => {
             if (res.status === 204 || res.status === 200 || res.data.success) {
                 showToast(`${currentTab.label} deleted successfully.`, 'success');
                 setDeletingItem(null);
+                masterDataService.invalidate(currentTab.cacheKey);
                 fetchItems();
             }
         } catch (err) {
@@ -405,4 +409,3 @@ const Settings = () => {
 };
 
 export default Settings;
-

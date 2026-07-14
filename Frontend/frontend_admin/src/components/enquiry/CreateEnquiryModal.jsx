@@ -206,19 +206,43 @@ const CreateEnquiryModal = ({ show, onClose, onSuccess }) => {
     if (!show) return null;
 
     return (
-        <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.55)', zIndex: 1050 }}>
+        <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(15, 23, 42, 0.45)', backdropFilter: 'blur(4px)', zIndex: 1050 }}>
             <div className="modal-dialog modal-lg modal-dialog-centered">
-                <div className="modal-content border-0 shadow-lg">
-                    <div className="modal-header text-white border-0 py-3 d-flex align-items-center justify-content-between" style={{ background: 'linear-gradient(135deg, #a561ff, #7f39fb)' }}>
-                        <h5 className="modal-title font-weight-bold mb-0">New Enquiry Request</h5>
+                <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+                    
+                    {/* Header with signature Purple Admin gradient */}
+                    <div className="enq-modal-header text-white d-flex align-items-center justify-content-between" style={{ 
+                        background: 'linear-gradient(to right, #da8cff, #9a55ff)',
+                        padding: '1.5rem 2rem'
+                    }}>
                         <div className="d-flex align-items-center gap-3">
-                            {previousProjectNumber && (
-                                <span className="badge bg-white text-primary font-weight-bold px-2.5 py-1.5 shadow-sm" style={{ fontSize: '0.72rem', borderRadius: '6px' }}>
-                                    Prev Proj: {previousProjectNumber}
-                                </span>
-                            )}
-                            <button type="button" className="btn-close btn-close-white" onClick={onClose}></button>
+                            <div className="enq-modal-icon-wrap shadow-sm" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                    <path d="M12 5v14M5 12h14"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h5 className="modal-title font-weight-bold mb-0" style={{ letterSpacing: '0.5px' }}>New Enquiry Request</h5>
+                                {previousProjectNumber && (
+                                    <span className="text-white-50 small" style={{ fontSize: '0.82rem' }}>Prev Proj: {previousProjectNumber}</span>
+                                )}
+                            </div>
                         </div>
+                        <button type="button" className="enq-modal-close-icon border-0" onClick={onClose} style={{ 
+                            background: 'rgba(255, 255, 255, 0.2)', 
+                            borderRadius: '50%',
+                            width: '32px',
+                            height: '32px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#fff'
+                        }}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        </button>
                     </div>
                     <form onSubmit={handleCreateSubmit} className="modal-body p-4" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
                         <div className="row g-3 mb-4">

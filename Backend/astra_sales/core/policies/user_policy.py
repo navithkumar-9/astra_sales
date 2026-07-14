@@ -26,7 +26,12 @@ class UserAuthorizationPolicy:
             raise PermissionDenied(f"{creator.role.title()} can only create {allowed_label}.")
 
     def assert_can_list(self, requestor):
-        if requestor.role not in (RoleChoices.SUPERADMIN, RoleChoices.ADMIN, RoleChoices.RFQ_TRACKER):
+        if requestor.role not in (
+            RoleChoices.SUPERADMIN,
+            RoleChoices.ADMIN,
+            RoleChoices.RFQ_TRACKER,
+            RoleChoices.SALES_REP,
+        ):
             raise PermissionDenied("You do not have permission to list users.")
 
     def assert_can_update(self, requestor, target_user, data):

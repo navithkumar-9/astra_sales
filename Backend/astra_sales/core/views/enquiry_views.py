@@ -5,6 +5,7 @@ from core.models.enquiry import Enquiry
 from core.serializers.enquiry import EnquirySerializer, EnquiryReadSerializer
 from core.permissions import CanEditEnquiry
 from core.services.cache_service import CacheService
+from core.services.enquiry_service import refresh_enquiry_caches_after_commit
 
 ENQUIRY_SELECT_RELATED = (
     'customer',
@@ -41,6 +42,10 @@ class EnquiryViewSet(BaseModelViewSet):
             return EnquiryReadSerializer
         return EnquirySerializer
 
+    def perform_destroy(self, instance):
+        instance.delete()
+        refresh_enquiry_caches_after_commit()
+
     def list(self, request, *args, **kwargs):
         # Cache-Aside Pattern
         cache_key = CacheService.make_enquiries_key(request.query_params)
@@ -61,4 +66,3 @@ class EnquiryViewSet(BaseModelViewSet):
         response_data = serializer.data
         CacheService.set_enquiries(cache_key, response_data)
         return Response(response_data)
-

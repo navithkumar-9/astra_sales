@@ -12,16 +12,16 @@ class Enquiry(TimeStampedModel):
     project_number = models.CharField(max_length=50, unique=True)
     rfq_date = models.DateField()
     rfq_no = models.CharField(max_length=100, db_index=True)
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='enquiries')
-    sbu = models.ForeignKey(SBU, on_delete=models.CASCADE, related_name='enquiries')
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='enquiries')
+    sbu = models.ForeignKey(SBU, on_delete=models.PROTECT, related_name='enquiries')
     project_name = models.CharField(max_length=255, db_index=True)
-    division = models.ForeignKey(Division, on_delete=models.CASCADE, related_name='enquiries')
+    division = models.ForeignKey(Division, on_delete=models.PROTECT, related_name='enquiries')
     rfq_due_date = models.DateField()
     rfq_due_time = models.TimeField()
     rfq_assign_date = models.DateField()
-    rfq_type = models.ForeignKey(RFQ, on_delete=models.CASCADE, related_name='enquiries')
-    fg_type = models.ForeignKey(FG, on_delete=models.CASCADE, related_name='enquiries')
-    sales_rep = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assigned_enquiries')
+    rfq_type = models.ForeignKey(RFQ, on_delete=models.PROTECT, related_name='enquiries')
+    fg_type = models.ForeignKey(FG, on_delete=models.PROTECT, related_name='enquiries')
+    sales_rep = models.ForeignKey(User, on_delete=models.PROTECT, related_name='assigned_enquiries')
 
     # Estimation tracking fields
     ed_of_engg = models.DateField(null=True, blank=True) # Expected Date of Engineering

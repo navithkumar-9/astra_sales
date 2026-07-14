@@ -33,10 +33,15 @@ def refresh_enquiries_cache():
         count = qs.count()
         results = EnquiryReadSerializer(qs[:1000], many=True).data
         data_kanban = {
-            "count": count,
-            "next": None,
-            "previous": None,
-            "results": results
+            "isV1": True,
+            "success": True,
+            "message": "Paginated list retrieved successfully.",
+            "data": {
+                "count": count,
+                "next": None,
+                "previous": None,
+                "results": results,
+            },
         }
         CacheService.set_enquiries(key_kanban, data_kanban)
     except Exception as e:
