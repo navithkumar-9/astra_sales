@@ -30,7 +30,7 @@ class DashboardService:
         aggregates = qs.aggregate(
             total_enquiry_count=Count('id'),
             overall_pending_count=Count('id', filter=~Q(status__in=terminal_statuses)),
-            quoted_90_days=Count('id', filter=Q(status='Sales to Quote', rfq_date__lte=date_90_days_ago)),
+            quoted_90_days=Count('id', filter=~Q(status__in=terminal_statuses) & Q(rfq_date__lte=date_90_days_ago)),
             budgetary_count=Count('id', filter=Q(rfq_type__name__icontains='Budgetary')),
             open_l1_count=Count('id', filter=Q(status='Open - L1')),
             won_count=Count('id', filter=Q(status='Won')),
@@ -44,10 +44,10 @@ class DashboardService:
             lost_value=Sum('lost_value'),
             todays_due=Count('id', filter=Q(rfq_due_date=now_date)),
             tomorrow_due=Count('id', filter=Q(rfq_due_date=tomorrow_date)),
-            ageing_0_30=Count('id', filter=Q(rfq_date__gte=date_30_days_ago)),
-            ageing_31_60=Count('id', filter=Q(rfq_date__lt=date_30_days_ago, rfq_date__gte=date_60_days_ago)),
-            ageing_61_90=Count('id', filter=Q(rfq_date__lt=date_60_days_ago, rfq_date__gte=date_90_days_ago)),
-            ageing_over_90=Count('id', filter=Q(rfq_date__lt=date_90_days_ago)),
+            ageing_0_30=Count('id', filter=Q(rfq_date__gte=date_30_days_ago) & ~Q(status__in=terminal_statuses)),
+            ageing_31_60=Count('id', filter=Q(rfq_date__lt=date_30_days_ago, rfq_date__gte=date_60_days_ago) & ~Q(status__in=terminal_statuses)),
+            ageing_61_90=Count('id', filter=Q(rfq_date__lt=date_60_days_ago, rfq_date__gte=date_90_days_ago) & ~Q(status__in=terminal_statuses)),
+            ageing_over_90=Count('id', filter=Q(rfq_date__lt=date_90_days_ago) & ~Q(status__in=terminal_statuses)),
         )
         status_counts = {
             item['status']: item['value']
@@ -152,6 +152,21 @@ class DashboardService:
             },
         ]
 
+        # Get the 10 newest Quote Submitted enquiries
+        quote_submitted_qs = qs.filter(status='Quote Submitted').order_by('-created_at')[:10]
+        recent_quotes = []
+        for enq in quote_submitted_qs.select_related('customer', 'sbu', 'division', 'sales_rep'):
+            recent_quotes.append({
+                "id": enq.id,
+                "project_number": enq.project_number,
+                "project_name": enq.project_name,
+                "customer": enq.customer.name if enq.customer else "",
+                "sbu": enq.sbu.name if enq.sbu else "",
+                "quote_value": float(enq.quote_value) if enq.quote_value is not None else 0.0,
+                "created_at": enq.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                "sales_rep": enq.sales_rep.username if enq.sales_rep else ""
+            })
+
         charts = {
             "statusDistribution": status_distribution,
             "monthlyTrend": monthly_trend,
@@ -170,5 +185,6 @@ class DashboardService:
 
         return {
             "kpis": kpis,
-            "charts": charts
+            "charts": charts,
+            "recentQuotes": recent_quotes
         }

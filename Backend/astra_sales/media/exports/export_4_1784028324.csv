@@ -1,0 +1,21 @@
+﻿Project Number,RFQ Date,RFQ No,Customer,SBU,Project Name,Division,Status,Sales Rep,RFQ Due Date,Quote Value,PO Value,Created At
+PRJ-20260020,2026-06-04,RFQ-2000,Siemens,Industrial,Project PRJ-20260020,Asia Pacific,Sales to Quote,salesrep,2026-07-21,,,2026-07-13 05:20:03
+PRJ-20260019,2026-06-22,RFQ-1900,Medtronic,Industrial,Project PRJ-20260019,Europe,Pending with Engg,salesrep,2026-07-06,,,2026-07-13 05:20:03
+PRJ-20260018,2026-06-16,RFQ-1800,Boeing,Industrial,Project PRJ-20260018,Asia Pacific,Quote Submitted,salesrep,2026-07-13,413655.00,,2026-07-13 05:20:03
+PRJ-20260017,2026-07-02,RFQ-1700,Boeing,Industrial,Project PRJ-20260017,North America,Pending with Sales,salesrep,2026-07-08,,,2026-07-13 05:20:03
+PRJ-20260016,2026-06-23,RFQ-1600,Medtronic,Aerospace,Project PRJ-20260016,North America,Pending with Sales,salesrep,2026-07-22,,,2026-07-13 05:20:03
+PRJ-20260015,2026-06-07,RFQ-1500,Siemens,Automotive,Project PRJ-20260015,North America,Pending with Sales,salesrep,2026-07-14,,,2026-07-13 05:20:03
+PRJ-20260014,2026-06-06,RFQ-1400,Siemens,Industrial,Project PRJ-20260014,Latin America,Quote Submitted,salesrep,2026-07-11,63827.00,,2026-07-13 05:20:03
+PRJ-20260013,2026-07-03,RFQ-1300,Siemens,Healthcare,Project PRJ-20260013,Latin America,Pending with Costing,salesrep,2026-07-16,,,2026-07-13 05:20:03
+PRJ-20260012,2026-06-22,RFQ-1200,Medtronic,Healthcare,Project PRJ-20260012,North America,Pending with Sales,salesrep,2026-07-15,,,2026-07-13 05:20:03
+PRJ-20260011,2026-06-19,RFQ-1100,Medtronic,Healthcare,Project PRJ-20260011,Asia Pacific,Lost,salesrep,2026-07-05,80007.00,,2026-07-13 05:20:03
+PRJ-20260010,2026-06-20,RFQ-1000,Medtronic,Automotive,Project PRJ-20260010,Europe,Pending with Costing,salesrep,2026-07-17,,,2026-07-13 05:20:03
+PRJ-20260009,2026-06-20,RFQ-900,Medtronic,Aerospace,Project PRJ-20260009,North America,Pending with Engg,salesrep,2026-07-12,,,2026-07-13 05:20:03
+PRJ-20260008,2026-06-08,RFQ-800,Siemens,Automotive,Project PRJ-20260008,Europe,Pending with Engg,salesrep,2026-07-10,,,2026-07-13 05:20:03
+PRJ-20260007,2026-06-17,RFQ-700,Boeing,Automotive,Project PRJ-20260007,Europe,Sales to Quote,salesrep,2026-07-22,238839.00,,2026-07-13 05:20:03
+PRJ-20260006,2026-06-08,RFQ-600,Ford Motor Company,Healthcare,Project PRJ-20260006,Europe,Quote Submitted,salesrep,2026-07-03,40588.00,,2026-07-13 05:20:03
+PRJ-20260005,2026-06-24,RFQ-500,Boeing,Healthcare,Project PRJ-20260005,North America,Pending with Sales,salesrep,2026-07-21,,,2026-07-13 05:20:03
+PRJ-20260004,2026-06-23,RFQ-400,Boeing,Automotive,Project PRJ-20260004,Latin America,Pending with Costing,salesrep,2026-07-22,,,2026-07-13 05:20:03
+PRJ-20260003,2026-06-19,RFQ-300,Boeing,Automotive,Project PRJ-20260003,Asia Pacific,Pending with Sales,salesrep,2026-07-19,,,2026-07-13 05:20:03
+PRJ-20260002,2026-06-13,RFQ-200,Siemens,Aerospace,Project PRJ-20260002,North America,Pending with Engg,salesrep,2026-07-17,,,2026-07-13 05:20:03
+PRJ-20260001,2026-06-14,RFQ-100,Boeing,Aerospace,Project PRJ-20260001,Asia Pacific,Won,salesrep,2026-07-04,157167.00,,2026-07-13 05:19:41

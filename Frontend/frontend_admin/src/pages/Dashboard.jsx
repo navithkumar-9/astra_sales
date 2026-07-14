@@ -110,7 +110,8 @@ const Dashboard = () => {
             followupTimeline: [],
             tatData: [],
             pendingByDept: []
-        }
+        },
+        recentQuotes: []
     });
 
     useEffect(() => {
@@ -124,7 +125,8 @@ const Dashboard = () => {
             if (res.data.success && res.data.data) {
                 setData({
                     kpis: { ...data.kpis, ...res.data.data.kpis },
-                    charts: { ...data.charts, ...res.data.data.charts }
+                    charts: { ...data.charts, ...res.data.data.charts },
+                    recentQuotes: res.data.data.recentQuotes || []
                 });
             }
         } catch (err) {
@@ -132,6 +134,22 @@ const Dashboard = () => {
             console.error(err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const [mailing, setMailing] = useState(false);
+
+    const handleMailAll = async () => {
+        try {
+            setMailing(true);
+            showToast('Triggering mail report delivery...', 'info');
+            await API.post('/mails/mail-all/');
+            showToast('Email report successfully dispatched in the background!', 'success');
+        } catch (err) {
+            showToast('Failed to dispatch email report.', 'error');
+            console.error(err);
+        } finally {
+            setMailing(false);
         }
     };
 
@@ -172,7 +190,27 @@ const Dashboard = () => {
                     <h2 className="font-weight-bold mb-1 text-dark" style={{ letterSpacing: '-0.5px' }}>CRM Enterprise Dashboard</h2>
                     <p className="text-muted mb-0 small">Executive performance metrics and real-time pipeline status</p>
                 </div>
-                <div className="d-flex gap-3">
+                <div className="d-flex gap-3 align-items-center">
+                    <button 
+                        className="btn border shadow-sm btn-sm rounded-pill px-3 d-flex align-items-center gap-1 text-white" 
+                        disabled={mailing}
+                        onClick={handleMailAll}
+                        style={{
+                            background: 'linear-gradient(to right, #da8cff, #9a55ff)',
+                            border: 'none',
+                            fontWeight: '600'
+                        }}
+                    >
+                        {mailing ? (
+                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '12px', height: '12px' }}></span>
+                        ) : (
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                <polyline points="22,6 12,13 2,6" />
+                            </svg>
+                        )}
+                        Mail Report
+                    </button>
                     <button className="btn btn-white border shadow-sm btn-sm rounded-pill px-3 d-flex align-items-center gap-1 bg-white" onClick={fetchDashboardData}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
                         Sync Data
@@ -377,6 +415,70 @@ const Dashboard = () => {
                             </BarChart>
                         </ResponsiveContainer>
                     </ChartCard>
+                </div>
+            </div>
+
+            {/* 10 Newest Quote Submitted Enquiries */}
+            <div className="card border-0 shadow-sm mt-4 mb-4" style={{ borderRadius: '16px', backgroundColor: '#ffffff' }}>
+                <div className="card-header bg-white border-0 pt-4 px-4 pb-2">
+                    <h5 className="font-weight-bold text-dark mb-1">Newest Quote Submitted (Last 10 Records)</h5>
+                    <p className="text-muted small mb-0">Recently sent pricing quotes and proposals</p>
+                </div>
+                <div className="card-body px-4 pb-4 pt-2">
+                    <div className="table-responsive">
+                        <table className="table table-hover align-middle mb-0">
+                            <thead className="table-light" style={{ fontSize: '0.85rem', fontWeight: '600', color: '#475569' }}>
+                                <tr>
+                                    <th className="border-0 px-3 py-3">Project Number</th>
+                                    <th className="border-0 py-3">Project Name</th>
+                                    <th className="border-0 py-3">Customer</th>
+                                    <th className="border-0 py-3">SBU</th>
+                                    <th className="border-0 py-3 text-end">Quote Value</th>
+                                    <th className="border-0 py-3">Sales Rep</th>
+                                    <th className="border-0 px-3 py-3 text-end">Created At</th>
+                                </tr>
+                            </thead>
+                            <tbody style={{ fontSize: '0.9rem', color: '#334155' }}>
+                                {data.recentQuotes && data.recentQuotes.length > 0 ? (
+                                    data.recentQuotes.map((enq) => (
+                                        <tr key={enq.id} style={{ transition: 'background-color 0.15s' }}>
+                                            <td className="px-3 py-3 font-weight-bold text-primary">{enq.project_number}</td>
+                                            <td className="py-3">{enq.project_name}</td>
+                                            <td className="py-3">{enq.customer}</td>
+                                            <td className="py-3">
+                                                <span className="badge bg-light text-dark border px-2 py-1.5" style={{ borderRadius: '6px' }}>{enq.sbu}</span>
+                                            </td>
+                                            <td className="py-3 text-end font-weight-bold text-success">{formatCurrency(enq.quote_value)}</td>
+                                            <td className="py-3">
+                                                <div className="d-flex align-items-center gap-2">
+                                                    <span className="avatar-circle-sm" style={{ 
+                                                        width: '28px', 
+                                                        height: '28px', 
+                                                        borderRadius: '50%', 
+                                                        background: 'linear-gradient(to right, #da8cff, #9a55ff)',
+                                                        color: 'white',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: 'bold'
+                                                    }}>
+                                                        {enq.sales_rep ? enq.sales_rep.substring(0, 2).toUpperCase() : 'SR'}
+                                                    </span>
+                                                    <span>{enq.sales_rep}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-3 py-3 text-end text-muted" style={{ fontSize: '0.8rem' }}>{enq.created_at}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="7" className="text-center py-4 text-muted">No recent Quote Submitted records found.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

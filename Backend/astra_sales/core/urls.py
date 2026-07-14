@@ -15,6 +15,7 @@ from core.views.master_data_views import (
 )
 from core.views.enquiry_views import EnquiryViewSet
 from core.views.activity_views import ActivityViewSet
+from core.views.export_views import ExportJobAPIView, ExportJobDetailAPIView, ExportJobDownloadAPIView
 
 router = DefaultRouter()
 router.register('sbus', SBUViewSet, basename='sbu')
@@ -34,5 +35,9 @@ urlpatterns = [
     path('users/<int:pk>/', UserDetailView.as_view(), name='users_detail'),
     path('profile/', ProfileView.as_view(), name='profile'),
     path('dashboard/stats/', DashboardStatsView.as_view(), name='dashboard_stats'),
+    path('exports/', ExportJobAPIView.as_view(), name='exports_list_create'),
+    path('exports/<int:pk>/', ExportJobDetailAPIView.as_view(), name='exports_detail'),
+    path('exports/<int:pk>/download/', ExportJobDownloadAPIView.as_view(), name='exports_download'),
     path('', include(router.urls)),
 ]
+

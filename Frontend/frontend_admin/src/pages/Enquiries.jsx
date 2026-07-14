@@ -7,6 +7,8 @@ import EnquiryTable from '../components/common/EnquiryTable';
 import { enquiryService } from '../services/enquiryService';
 import CreateEnquiryModal from '../components/enquiry/CreateEnquiryModal';
 import ViewEnquiryModal from '../components/enquiry/ViewEnquiryModal';
+import ExportButton from '../components/common/ExportButton';
+
 
 const Enquiries = () => {
     const { user } = useAuth();
@@ -127,18 +129,22 @@ const Enquiries = () => {
                     <h1 className="page-title h3 font-weight-bold mb-1">Enquiry Tracker</h1>
                     <p className="page-subtitle text-muted mb-0">List and manage sales request enquiries</p>
                 </div>
-                {canCreate && (
-                    <button 
-                        className="btn btn-gradient-primary d-flex align-items-center gap-2 border-0 shadow-sm"
-                        onClick={openCreateModal}
-                    >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <line x1="12" y1="5" x2="12" y2="19" />
-                            <line x1="5" y1="12" x2="19" y2="12" />
-                        </svg>
-                        Add Enquiry
-                    </button>
-                )}
+                <div className="d-flex align-items-center gap-3">
+                    <ExportButton filters={{ search }} />
+                    {canCreate && (
+                        <button 
+                            className="btn btn-gradient-primary d-flex align-items-center gap-2 border-0 shadow-sm"
+                            onClick={openCreateModal}
+                            style={{ margin: 0 }}
+                        >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                            </svg>
+                            Add Enquiry
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Modern Search Input */}

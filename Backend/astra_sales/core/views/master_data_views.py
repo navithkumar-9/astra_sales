@@ -22,6 +22,7 @@ from core.serializers.master_data import (
     MailSerializer,
 )
 
+
 class BaseModelViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
 
@@ -51,26 +52,47 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         instance.delete()
         refresh_enquiry_caches_after_commit()
 
+
 class SBUViewSet(BaseModelViewSet):
     queryset = SBU.objects.all()
     serializer_class = SBUSerializer
+
 
 class DivisionViewSet(BaseModelViewSet):
     queryset = Division.objects.all()
     serializer_class = DivisionSerializer
 
+
 class FGViewSet(BaseModelViewSet):
     queryset = FG.objects.all()
     serializer_class = FGSerializer
+
 
 class RFQViewSet(BaseModelViewSet):
     queryset = RFQ.objects.all()
     serializer_class = RFQSerializer
 
+
 class CustomerViewSet(BaseModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
+
+from rest_framework.decorators import action
+from core.tasks.mail_tasks import send_mail_all_task
+
 class MailViewSet(BaseModelViewSet):
     queryset = Mail.objects.all()
     serializer_class = MailSerializer
+
+    @action(detail=False, methods=['post'], url_path='mail-all')
+    def mail_all(self, request):
+        """
+        Triggers an asynchronous task to send CRM pipeline report to all registered email addresses.
+        """
+        send_mail_all_task.delay()
+        return Response({
+            "success": True,
+            "message": "Mail report successfully triggered in the background."
+        }, status=status.HTTP_202_ACCEPTED)
+
