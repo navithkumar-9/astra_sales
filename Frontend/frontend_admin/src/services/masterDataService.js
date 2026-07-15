@@ -31,13 +31,25 @@ export const fgService = createMasterDataService('/fgs/');
 const cache = {};
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
+const makeCacheKey = (key, params = {}) => {
+    const queryParams = new URLSearchParams();
+    Object.entries(params || {}).forEach(([paramKey, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+            queryParams.append(paramKey, value);
+        }
+    });
+    const queryString = queryParams.toString();
+    return queryString ? `${key}?${queryString}` : key;
+};
+
 const fetchWithCache = async (key, fetchFn, params) => {
+    const cacheKey = makeCacheKey(key, params);
     const now = Date.now();
-    if (cache[key] && (now - cache[key].timestamp < CACHE_DURATION)) {
-        return cache[key].data;
+    if (cache[cacheKey] && (now - cache[cacheKey].timestamp < CACHE_DURATION)) {
+        return cache[cacheKey].data;
     }
     const data = await fetchFn(params);
-    cache[key] = {
+    cache[cacheKey] = {
         data,
         timestamp: now
     };
@@ -52,7 +64,9 @@ export const masterDataService = {
     getFGs: (params) => fetchWithCache('fgs', fgService.getAll, params),
     invalidate: (key) => {
         if (key) {
-            delete cache[key];
+            Object.keys(cache)
+                .filter((cacheKey) => cacheKey === key || cacheKey.startsWith(`${key}?`))
+                .forEach((cacheKey) => delete cache[cacheKey]);
             return;
         }
         Object.keys(cache).forEach((cacheKey) => delete cache[cacheKey]);

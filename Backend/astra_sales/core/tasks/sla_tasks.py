@@ -2,6 +2,7 @@ from celery import shared_task
 from django.utils import timezone
 from core.models.enquiry import Enquiry
 from core.models.activity import Activity
+from core.services.cache_service import CacheService
 
 @shared_task
 def check_sla_violations():
@@ -37,5 +38,8 @@ def check_sla_violations():
                 
                 # In the future, we could trigger an email here:
                 # MailService.send_sla_warning_email(enq)
+
+    if warnings_created:
+        CacheService.invalidate_enquiry_dependencies()
 
     return f"SLA check complete. Logged {warnings_created} warnings."

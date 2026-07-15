@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import API from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { getAvatarStyle } from '../utils/avatar';
 import { hasPermission, PERMISSIONS, ROLES } from '../config/permissions';
@@ -7,12 +8,60 @@ import { hasPermission, PERMISSIONS, ROLES } from '../config/permissions';
 const Sidebar = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [isCollapsed, setIsCollapsed] = useState(() => {
         return localStorage.getItem('sidebar_collapsed') === 'true';
     });
 
     const [openMenus, setOpenMenus] = useState({ 'Sales Pipeline': true });
+
+    const [counts, setCounts] = useState({
+        openL1Count: 0,
+        wonCount: 0,
+        regrettedCount: 0,
+        lostCount: 0,
+        holdCount: 0
+    });
+
+    useEffect(() => {
+        if (!user) return;
+        const fetchCounts = async () => {
+            try {
+                const res = await API.get('/dashboard/stats/');
+                if (res.data.success && res.data.data && res.data.data.kpis) {
+                    const k = res.data.data.kpis;
+                    setCounts({
+                        openL1Count: k.openL1Count || 0,
+                        wonCount: k.wonCount || 0,
+                        regrettedCount: k.regrettedCount || 0,
+                        lostCount: k.lostCount || 0,
+                        holdCount: k.holdCount || 0
+                    });
+                }
+            } catch (err) {
+                console.error("Failed to fetch sidebar counts:", err);
+            }
+        };
+        fetchCounts();
+    }, [location, user]);
+
+    const getSubmenuCount = (subLabel) => {
+        switch (subLabel) {
+            case 'Open L1':
+                return counts.openL1Count;
+            case 'Won':
+                return counts.wonCount;
+            case 'Regretted':
+                return counts.regrettedCount;
+            case 'Lost':
+                return counts.lostCount;
+            case 'On Hold':
+                return counts.holdCount;
+            default:
+                return null;
+        }
+    };
 
     const toggleMenu = (label) => {
         setOpenMenus(prev => ({ ...prev, [label]: !prev[label] }));
@@ -305,8 +354,32 @@ const Sidebar = () => {
                                                     className={({ isActive }) =>
                                                         `submenu-item ${isActive ? 'submenu-item-active' : ''}`
                                                     }
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'space-between',
+                                                        textDecoration: 'none'
+                                                    }}
                                                 >
-                                                    {sub.label}
+                                                    <span>{sub.label}</span>
+                                                    {getSubmenuCount(sub.label) !== null && (
+                                                        <span className="badge rounded-pill" style={{
+                                                            fontSize: '0.75rem',
+                                                            minWidth: '20px',
+                                                            height: '20px',
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            backgroundColor: '#da8cff',
+                                                            color: '#ffffff',
+                                                            padding: '0 6px',
+                                                            borderRadius: '10px',
+                                                            fontWeight: '700',
+                                                            marginLeft: '8px'
+                                                        }}>
+                                                            {getSubmenuCount(sub.label)}
+                                                        </span>
+                                                    )}
                                                 </NavLink>
                                             ))}
                                         </div>

@@ -1,9 +1,12 @@
 from celery import shared_task
 from django.http import QueryDict
+import logging
 from core.services.cache_service import CacheService
 from core.services.dashboard_service import DashboardService
 from core.models.enquiry import Enquiry
-from core.serializers.enquiry import EnquiryReadSerializer
+from core.serializers.enquiry import EnquiryListSerializer
+
+logger = logging.getLogger(__name__)
 
 @shared_task
 def refresh_dashboard_cache():
@@ -11,8 +14,8 @@ def refresh_dashboard_cache():
     try:
         data = DashboardService.calculate_stats()
         CacheService.set_dashboard_stats(data)
-    except Exception as e:
-        print(f"Error refreshing dashboard cache: {e}")
+    except Exception:
+        logger.exception("Error refreshing dashboard cache")
 
 @shared_task
 def refresh_enquiries_cache():
@@ -27,11 +30,11 @@ def refresh_enquiries_cache():
         
         from core.views.enquiry_views import ENQUIRY_SELECT_RELATED
         qs = Enquiry.objects.select_related(*ENQUIRY_SELECT_RELATED).prefetch_related(
-            'fg_details', 'audit_logs', 'audit_logs__user', 'activities', 'activities__user'
+            'fg_details'
         ).order_by('-created_at')
         
         count = qs.count()
-        results = EnquiryReadSerializer(qs[:1000], many=True).data
+        results = EnquiryListSerializer(qs[:1000], many=True).data
         data_kanban = {
             "isV1": True,
             "success": True,
@@ -44,8 +47,8 @@ def refresh_enquiries_cache():
             },
         }
         CacheService.set_enquiries(key_kanban, data_kanban)
-    except Exception as e:
-        print(f"Error refreshing enquiries cache: {e}")
+    except Exception:
+        logger.exception("Error refreshing enquiries cache")
 
 @shared_task
 def refresh_all_caches():

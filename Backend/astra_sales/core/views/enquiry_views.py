@@ -2,7 +2,7 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from core.views.master_data_views import BaseModelViewSet
 from core.models.enquiry import Enquiry
-from core.serializers.enquiry import EnquirySerializer, EnquiryReadSerializer
+from core.serializers.enquiry import EnquirySerializer, EnquiryListSerializer, EnquiryReadSerializer
 from core.permissions import CanEditEnquiry
 from core.services.cache_service import CacheService
 from core.services.enquiry_service import refresh_enquiry_caches_after_commit
@@ -23,11 +23,19 @@ class EnquiryViewSet(BaseModelViewSet):
     search_fields = ['project_number', 'project_name', 'rfq_no']
 
     def get_queryset(self):
-        return (
+        queryset = (
             Enquiry.objects
             .select_related(*ENQUIRY_SELECT_RELATED)
-            .prefetch_related('fg_details', 'audit_logs', 'audit_logs__user', 'activities', 'activities__user')
             .order_by('-created_at')
+        )
+        if self.action == 'list':
+            return queryset.prefetch_related('fg_details')
+        return queryset.prefetch_related(
+            'fg_details',
+            'audit_logs',
+            'audit_logs__user',
+            'activities',
+            'activities__user',
         )
 
     def filter_queryset(self, queryset):
@@ -38,9 +46,17 @@ class EnquiryViewSet(BaseModelViewSet):
         return queryset
 
     def get_serializer_class(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action == 'list':
+            return EnquiryListSerializer
+        if self.action == 'retrieve':
             return EnquiryReadSerializer
         return EnquirySerializer
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+    def perform_update(self, serializer):
+        serializer.save()
 
     def perform_destroy(self, instance):
         instance.delete()

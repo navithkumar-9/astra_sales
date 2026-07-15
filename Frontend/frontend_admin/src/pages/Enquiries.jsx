@@ -92,9 +92,15 @@ const Enquiries = () => {
         setShowCreateModal(true);
     };
 
-    const handleViewEnquiry = (enquiry) => {
+    const handleViewEnquiry = async (enquiry) => {
         setSelectedEnquiry(enquiry);
         setShowViewModal(true);
+        try {
+            const detail = await enquiryService.getById(enquiry.id);
+            setSelectedEnquiry(detail);
+        } catch (err) {
+            showToast('Failed to load full enquiry details.', 'error');
+        }
     };
 
     const handleRefreshEnquiry = async () => {

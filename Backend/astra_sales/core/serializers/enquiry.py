@@ -137,3 +137,11 @@ class EnquiryReadSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
         ]
+
+
+class EnquiryListSerializer(EnquiryReadSerializer):
+    class Meta(EnquiryReadSerializer.Meta):
+        fields = [
+            field for field in EnquiryReadSerializer.Meta.fields
+            if field not in ('audit_logs', 'activities')
+        ]
