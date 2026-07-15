@@ -10,8 +10,8 @@ import { hasPermission, PERMISSIONS } from '../config/permissions';
 const PIPELINE_STAGES = [
     { id: 'Pending with Engg', label: 'Pending with Engg', color: '#3b82f6', bgLight: '#eff6ff' },
     { id: 'Pending with Costing', label: 'Pending with Costing', color: '#f59e0b', bgLight: '#fef3c7' },
-    { id: 'Pending with Sales', label: 'Pending with Sales', color: '#8b5cf6', bgLight: '#f5f3ff' },
     { id: 'Sales to Quote', label: 'Sales to Quote', color: '#ec4899', bgLight: '#fdf2f8' },
+    { id: 'Pending with Sales', label: 'Pending with Sales', color: '#8b5cf6', bgLight: '#f5f3ff' },
     { id: 'Quote Submitted', label: 'Quote Submitted', color: '#10b981', bgLight: '#ecfdf5' }
 ];
 
@@ -109,6 +109,16 @@ const KanbanBoard = () => {
         return colors[hash % colors.length];
     };
 
+    // Dynamic priority calculation based on SLA / aging
+    const getPriority = (enq) => {
+        const days = enq.rfq_aging || 0;
+        const isOverdue = new Date(enq.rfq_due_date) < new Date();
+        if (isOverdue) return 'urgent';
+        if (days > 45) return 'high';
+        if (days > 15) return 'medium';
+        return 'low';
+    };
+
     return (
         <div className="page container-fluid px-4 py-4 h-100 d-flex flex-column bg-light" style={{ overflow: 'hidden', minHeight: '90vh' }}>
             <div className="page-header mb-4 flex-shrink-0 border-bottom pb-3 d-flex justify-content-between align-items-center">
@@ -162,6 +172,10 @@ const KanbanBoard = () => {
                                         stageEnquiries.map(enq => {
                                             const days = calculateDaysInStage(enq);
                                             const ageColor = days > 60 ? '#ef4444' : days > 30 ? '#f59e0b' : '#10b981';
+                                            const isOverdue = new Date(enq.rfq_due_date) < new Date() && !['Won', 'Lost', 'Regretted'].includes(enq.status);
+                                            const priority = getPriority(enq);
+                                            const expectedRevenue = enq.quote_value || enq.po_value || 0;
+                                            
                                             return (
                                                 <div 
                                                     key={enq.id} 
@@ -187,22 +201,31 @@ const KanbanBoard = () => {
                                                         <div className="d-flex justify-content-between align-items-start mb-2">
                                                             <h6 className="font-weight-bold mb-0 text-dark" style={{ fontSize: '0.85rem' }}>{enq.project_number}</h6>
                                                             <span className="badge text-white" style={{ fontSize: '0.65rem', backgroundColor: ageColor, padding: '0.25em 0.5em', borderRadius: '4px' }}>
-                                                                {days} Days
+                                                                {days} Days Old
                                                             </span>
                                                         </div>
                                                         
-                                                        <div className="text-secondary small mb-3 font-weight-medium text-truncate" title={enq.customer?.name} style={{ fontSize: '0.75rem' }}>
-                                                            {enq.customer?.name || 'Unknown Customer'}
+                                                        <div className="text-secondary small mb-2 font-weight-medium text-truncate" title={enq.customer?.name} style={{ fontSize: '0.75rem' }}>
+                                                            🏢 {enq.customer?.name || 'Unknown Customer'}
+                                                        </div>
+
+                                                        {/* Expected Revenue / Quote Value */}
+                                                        <div className="mb-2 text-dark font-weight-bold" style={{ fontSize: '0.8rem' }}>
+                                                            💰 Est: INR {Number(expectedRevenue).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                         </div>
 
                                                         {/* Badges/SBU/RFQs info */}
-                                                        <div className="d-flex flex-wrap gap-1 mb-3">
+                                                        <div className="d-flex flex-wrap gap-1 mb-2">
                                                             <span className="badge text-white" style={{ fontSize: '0.65rem', backgroundColor: '#6366f1', fontWeight: '500' }}>
                                                                 {enq.sbu?.name || 'SBU'}
                                                             </span>
                                                             <span className="badge bg-light text-dark border" style={{ fontSize: '0.65rem', fontWeight: '500' }}>
                                                                 {enq.rfq_type?.name || 'RFQ'}
                                                             </span>
+                                                        </div>
+
+                                                        <div className="text-muted small mb-2" style={{ fontSize: '0.65rem' }}>
+                                                            🕒 Updated: {new Date(enq.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                                         </div>
 
                                                         {/* Card Footer: Date and Assignee */}
@@ -212,7 +235,7 @@ const KanbanBoard = () => {
                                                                     <circle cx="12" cy="12" r="10" />
                                                                     <polyline points="12 6 12 12 16 14" />
                                                                 </svg>
-                                                                {new Date(enq.rfq_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                                Due: {new Date(enq.rfq_due_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                                             </div>
                                                             
                                                             {/* User Avatar Circle */}

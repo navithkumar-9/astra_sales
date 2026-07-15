@@ -11,6 +11,7 @@ from .audit import EnquiryAuditLog
 from .activity import Activity
 from .export_job import ExportJob
 from .notification import Notification
+from .email_log import EmailLog
 
 __all__ = [
     'TimeStampedModel',
@@ -26,7 +27,6 @@ __all__ = [
     'EnquiryAuditLog',
     'Activity',
     'ExportJob',
-    'Notification'
+    'Notification',
+    'EmailLog',
 ]
-
-

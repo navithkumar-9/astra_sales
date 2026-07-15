@@ -108,6 +108,9 @@ const SalesToQuote = () => {
 
         setSubmitting(true);
         let newStatus = status;
+        if (newStatus === 'Sales to Quote' && quoteDate && quoteValue) {
+            newStatus = 'Pending with Sales';
+        }
 
         const payload = {
             ...selectedEnq,

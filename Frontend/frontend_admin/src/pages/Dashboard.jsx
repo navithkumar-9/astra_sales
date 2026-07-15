@@ -93,8 +93,12 @@ const Dashboard = () => {
             poValue: 0,
             openL1Value: 0,
             lostValue: 0,
+            holdValue: 0,
             todaysDue: 0,
-            tomorrowDue: 0
+            tomorrowDue: 0,
+            recentCreatedCount: 0,
+            overdueCount: 0,
+            winRate: 0
         },
         charts: {
             statusDistribution: [],
@@ -138,20 +142,44 @@ const Dashboard = () => {
     };
 
     const [mailing, setMailing] = useState(false);
+    const [mailCooldown, setMailCooldown] = useState(0);
+
+    // Bug #12 fix: 60-second frontend cooldown timer
+    useEffect(() => {
+        if (mailCooldown <= 0) return;
+        const timer = setInterval(() => {
+            setMailCooldown((prev) => {
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [mailCooldown]);
 
     const handleMailAll = async () => {
+        if (mailCooldown > 0) return;
         try {
             setMailing(true);
             showToast('Triggering mail report delivery...', 'info');
             await API.post('/mails/mail-all/');
             showToast('Email report successfully dispatched in the background!', 'success');
+            setMailCooldown(60); // Start 60-second cooldown
         } catch (err) {
-            showToast('Failed to dispatch email report.', 'error');
+            if (err.response && err.response.status === 429) {
+                showToast('A report was recently sent. Please wait before trying again.', 'warning');
+                setMailCooldown(30);
+            } else {
+                showToast('Failed to dispatch email report.', 'error');
+            }
             console.error(err);
         } finally {
             setMailing(false);
         }
     };
+
 
     if (loading) {
         return (
@@ -193,12 +221,15 @@ const Dashboard = () => {
                 <div className="d-flex gap-3 align-items-center">
                     <button 
                         className="btn border shadow-sm btn-sm rounded-pill px-3 d-flex align-items-center gap-1 text-white" 
-                        disabled={mailing}
+                        disabled={mailing || mailCooldown > 0}
                         onClick={handleMailAll}
                         style={{
-                            background: 'linear-gradient(to right, #da8cff, #9a55ff)',
+                            background: mailCooldown > 0 
+                                ? 'linear-gradient(to right, #a0a0a0, #808080)' 
+                                : 'linear-gradient(to right, #da8cff, #9a55ff)',
                             border: 'none',
-                            fontWeight: '600'
+                            fontWeight: '600',
+                            opacity: mailCooldown > 0 ? 0.7 : 1,
                         }}
                     >
                         {mailing ? (
@@ -209,7 +240,7 @@ const Dashboard = () => {
                                 <polyline points="22,6 12,13 2,6" />
                             </svg>
                         )}
-                        Mail Report
+                        {mailCooldown > 0 ? `Mail Report (${mailCooldown}s)` : 'Mail Report'}
                     </button>
                     <button className="btn btn-white border shadow-sm btn-sm rounded-pill px-3 d-flex align-items-center gap-1 bg-white" onClick={fetchDashboardData}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
@@ -221,29 +252,29 @@ const Dashboard = () => {
             {/* KPIs Grid */}
             <div className="row g-3 mb-4">
                 <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="Total Enquiries" value={kpis.totalEnquiryCount} gradient="linear-gradient(to right, #ffbf96, #fe7096)" shadowColor="rgba(254, 112, 150, 0.25)" icon={icons.chart} subtitle="Increased by 60%" />
+                    <KpiCard title="Total Enquiries" value={kpis.totalEnquiryCount} gradient="linear-gradient(to right, #ffbf96, #fe7096)" shadowColor="rgba(254, 112, 150, 0.25)" icon={icons.chart} subtitle={`+${kpis.recentCreatedCount} in last 30 days`} />
                 </div>
                 <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="Overall Pending" value={kpis.overallPendingCount} gradient="linear-gradient(to right, #90caf9, #047edf 99%)" shadowColor="rgba(4, 126, 223, 0.25)" icon={icons.clock} subtitle="Decreased by 10%" />
+                    <KpiCard title="Overall Pending" value={kpis.overallPendingCount} gradient="linear-gradient(to right, #90caf9, #047edf 99%)" shadowColor="rgba(4, 126, 223, 0.25)" icon={icons.clock} subtitle={`${kpis.overdueCount} Overdue`} />
                 </div>
                 <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="Quoted (>90 Days)" value={kpis.quoted90Days} gradient="linear-gradient(to right, #84d9d2, #07cdae)" shadowColor="rgba(7, 205, 174, 0.25)" icon={icons.alert} subtitle="Stuck Enquiries" />
+                    <KpiCard title="Quoted (>90 Days)" value={kpis.quoted90Days} gradient="linear-gradient(to right, #84d9d2, #07cdae)" shadowColor="rgba(7, 205, 174, 0.25)" icon={icons.alert} subtitle="RFQ date > 90 days ago" />
                 </div>
                 <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="Budgetary Quotes" value={kpis.budgetaryCount} gradient="linear-gradient(to right, #c3a1ff, #7f39fb)" shadowColor="rgba(127, 57, 251, 0.25)" icon={icons.bookmark} subtitle="Budgetary RFQs" />
+                    <KpiCard title="Budgetary Quotes" value={kpis.budgetaryCount} gradient="linear-gradient(to right, #c3a1ff, #7f39fb)" shadowColor="rgba(127, 57, 251, 0.25)" icon={icons.bookmark} subtitle={`Value: ${formatCurrency(kpis.budgetaryValue)}`} />
                 </div>
                 
                 <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="Open - L1" value={kpis.openL1Count} gradient="linear-gradient(to right, #ffbf96, #fe7096)" shadowColor="rgba(254, 112, 150, 0.25)" icon={icons.award} subtitle="Opportunities at L1" />
+                    <KpiCard title="Open - L1" value={kpis.openL1Count} gradient="linear-gradient(to right, #ffbf96, #fe7096)" shadowColor="rgba(254, 112, 150, 0.25)" icon={icons.award} subtitle={`Value: ${formatCurrency(kpis.openL1Value)}`} />
                 </div>
                 <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="Won" value={kpis.wonCount} gradient="linear-gradient(to right, #84d9d2, #07cdae)" shadowColor="rgba(7, 205, 174, 0.25)" icon={icons.diamond} subtitle="Increased by 5%" />
+                    <KpiCard title="Won" value={kpis.wonCount} gradient="linear-gradient(to right, #84d9d2, #07cdae)" shadowColor="rgba(7, 205, 174, 0.25)" icon={icons.diamond} subtitle={`Win Rate: ${kpis.winRate}%`} />
                 </div>
                 <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="Lost" value={kpis.lostCount} gradient="linear-gradient(to right, #64748b, #475569)" shadowColor="rgba(100, 116, 139, 0.25)" icon={icons.clock} subtitle="Lost opportunities" />
+                    <KpiCard title="Lost" value={kpis.lostCount} gradient="linear-gradient(to right, #64748b, #475569)" shadowColor="rgba(100, 116, 139, 0.25)" icon={icons.clock} subtitle={`Value: ${formatCurrency(kpis.lostValue)}`} />
                 </div>
                 <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="On Hold" value={kpis.holdCount} gradient="linear-gradient(to right, #ffbf96, #fe7096)" shadowColor="rgba(254, 112, 150, 0.25)" icon={icons.bookmark} subtitle="Delayed registrations" />
+                    <KpiCard title="On Hold" value={kpis.holdCount} gradient="linear-gradient(to right, #ffbf96, #fe7096)" shadowColor="rgba(254, 112, 150, 0.25)" icon={icons.bookmark} subtitle={`Value: ${formatCurrency(kpis.holdValue)}`} />
                 </div>
                 
                 <div className="col-xl-3 col-md-4 col-sm-6">

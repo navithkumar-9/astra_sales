@@ -508,6 +508,7 @@ const PendingSales = () => {
                                             <option value="Pending with Engg">Pending with Engg</option>
                                             <option value="Pending with Costing">Pending with Costing</option>
                                             <option value="Pending with Sales">Pending with Sales</option>
+                                            <option value="Quote Submitted">Quote Submitted</option>
                                         </select>
                                     </div>
                                 </div>

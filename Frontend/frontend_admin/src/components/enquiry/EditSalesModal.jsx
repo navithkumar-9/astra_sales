@@ -239,182 +239,274 @@ const EditSalesModal = ({ enq, show, onClose, onSuccess, onRefresh, canEdit, vie
                             ))}
                         </ul>
                     </div>
-
                     <form onSubmit={handleSave} className="modal-body p-4" style={{ maxHeight: '75vh', overflowY: 'auto', backgroundColor: '#f8fafc' }}>
                         
                         <div style={{ display: activeTab === 'details' ? 'block' : 'none' }}>
                             
-                            {/* Project Information Section */}
-                            <h6 className="font-weight-bold mb-3 pb-2 border-bottom" style={{ color: '#9a55ff', fontSize: '0.95rem' }}>Project Information</h6>
-                            <div className="card border-0 shadow-sm p-4 mb-4" style={{ borderRadius: '16px' }}>
-                                <div className="row g-3">
-                                    <div className="col-md-4">
-                                        <label className="form-label font-weight-semibold text-secondary small uppercase">Customer Name</label>
-                                        <select className="form-select border-light shadow-sm" style={{ padding: '0.65rem', borderRadius: '10px' }} value={selectedCustomer} onChange={(e) => setSelectedCustomer(e.target.value)} disabled={!canEdit || viewOnly}>
+                            {/* Top Info Cards (2 Columns) */}
+                            <div className="row g-3 mb-4">
+                                <div className="col-md-6">
+                                    <div className="enq-details-card bg-white border-0 shadow-sm" style={{ borderLeft: '4px solid #da8cff' }}>
+                                        <label className="enq-details-label" style={{ color: '#9a55ff' }}>Customer Name</label>
+                                        <select className="form-select border-0 shadow-none text-dark p-0 font-weight-bold" style={{ fontSize: '0.9rem', backgroundPosition: 'right center' }} value={selectedCustomer} onChange={(e) => setSelectedCustomer(e.target.value)} disabled={!canEdit || viewOnly}>
                                             <option value="">Select Customer</option>
                                             {customers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                                         </select>
                                     </div>
-                                    <div className="col-md-4">
-                                        <label className="form-label font-weight-semibold text-secondary small uppercase">SBU</label>
-                                        <select className="form-select border-light shadow-sm" style={{ padding: '0.65rem', borderRadius: '10px' }} value={selectedSbu} onChange={(e) => setSelectedSbu(e.target.value)} disabled={!canEdit || viewOnly}>
+                                </div>
+                                <div className="col-md-6">
+                                    <div className="enq-details-card bg-white border-0 shadow-sm" style={{ borderLeft: '4px solid #9a55ff' }}>
+                                        <label className="enq-details-label" style={{ color: '#7f39fb' }}>SBU</label>
+                                        <select className="form-select border-0 shadow-none text-dark p-0 font-weight-bold" style={{ fontSize: '0.9rem', backgroundPosition: 'right center' }} value={selectedSbu} onChange={(e) => setSelectedSbu(e.target.value)} disabled={!canEdit || viewOnly}>
                                             <option value="">Select SBU</option>
                                             {sbus.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                                         </select>
                                     </div>
-                                    <div className="col-md-4">
-                                        <label className="form-label font-weight-semibold text-secondary small uppercase">Division</label>
-                                        <select className="form-select border-light shadow-sm" style={{ padding: '0.65rem', borderRadius: '10px' }} value={selectedDivision} onChange={(e) => setSelectedDivision(e.target.value)} disabled={!canEdit || viewOnly}>
-                                            <option value="">Select Division</option>
-                                            {divisions.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-                                        </select>
+                                </div>
+                            </div>
+
+                            {/* Inline Badges */}
+                            <div className="d-flex flex-wrap gap-4 mb-4 font-weight-semibold align-items-center" style={{ fontSize: '0.85rem' }}>
+                                <div className="d-flex align-items-center gap-2">
+                                    <span className="text-secondary">Division: </span>
+                                    <select className="form-select form-select-sm bg-white text-dark shadow-sm border rounded-pill px-3 py-1" style={{ width: 'auto' }} value={selectedDivision} onChange={(e) => setSelectedDivision(e.target.value)} disabled={!canEdit || viewOnly}>
+                                        <option value="">Select Division</option>
+                                        {divisions.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <span className="text-secondary">RFQ Type: </span>
+                                    <span className="badge bg-white text-dark shadow-sm border px-3 py-2 rounded-pill">{enq.rfq_type?.name || 'N/A'}</span>
+                                </div>
+                                <div className="d-flex align-items-center gap-2">
+                                    <span className="text-secondary">RFQ No: </span>
+                                    <input type="text" className="form-control form-control-sm bg-white text-dark shadow-sm border rounded-pill px-3 py-1" style={{ width: '120px' }} value={rfqNo} onChange={(e) => setRfqNo(e.target.value)} disabled={!canEdit || viewOnly} />
+                                </div>
+                            </div>
+
+                            {/* Time Blocks (3 Columns) */}
+                            <div className="row g-3 mb-4">
+                                <div className="col-md-4">
+                                    <div className="enq-time-block shadow-sm border-0" style={{ background: 'linear-gradient(to right, #84d9d2, #07cdae)', color: '#fff', padding: '1.25rem' }}>
+                                        <label className="enq-time-block-label" style={{ opacity: 0.85, display: 'block' }}>RFQ Date</label>
+                                        <input type="date" className="form-control form-control-sm border-0 bg-transparent text-white p-0 font-weight-bold" style={{ fontSize: '1rem', colorScheme: 'dark' }} value={rfqDate} onChange={(e) => setRfqDate(e.target.value)} disabled={!canEdit || viewOnly} />
                                     </div>
                                 </div>
-
-                                <div className="row g-3 mt-2">
-                                    <div className="col-md-4">
-                                        <label className="form-label font-weight-semibold text-secondary small uppercase">RFQ No</label>
-                                        <input type="text" className="form-control border-light shadow-sm" style={{ padding: '0.65rem', borderRadius: '10px' }} value={rfqNo} onChange={(e) => setRfqNo(e.target.value)} disabled={!canEdit || viewOnly} />
+                                <div className="col-md-4">
+                                    <div className="enq-time-block shadow-sm border-0" style={{ background: 'linear-gradient(to right, #ffbf96, #fe7096)', color: '#fff', padding: '1.25rem' }}>
+                                        <label className="enq-time-block-label" style={{ opacity: 0.85, display: 'block' }}>RFQ Due Date</label>
+                                        <input type="date" className="form-control form-control-sm border-0 bg-transparent text-white p-0 font-weight-bold" style={{ fontSize: '1rem', colorScheme: 'dark' }} value={rfqDueDate} onChange={(e) => setRfqDueDate(e.target.value)} disabled={!canEdit || viewOnly} />
                                     </div>
-                                    <div className="col-md-4">
-                                        <label className="form-label font-weight-semibold text-secondary small uppercase">RFQ Date</label>
-                                        <input type="date" className="form-control border-light shadow-sm" style={{ padding: '0.65rem', borderRadius: '10px' }} value={rfqDate} onChange={(e) => setRfqDate(e.target.value)} disabled={!canEdit || viewOnly} />
-                                    </div>
-                                    <div className="col-md-4">
-                                        <label className="form-label font-weight-semibold text-secondary small uppercase">RFQ Due Date</label>
-                                        <input type="date" className="form-control border-light shadow-sm" style={{ padding: '0.65rem', borderRadius: '10px' }} value={rfqDueDate} onChange={(e) => setRfqDueDate(e.target.value)} disabled={!canEdit || viewOnly} />
+                                </div>
+                                <div className="col-md-4">
+                                    <div className="enq-time-block shadow-sm border-0" style={{ background: 'linear-gradient(to right, #90caf9, #047edf)', color: '#fff', padding: '1.25rem' }}>
+                                        <div className="enq-time-block-label" style={{ opacity: 0.85 }}>RFQ Aging</div>
+                                        <div className="enq-time-block-value">
+                                            {enq.rfq_aging} Days
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Tracking Summary in Columns */}
+                            {/* Clarifications */}
                             <div className="row g-3 mb-4">
                                 <div className="col-md-6">
-                                    <div className="card border-0 shadow-sm p-4 h-100" style={{ borderRadius: '16px', borderLeft: '4px solid #3b82f6' }}>
-                                        <h6 className="font-weight-bold mb-3 pb-1" style={{ color: '#3b82f6', fontSize: '0.85rem' }}>Engineering Tracking</h6>
-                                        <div className="row g-2">
-                                            <div className="col-md-6">
-                                                <label className="form-label text-secondary small">Expected Date</label>
-                                                <input type="date" className="form-control form-control-sm border-light shadow-sm" value={edOfEngg} onChange={(e) => setEdOfEngg(e.target.value)} disabled={!canEdit || viewOnly} />
-                                            </div>
-                                            <div className="col-md-6">
-                                                <label className="form-label text-secondary small">Actual Date</label>
-                                                <input type="date" className="form-control form-control-sm border-light shadow-sm" value={actualDateOfEngg} onChange={(e) => setActualDateOfEngg(e.target.value)} disabled={!canEdit || viewOnly} />
-                                            </div>
-                                            <div className="col-12 mt-2">
-                                                <label className="form-label text-secondary small">Engg Remarks</label>
-                                                <input type="text" className="form-control form-control-sm border-light shadow-sm" value={enggRemarks} onChange={(e) => setEnggRemarks(e.target.value)} disabled={!canEdit || viewOnly} />
-                                            </div>
+                                    <div className="enq-details-card bg-white border-0 shadow-sm">
+                                        <div className="enq-details-label" style={{ color: '#e056fd' }}>Clarification To CS</div>
+                                        <div className="enq-details-value text-wrap text-secondary" style={{ fontSize: '0.9rem', fontWeight: 'normal' }}>
+                                            {enq.clarification_to_cs || 'No clarification requested.'}
                                         </div>
                                     </div>
                                 </div>
-
                                 <div className="col-md-6">
-                                    <div className="card border-0 shadow-sm p-4 h-100" style={{ borderRadius: '16px', borderLeft: '4px solid #f59e0b' }}>
-                                        <h6 className="font-weight-bold mb-3 pb-1" style={{ color: '#f59e0b', fontSize: '0.85rem' }}>Costing Tracking</h6>
-                                        <div className="row g-2">
-                                            <div className="col-md-6">
-                                                <label className="form-label text-secondary small">Expected Date</label>
-                                                <input type="date" className="form-control form-control-sm border-light shadow-sm" value={edOfCosting} onChange={(e) => setEdOfCosting(e.target.value)} disabled={!canEdit || viewOnly} />
-                                            </div>
-                                            <div className="col-md-6">
-                                                <label className="form-label text-secondary small">Actual Date</label>
-                                                <input type="date" className="form-control form-control-sm border-light shadow-sm" value={actualDateOfCosting} onChange={(e) => setActualDateOfCosting(e.target.value)} disabled={!canEdit || viewOnly} />
-                                            </div>
-                                            <div className="col-12 mt-2">
-                                                <label className="form-label text-secondary small">Costing Remarks</label>
-                                                <input type="text" className="form-control form-control-sm border-light shadow-sm" value={costingRemarks} onChange={(e) => setCostingRemarks(e.target.value)} disabled={!canEdit || viewOnly} />
-                                            </div>
+                                    <div className="enq-details-card bg-white border-0 shadow-sm">
+                                        <div className="enq-details-label" style={{ color: '#e056fd' }}>Clarification From CS</div>
+                                        <div className="enq-details-value text-wrap text-secondary" style={{ fontSize: '0.9rem', fontWeight: 'normal' }}>
+                                            {enq.clarification_from_cs || 'No response received.'}
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Sales Actions & Estimation Section */}
+                            {/* Remarks */}
+                            <div className="mb-4">
+                                <div className="enq-details-label" style={{ color: '#64748b' }}>Remarks / Description</div>
+                                <div className="enq-remarks-box bg-white border-0 shadow-sm rounded-lg" style={{ minHeight: '80px', color: '#475569' }}>
+                                    {enq.remarks || 'No remarks provided.'}
+                                </div>
+                            </div>
+
+                            {/* Settings & Status */}
+                            <h6 className="font-weight-bold mb-3 pb-2 border-bottom" style={{ color: '#9a55ff', fontSize: '0.95rem' }}>Pipeline Settings</h6>
+                            <div className="row g-3 mb-4">
+                                <div className="col-md-6">
+                                    <label className="form-label font-weight-semibold text-secondary small uppercase" style={{ letterSpacing: '0.5px' }}>Sales Representative <span className="text-danger">*</span></label>
+                                    <select className="form-select border-0 shadow-sm" style={{ padding: '0.75rem 1rem', borderRadius: '10px' }} value={selectedSalesRep} onChange={(e) => setSelectedSalesRep(e.target.value)} disabled={!canEdit || viewOnly} required>
+                                        <option value="">Select Sales Rep</option>
+                                        {salesReps.map(rep => (
+                                            <option key={rep.id} value={rep.id}>{rep.name || rep.username}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="col-md-6">
+                                    <label className="form-label font-weight-semibold text-secondary small uppercase" style={{ letterSpacing: '0.5px' }}>Status</label>
+                                    <select className="form-select border-0 shadow-sm" style={{ padding: '0.75rem 1rem', borderRadius: '10px', fontWeight: 'bold', color: '#9a55ff' }} value={status} onChange={(e) => setStatus(e.target.value)} disabled={!canEdit || viewOnly}>
+                                        {enq?.status === 'Pending with Sales' || enq?.status === 'Quote Submitted' ? (
+                                            <>
+                                                <option value="Pending with Sales">Pending with Sales</option>
+                                                <option value="Quote Submitted">Quote Submitted</option>
+                                                <option value="Pending with Costing">Pending with Costing</option>
+                                                <option value="Pending with Engg">Pending with Engg</option>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <option value="Sales to Quote">Sales to Quote</option>
+                                                <option value="On Hold">On Hold</option>
+                                                <option value="Regretted">Regretted</option>
+                                                <option value="Open - L1">Open - L1</option>
+                                                <option value="Won">Won</option>
+                                                <option value="Lost">Lost</option>
+                                                <option value="Quote Regretted">Quote Regretted</option>
+                                            </>
+                                        )}
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Engineering Estimation Details */}
+                            <h6 className="font-weight-bold mb-3 pb-2 border-bottom" style={{ color: '#9a55ff', fontSize: '0.95rem' }}>Engineering Estimation Details</h6>
+                            <div className="row g-3 mb-4">
+                                <div className="col-md-6">
+                                    <div className="enq-details-card bg-white border-0 shadow-sm">
+                                        <label className="enq-details-label">Expected Date of Engineering</label>
+                                        <input type="date" className="form-control border-0 bg-transparent text-secondary p-0 font-weight-bold shadow-none" style={{ fontSize: '0.9rem' }} value={edOfEngg} onChange={(e) => setEdOfEngg(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                </div>
+                                <div className="col-md-6">
+                                    <div className="enq-details-card bg-white border-0 shadow-sm">
+                                        <label className="enq-details-label">Actual Date of Engineering</label>
+                                        <input type="date" className="form-control border-0 bg-transparent text-secondary p-0 font-weight-bold shadow-none" style={{ fontSize: '0.9rem' }} value={actualDateOfEngg} onChange={(e) => setActualDateOfEngg(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mb-4">
+                                <label className="form-label font-weight-semibold text-secondary small uppercase" style={{ letterSpacing: '0.5px' }}>Engineering Remarks</label>
+                                <textarea className="form-control border-0 shadow-sm" style={{ borderRadius: '12px', padding: '1rem' }} rows="2" placeholder="Add engineering remarks" value={enggRemarks} onChange={(e) => setEnggRemarks(e.target.value)} disabled={!canEdit || viewOnly} />
+                            </div>
+
+                            {/* Costing Estimation Details */}
+                            <h6 className="font-weight-bold mb-3 pb-2 border-bottom" style={{ color: '#9a55ff', fontSize: '0.95rem' }}>Costing Estimation Details</h6>
+                            <div className="row g-3 mb-4">
+                                <div className="col-md-6">
+                                    <div className="enq-details-card bg-white border-0 shadow-sm">
+                                        <label className="enq-details-label">Expected Date of Costing</label>
+                                        <input type="date" className="form-control border-0 bg-transparent text-secondary p-0 font-weight-bold shadow-none" style={{ fontSize: '0.9rem' }} value={edOfCosting} onChange={(e) => setEdOfCosting(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                </div>
+                                <div className="col-md-6">
+                                    <div className="enq-details-card bg-white border-0 shadow-sm">
+                                        <label className="enq-details-label">Actual Date of Costing</label>
+                                        <input type="date" className="form-control border-0 bg-transparent text-secondary p-0 font-weight-bold shadow-none" style={{ fontSize: '0.9rem' }} value={actualDateOfCosting} onChange={(e) => setActualDateOfCosting(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mb-4">
+                                <label className="form-label font-weight-semibold text-secondary small uppercase" style={{ letterSpacing: '0.5px' }}>Costing Remarks</label>
+                                <textarea className="form-control border-0 shadow-sm" style={{ borderRadius: '12px', padding: '1rem' }} rows="2" placeholder="Add costing remarks" value={costingRemarks} onChange={(e) => setCostingRemarks(e.target.value)} disabled={!canEdit || viewOnly} />
+                            </div>
+
+                            {/* Sales Estimation & Action */}
                             <h6 className="font-weight-bold mb-3 pb-2 border-bottom" style={{ color: '#9a55ff', fontSize: '0.95rem' }}>Sales Estimation & Action</h6>
-                            <div className="card border-0 shadow-sm p-4 mb-4" style={{ borderRadius: '16px' }}>
-                                <div className="row g-3">
-                                    <div className="col-md-6">
-                                        <label className="form-label font-weight-semibold text-secondary small uppercase">Sales Representative <span className="text-danger">*</span></label>
-                                        <select className="form-select border-light shadow-sm" style={{ padding: '0.65rem', borderRadius: '10px' }} value={selectedSalesRep} onChange={(e) => setSelectedSalesRep(e.target.value)} disabled={!canEdit || viewOnly} required>
-                                            <option value="">Select Sales Rep</option>
-                                            {salesReps.map(rep => (
-                                                <option key={rep.id} value={rep.id}>{rep.name || rep.username}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="col-md-6">
-                                        <label className="form-label font-weight-semibold text-secondary small uppercase">Status</label>
-                                        <select className="form-select border-light shadow-sm" style={{ padding: '0.65rem', borderRadius: '10px', fontWeight: 'bold', color: '#9a55ff' }} value={status} onChange={(e) => setStatus(e.target.value)} disabled={!canEdit || viewOnly}>
-                                            {enq?.status === 'Pending with Sales' ? (
-                                                <>
-                                                    <option value="Pending with Sales">Pending with Sales</option>
-                                                    <option value="Pending with Costing">Pending with Costing</option>
-                                                    <option value="Pending with Engg">Pending with Engg</option>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <option value="Sales to Quote">Sales to Quote</option>
-                                                    <option value="On Hold">On Hold</option>
-                                                    <option value="Regretted">Regretted</option>
-                                                    <option value="Open - L1">Open - L1</option>
-                                                    <option value="Won">Won</option>
-                                                    <option value="Lost">Lost</option>
-                                                    <option value="Quote Regretted">Quote Regretted</option>
-                                                </>
-                                            )}
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div className="mt-3">
-                                    <label className="form-label font-weight-semibold text-secondary small uppercase">Sales Team Remarks</label>
-                                    <textarea className="form-control border-light shadow-sm" style={{ borderRadius: '12px', padding: '0.75rem' }} rows="2" placeholder="Add sales remarks / notes" value={salesRemarks} onChange={(e) => setSalesRemarks(e.target.value)} disabled={!canEdit || viewOnly} />
-                                </div>
+                            <div className="mb-4">
+                                <label className="form-label font-weight-semibold text-secondary small uppercase" style={{ letterSpacing: '0.5px' }}>Sales Team Remarks</label>
+                                <textarea className="form-control border-0 shadow-sm" style={{ borderRadius: '12px', padding: '1rem' }} rows="2" placeholder="Add sales remarks" value={salesRemarks} onChange={(e) => setSalesRemarks(e.target.value)} disabled={!canEdit || viewOnly} />
                             </div>
 
-                            {/* Quote & PO Tracking Section */}
+                            {/* Quote & PO Tracking */}
                             <h6 className="font-weight-bold mb-3 pb-2 border-bottom" style={{ color: '#9a55ff', fontSize: '0.95rem' }}>Quote & PO Tracking</h6>
-                            <div className="card border-0 shadow-sm p-4 mb-4" style={{ borderRadius: '16px' }}>
-                                <div className="row g-3">
-                                    <div className="col-md-3">
-                                        <label className="form-label text-secondary small">Quote Date</label>
-                                        <input type="date" className="form-control border-light shadow-sm" style={{ padding: '0.5rem', borderRadius: '8px' }} value={quoteDate} onChange={(e) => setQuoteDate(e.target.value)} disabled={!canEdit || viewOnly} />
-                                    </div>
-                                    <div className="col-md-3">
-                                        <label className="form-label text-secondary small">Quote Value ($)</label>
-                                        <input type="number" className="form-control border-light shadow-sm" style={{ padding: '0.5rem', borderRadius: '8px' }} value={quoteValue} onChange={(e) => setQuoteValue(e.target.value)} disabled={!canEdit || viewOnly} />
-                                    </div>
-                                    <div className="col-md-3">
-                                        <label className="form-label text-secondary small">Open-L1 Value ($)</label>
-                                        <input type="number" className="form-control border-light shadow-sm" style={{ padding: '0.5rem', borderRadius: '8px' }} value={openL1Value} onChange={(e) => setOpenL1Value(e.target.value)} disabled={!canEdit || viewOnly} />
-                                    </div>
-                                    <div className="col-md-3">
-                                        <label className="form-label text-secondary small">Open-L1 Date</label>
-                                        <input type="date" className="form-control border-light shadow-sm" style={{ padding: '0.5rem', borderRadius: '8px' }} value={openL1Date} onChange={(e) => setOpenL1Date(e.target.value)} disabled={!canEdit || viewOnly} />
+                            <div className="row g-3 mb-4">
+                                <div className="col-md-3">
+                                    <div className="enq-details-card bg-white border-0 shadow-sm">
+                                        <label className="enq-details-label">Quote Date</label>
+                                        <input type="date" className="form-control border-0 bg-transparent text-secondary p-0 font-weight-bold shadow-none" style={{ fontSize: '0.9rem' }} value={quoteDate} onChange={(e) => setQuoteDate(e.target.value)} disabled={!canEdit || viewOnly} />
                                     </div>
                                 </div>
-
-                                <div className="row g-3 mt-2">
-                                    <div className="col-md-3">
-                                        <label className="form-label text-secondary small">Lost Value ($)</label>
-                                        <input type="number" className="form-control border-light shadow-sm" style={{ padding: '0.5rem', borderRadius: '8px' }} value={lostValue} onChange={(e) => setLostValue(e.target.value)} disabled={!canEdit || viewOnly} />
+                                <div className="col-md-3">
+                                    <div className="enq-details-card bg-white border-0 shadow-sm">
+                                        <label className="enq-details-label">Quote Value ($)</label>
+                                        <input type="number" className="form-control border-0 bg-transparent text-secondary p-0 font-weight-bold shadow-none" style={{ fontSize: '0.9rem' }} value={quoteValue} onChange={(e) => setQuoteValue(e.target.value)} disabled={!canEdit || viewOnly} />
                                     </div>
-                                    <div className="col-md-3">
-                                        <label className="form-label text-secondary small">PO No</label>
-                                        <input type="text" className="form-control border-light shadow-sm" style={{ padding: '0.5rem', borderRadius: '8px' }} value={poNo} onChange={(e) => setPoNo(e.target.value)} disabled={!canEdit || viewOnly} />
+                                </div>
+                                <div className="col-md-3">
+                                    <div className="enq-details-card bg-white border-0 shadow-sm">
+                                        <label className="enq-details-label">Open-L1 Value ($)</label>
+                                        <input type="number" className="form-control border-0 bg-transparent text-secondary p-0 font-weight-bold shadow-none" style={{ fontSize: '0.9rem' }} value={openL1Value} onChange={(e) => setOpenL1Value(e.target.value)} disabled={!canEdit || viewOnly} />
                                     </div>
-                                    <div className="col-md-3">
-                                        <label className="form-label text-secondary small">PO Receipt Date</label>
-                                        <input type="date" className="form-control border-light shadow-sm" style={{ padding: '0.5rem', borderRadius: '8px' }} value={poReceiptDate} onChange={(e) => setPoReceiptDate(e.target.value)} disabled={!canEdit || viewOnly} />
+                                </div>
+                                <div className="col-md-3">
+                                    <div className="enq-details-card bg-white border-0 shadow-sm">
+                                        <label className="enq-details-label">Open-L1 Date</label>
+                                        <input type="date" className="form-control border-0 bg-transparent text-secondary p-0 font-weight-bold shadow-none" style={{ fontSize: '0.9rem' }} value={openL1Date} onChange={(e) => setOpenL1Date(e.target.value)} disabled={!canEdit || viewOnly} />
                                     </div>
-                                    <div className="col-md-3">
-                                        <label className="form-label text-secondary small">PO Value ($)</label>
-                                        <input type="number" className="form-control border-light shadow-sm" style={{ padding: '0.5rem', borderRadius: '8px' }} value={poValue} onChange={(e) => setPoValue(e.target.value)} disabled={!canEdit || viewOnly} />
+                                </div>
+                            </div>
+                            <div className="row g-3 mb-4">
+                                <div className="col-md-3">
+                                    <div className="enq-details-card bg-white border-0 shadow-sm">
+                                        <label className="enq-details-label">Lost Value ($)</label>
+                                        <input type="number" className="form-control border-0 bg-transparent text-secondary p-0 font-weight-bold shadow-none" style={{ fontSize: '0.9rem' }} value={lostValue} onChange={(e) => setLostValue(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                </div>
+                                <div className="col-md-3">
+                                    <div className="enq-details-card bg-white border-0 shadow-sm">
+                                        <label className="enq-details-label">PO No</label>
+                                        <input type="text" className="form-control border-0 bg-transparent text-secondary p-0 font-weight-bold shadow-none" style={{ fontSize: '0.9rem' }} value={poNo} onChange={(e) => setPoNo(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                </div>
+                                <div className="col-md-3">
+                                    <div className="enq-details-card bg-white border-0 shadow-sm">
+                                        <label className="enq-details-label">PO Receipt Date</label>
+                                        <input type="date" className="form-control border-0 bg-transparent text-secondary p-0 font-weight-bold shadow-none" style={{ fontSize: '0.9rem' }} value={poReceiptDate} onChange={(e) => setPoReceiptDate(e.target.value)} disabled={!canEdit || viewOnly} />
+                                    </div>
+                                </div>
+                                <div className="col-md-3">
+                                    <div className="enq-details-card bg-white border-0 shadow-sm">
+                                        <label className="enq-details-label">PO Value ($)</label>
+                                        <input type="number" className="form-control border-0 bg-transparent text-secondary p-0 font-weight-bold shadow-none" style={{ fontSize: '0.9rem' }} value={poValue} onChange={(e) => setPoValue(e.target.value)} disabled={!canEdit || viewOnly} />
                                     </div>
                                 </div>
                             </div>
 
+                            {/* Finished Goods Details (READ ONLY) */}
+                            <div className="mb-4">
+                                <div className="enq-details-label">Finished Goods (FG) Details</div>
+                                <div className="table-responsive bg-white rounded-lg shadow-sm border-0">
+                                    <table className="table table-hover mb-0">
+                                        <thead style={{ backgroundColor: 'rgba(154, 85, 255, 0.05)' }}>
+                                            <tr>
+                                                <th className="ps-3 text-secondary py-2 border-0" style={{ fontSize: '0.75rem' }}>FG Part No</th>
+                                                <th className="text-secondary py-2 border-0" style={{ fontSize: '0.75rem' }}>Description</th>
+                                                <th className="text-secondary pe-3 text-end py-2 border-0" style={{ fontSize: '0.75rem' }}>Quantity</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {enq.fg_details?.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan="3" className="text-center p-3 text-muted">No FG details associated.</td>
+                                                </tr>
+                                            ) : (
+                                                enq.fg_details?.map((detail, idx) => (
+                                                    <tr key={detail.id || idx}>
+                                                        <td className="ps-3 font-weight-semibold text-dark py-2 border-0" style={{ fontSize: '0.85rem' }}>{detail.fg_part_no}</td>
+                                                        <td className="text-muted py-2 border-0" style={{ fontSize: '0.85rem' }}>{detail.description || 'N/A'}</td>
+                                                        <td className="pe-3 text-end font-weight-bold py-2 border-0" style={{ fontSize: '0.85rem' }}>{detail.qty}</td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
 
                         {activeTab === 'documents' && (

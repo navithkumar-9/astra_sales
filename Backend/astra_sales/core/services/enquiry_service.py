@@ -41,24 +41,51 @@ class EnquiryService:
         return enquiry
 
     @staticmethod
+    def send_stage_notifications(enquiry, new_status):
+        from core.models.notification import Notification
+        from core.models.user import User, RoleChoices
+        
+        message = f"🔔 Project {enquiry.project_number} has moved to stage '{new_status}'."
+        
+        users_to_notify = []
+        if new_status in ['Pending with Engg', 'Pending with Costing']:
+            # Notify RFQ Trackers
+            users_to_notify = list(User.objects.filter(role=RoleChoices.RFQ_TRACKER))
+        elif new_status in ['Sales to Quote', 'Pending with Sales', 'Quote Submitted']:
+            # Notify the assigned Sales Rep
+            if enquiry.sales_rep:
+                users_to_notify = [enquiry.sales_rep]
+        
+        # Also notify superadmins and admins
+        admins = list(User.objects.filter(role__in=[RoleChoices.SUPERADMIN, RoleChoices.ADMIN]))
+        all_recipients = set(users_to_notify + admins)
+        
+        notifications = [
+            Notification(user=u, message=message, notification_type='STAGE_CHANGE')
+            for u in all_recipients
+        ]
+        Notification.objects.bulk_create(notifications)
+
+    @staticmethod
     @transaction.atomic
     def update_enquiry(instance, validated_data, user=None):
-        # Enforce Field-Level Access Control for Sales Reps
-        if user and user.role == 'SALES_REP':
-            restricted_fields = ['quote_value', 'po_value', 'sales_rep']
-            for field in restricted_fields:
-                if field in validated_data and getattr(instance, field) != validated_data[field]:
-                    raise PermissionDenied(f"Sales Reps are not allowed to modify {field}.")
+        from core.services.workflow_engine import WorkflowEngine
+        from core.models.activity import Activity
 
         # Pessimistic Locking
         instance = Enquiry.objects.select_for_update().get(id=instance.id)
 
         fg_details_data = validated_data.pop('fg_details', None)
+
+        # Enforce field permissions based on current stage and user role
+        WorkflowEngine.enforce_field_permissions(instance, validated_data, user)
         
         # Enforce status change logic
         old_status = instance.status
         new_status = validated_data.get('status', old_status)
         if old_status != new_status:
+            WorkflowEngine.validate_transition(instance, old_status, new_status, user)
+            
             if new_status == 'Pending with Engg':
                 validated_data['ed_of_engg'] = None
                 validated_data['actual_date_of_engg'] = None
@@ -69,13 +96,39 @@ class EnquiryService:
                 validated_data['ed_of_sales'] = None
                 validated_data['actual_date_of_sales'] = None
 
-        # Track audit logs (using AuditService)
+        # Track audit logs
         AuditService.log_enquiry_changes(instance, validated_data, user)
 
-        # Update Enquiry fields
+        # Update fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
+
+        # Log manual status changes and trigger notifications
+        user_name = user.name or user.username if user else 'System'
+        if old_status != new_status:
+            Activity.objects.create(
+                enquiry=instance,
+                user=user,
+                activity_type='SYSTEM',
+                description=f"📋 Stage manually updated from '{old_status}' to '{new_status}' by {user_name}."
+            )
+            EnquiryService.send_stage_notifications(instance, new_status)
+
+        # Check and handle auto-advance loop
+        auto_status = WorkflowEngine.check_auto_advance(instance)
+        while auto_status != instance.status:
+            prev_status = instance.status
+            instance.status = auto_status
+            instance.save()
+            Activity.objects.create(
+                enquiry=instance,
+                user=None,
+                activity_type='SYSTEM',
+                description=f"🤖 Stage automatically advanced from '{prev_status}' to '{auto_status}' (mandatory fields completed)."
+            )
+            EnquiryService.send_stage_notifications(instance, auto_status)
+            auto_status = WorkflowEngine.check_auto_advance(instance)
 
         # Update FG details if provided
         if fg_details_data is not None:

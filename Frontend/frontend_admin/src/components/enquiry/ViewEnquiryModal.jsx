@@ -235,6 +235,100 @@ const ViewEnquiryModal = ({ show, onClose, selectedEnquiry, onRefresh }) => {
                             </div>
                         </div>
 
+                        {/* Sales/Quotation Details */}
+                        <h6 className="font-weight-bold mb-3 pb-2 border-bottom" style={{ fontSize: '0.95rem', color: '#9a55ff' }}>Sales Estimation & Action</h6>
+                        <div className="row g-3 mb-4">
+                            <div className="col-md-6">
+                                <div className="enq-details-card bg-white border-0 shadow-sm">
+                                    <div className="enq-details-label">Sales Representative</div>
+                                    <div className="enq-details-value text-secondary" style={{ fontSize: '0.9rem' }}>
+                                        {selectedEnquiry.sales_rep?.name || selectedEnquiry.sales_rep?.username || 'N/A'}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="enq-details-card bg-white border-0 shadow-sm">
+                                    <div className="enq-details-label">Sales Team Remarks</div>
+                                    <div className="enq-details-value text-secondary" style={{ fontSize: '0.9rem' }}>
+                                        {selectedEnquiry.sales_remarks || 'No sales remarks recorded.'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Quote & PO Tracking */}
+                        <h6 className="font-weight-bold mb-3 pb-2 border-bottom" style={{ fontSize: '0.95rem', color: '#9a55ff' }}>Quote & PO Tracking</h6>
+                        <div className="row g-3 mb-4">
+                            <div className="col-md-4">
+                                <div className="enq-details-card bg-white border-0 shadow-sm">
+                                    <div className="enq-details-label">Quote Date</div>
+                                    <div className="enq-details-value text-secondary" style={{ fontSize: '0.9rem' }}>
+                                        {selectedEnquiry.quote_date || 'N/A'}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-md-4">
+                                <div className="enq-details-card bg-white border-0 shadow-sm">
+                                    <div className="enq-details-label">Quote Value ($)</div>
+                                    <div className="enq-details-value text-secondary" style={{ fontSize: '0.9rem' }}>
+                                        {selectedEnquiry.quote_value ? `INR ${Number(selectedEnquiry.quote_value).toLocaleString()}` : 'N/A'}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-md-4">
+                                <div className="enq-details-card bg-white border-0 shadow-sm">
+                                    <div className="enq-details-label">Open-L1 Value ($)</div>
+                                    <div className="enq-details-value text-secondary" style={{ fontSize: '0.9rem' }}>
+                                        {selectedEnquiry.open_l1_value ? `INR ${Number(selectedEnquiry.open_l1_value).toLocaleString()}` : 'N/A'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="row g-3 mb-4">
+                            <div className="col-md-4">
+                                <div className="enq-details-card bg-white border-0 shadow-sm">
+                                    <div className="enq-details-label">Open-L1 Date</div>
+                                    <div className="enq-details-value text-secondary" style={{ fontSize: '0.9rem' }}>
+                                        {selectedEnquiry.open_l1_date || 'N/A'}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-md-4">
+                                <div className="enq-details-card bg-white border-0 shadow-sm">
+                                    <div className="enq-details-label">Lost Value ($)</div>
+                                    <div className="enq-details-value text-secondary" style={{ fontSize: '0.9rem' }}>
+                                        {selectedEnquiry.lost_value ? `INR ${Number(selectedEnquiry.lost_value).toLocaleString()}` : 'N/A'}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-md-4">
+                                <div className="enq-details-card bg-white border-0 shadow-sm">
+                                    <div className="enq-details-label">PO No</div>
+                                    <div className="enq-details-value text-secondary" style={{ fontSize: '0.9rem' }}>
+                                        {selectedEnquiry.po_no || 'N/A'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="row g-3 mb-4">
+                            <div className="col-md-6">
+                                <div className="enq-details-card bg-white border-0 shadow-sm">
+                                    <div className="enq-details-label">PO Receipt Date</div>
+                                    <div className="enq-details-value text-secondary" style={{ fontSize: '0.9rem' }}>
+                                        {selectedEnquiry.po_receipt_date || 'N/A'}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="enq-details-card bg-white border-0 shadow-sm">
+                                    <div className="enq-details-label">PO Value ($)</div>
+                                    <div className="enq-details-value text-secondary" style={{ fontSize: '0.9rem' }}>
+                                        {selectedEnquiry.po_value ? `INR ${Number(selectedEnquiry.po_value).toLocaleString()}` : 'N/A'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Finished Goods sub-table */}
                         <div className="mb-4">
                             <div className="enq-details-label">Finished Goods (FG) Details</div>

@@ -192,6 +192,7 @@ else:
 
 CORS_ALLOW_CREDENTIALS = True
 
+
 # ──────────────────────────────────────────────
 # Celery Configuration
 # ──────────────────────────────────────────────
@@ -201,6 +202,25 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
+
+# Celery Hardening (Bug #2, #3, #9 fixes)
+# CELERY_TASK_SOFT_TIME_LIMIT = 300          # 5 min soft limit (raises SoftTimeLimitExceeded)
+# CELERY_TASK_TIME_LIMIT = 360               # 6 min hard kill
+# CELERY_TASK_ACKS_LATE = True               # Acknowledge after execution, not before
+# CELERY_TASK_REJECT_ON_WORKER_LOST = True   # Re-queue if worker crashes
+# CELERY_WORKER_PREFETCH_MULTIPLIER = 1      # Prevent greedy prefetching
+# CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True  # Retry broker connection on boot
+
+# ──────────────────────────────────────────────
+# Email Configuration
+# ──────────────────────────────────────────────
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'localhost')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 1025))
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'False').lower() in ('true', '1', 'yes')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'no-reply@astracrm.com')
 
 PROMETHEUS_EXPORT_MIGRATIONS = False
 

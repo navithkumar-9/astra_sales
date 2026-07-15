@@ -10,13 +10,17 @@ ENV PYTHONUNBUFFERED=1
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies required for mysqlclient + dos2unix for line endings
+# Install system dependencies required for mysqlclient, tini, and dos2unix
 RUN apt-get update && apt-get install -y --no-install-recommends \
     default-libmysqlclient-dev \
     build-essential \
     pkg-config \
     dos2unix \
+    tini \
     && rm -rf /var/lib/apt/lists/*
+
+# Create a non-root user
+RUN addgroup --system astra && adduser --system --group astra
 
 # Install Python dependencies
 COPY requirements.txt .
@@ -25,13 +29,18 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . .
 
-# Fix Windows CRLF line endings and make entrypoint executable
-RUN dos2unix /app/entrypoint.sh && chmod +x /app/entrypoint.sh
+# Fix line endings and permissions BEFORE switching user
+RUN dos2unix /app/entrypoint.sh && chmod +x /app/entrypoint.sh \
+    && chown -R astra:astra /app
+
+# Switch to non-root user
+USER astra
 
 # Expose server port
 EXPOSE 8000
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+# Use Tini as the init system to reap zombies and forward signals
+ENTRYPOINT ["/usr/bin/tini", "--", "/app/entrypoint.sh"]
 
 
 # --- Development Stage ---

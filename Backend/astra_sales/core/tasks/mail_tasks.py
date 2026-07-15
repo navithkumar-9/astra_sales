@@ -1,64 +1,77 @@
 import logging
 from celery import shared_task
-from django.core.mail import send_mail
-from django.conf import settings
-from core.models.mail import Mail
-from core.services.dashboard_service import DashboardService
+from smtplib import SMTPException
 
 logger = logging.getLogger(__name__)
 
-@shared_task(name="core.tasks.mail_tasks.send_mail_all_task")
-def send_mail_all_task():
+# Cooldown key prefix for idempotency
+MAIL_COOLDOWN_CACHE_KEY = "mail_report_cooldown"
+MAIL_COOLDOWN_SECONDS = 60
+
+
+@shared_task(
+    name="core.tasks.mail_tasks.send_mail_all_task",
+    bind=True,
+    autoretry_for=(SMTPException, ConnectionError, OSError),
+    retry_backoff=30,
+    retry_backoff_max=300,
+    retry_jitter=True,
+    max_retries=3,
+    soft_time_limit=600,
+    time_limit=660,
+    acks_late=True,
+    reject_on_worker_lost=True,
+)
+def send_mail_all_task(self, triggered_by_id=None):
     """
-    Asynchronously queries all registered email addresses, compiles the current
-    dashboard metrics, and dispatches a comprehensive CRM status email.
+    Production-hardened Celery task to send CRM pipeline report
+    to all registered email addresses.
+
+    Fixes applied:
+    - Bug #1:  Individual emails per recipient (no shared TO header)
+    - Bug #2:  Auto-retry with exponential backoff for SMTP failures
+    - Bug #3:  Soft/hard time limits to prevent worker exhaustion
+    - Bug #4:  Streaming queryset via iterator()
+    - Bug #5:  Full audit trail via EmailLog model
+    - Bug #7:  Uses cached dashboard KPIs when available
+    - Bug #8:  Bare 'raise' preserves traceback
+    - Bug #10: SMTP connection pooling via get_connection()
+    - Bug #11: Rate limiting with batch sleep intervals
     """
+    from core.services.email_service import EmailService
+
     try:
-        emails = list(Mail.objects.values_list('email', flat=True))
-        if not emails:
-            logger.info("No registered email addresses found to mail.")
+        # Generate unique batch ID for this run
+        batch_id = EmailService.generate_batch_id()
+        logger.info(f"Starting mail report task. batch_id={batch_id}")
+
+        # Get recipients
+        recipients = EmailService.get_all_recipient_emails()
+        if not recipients:
+            logger.info("No registered email addresses found.")
             return "No recipients found."
 
-        # Compile dashboard data
-        stats = DashboardService.calculate_stats()
-        kpis = stats.get('kpis', {})
-
+        # Compose report
         subject = "Astra CRM - Real-time Pipeline Performance Summary"
-        
-        # Build raw text report
-        message_body = (
-            "Hello,\n\n"
-            "Here is your real-time CRM performance and pipeline summary from Astra Sales:\n\n"
-            f"• Total Enquiries: {kpis.get('totalEnquiryCount', 0)}\n"
-            f"• Overall Pending Enquiries: {kpis.get('overallPendingCount', 0)}\n"
-            f"• Stuck Enquiries (>90 Days): {kpis.get('quoted90Days', 0)}\n"
-            f"• Budgetary Quotes: {kpis.get('budgetaryCount', 0)}\n"
-            f"• Open (L1) Opportunity Count: {kpis.get('openL1Count', 0)}\n"
-            f"• Won Enquiries: {kpis.get('wonCount', 0)}\n"
-            f"• Lost Enquiries: {kpis.get('lostCount', 0)}\n"
-            f"• On Hold Enquiries: {kpis.get('holdCount', 0)}\n\n"
-            "Financial Pipeline Values:\n"
-            f"• Total Quoted Value: INR {kpis.get('quotedValue', 0):,}\n"
-            f"• Total PO Value: INR {kpis.get('poValue', 0):,}\n"
-            f"• Open L1 Value: INR {kpis.get('openL1Value', 0):,}\n"
-            f"• Lost Value: INR {kpis.get('lostValue', 0):,}\n\n"
-            "Due Dates Status:\n"
-            f"• Enquiries Due Today: {kpis.get('todaysDue', 0)}\n"
-            f"• Enquiries Due Tomorrow: {kpis.get('tomorrowDue', 0)}\n\n"
-            "Best Regards,\n"
-            "Astra CRM Automations System"
-        )
+        body = EmailService.compose_crm_report_body()
 
-        send_mail(
+        # Send with connection pooling, rate limiting, and logging
+        result = EmailService.send_bulk_report(
             subject=subject,
-            message=message_body,
-            from_email=settings.DEFAULT_FROM_EMAIL or 'no-reply@astracrm.com',
-            recipient_list=emails,
-            fail_silently=False,
+            body=body,
+            recipients=recipients,
+            batch_id=batch_id,
+            triggered_by_id=triggered_by_id,
         )
 
-        logger.info(f"Successfully sent CRM report to {len(emails)} recipients.")
-        return f"Report successfully sent to {len(emails)} recipients."
-    except Exception as e:
-        logger.error(f"Error executing send_mail_all_task: {str(e)}")
-        raise e
+        msg = (
+            f"Batch {batch_id} complete: "
+            f"sent={result['sent']}, failed={result['failed']}, "
+            f"total={len(recipients)}"
+        )
+        logger.info(msg)
+        return msg
+
+    except Exception:
+        logger.exception("Error executing send_mail_all_task")
+        raise  # Bug #8 fix: bare raise preserves traceback

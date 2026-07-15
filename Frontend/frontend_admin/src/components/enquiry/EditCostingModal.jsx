@@ -168,75 +168,100 @@ const EditCostingModal = ({ enq, show, onClose, onSuccess, onRefresh, canEdit, v
                     <form onSubmit={handleSave} className="modal-body p-4" style={{ maxHeight: '65vh', overflowY: 'auto', backgroundColor: '#f8fafc' }}>
                         
                         <div style={{ display: activeTab === 'details' ? 'block' : 'none' }}>
-                            <h6 className="font-weight-bold mb-3 pb-2 border-bottom" style={{ color: '#9a55ff', fontSize: '0.95rem' }}>Project Information</h6>
-                            <div className="row g-3 mb-4">
-                                <div className="col-md-4">
-                                    <div className="enq-details-card bg-white border-0 shadow-sm" style={{ borderLeft: '4px solid #da8cff', padding: '12px 16px' }}>
-                                        <div className="enq-details-label" style={{ color: '#9a55ff', fontSize: '0.65rem' }}>Customer Name</div>
-                                        <div className="enq-details-value text-dark" style={{ fontSize: '0.9rem' }}>{enq.customer?.name || 'N/A'}</div>
-                                    </div>
-                                </div>
-                                <div className="col-md-4">
-                                    <div className="enq-details-card bg-white border-0 shadow-sm" style={{ borderLeft: '4px solid #9a55ff', padding: '12px 16px' }}>
-                                        <div className="enq-details-label" style={{ color: '#7f39fb', fontSize: '0.65rem' }}>SBU</div>
-                                        <div className="enq-details-value text-dark" style={{ fontSize: '0.9rem' }}>{enq.sbu?.name || 'N/A'}</div>
-                                    </div>
-                                </div>
-                                <div className="col-md-4">
-                                    <div className="enq-details-card bg-white border-0 shadow-sm" style={{ borderLeft: '4px solid #6366f1', padding: '12px 16px' }}>
-                                        <div className="enq-details-label" style={{ color: '#6366f1', fontSize: '0.65rem' }}>Division</div>
-                                        <div className="enq-details-value text-dark" style={{ fontSize: '0.9rem' }}>{enq.division?.name || 'N/A'}</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="row g-3 mb-4">
-                                <div className="col-md-4">
-                                    <div className="enq-details-card bg-white border-0 shadow-sm" style={{ borderLeft: '4px solid #06b6d4', padding: '12px 16px' }}>
-                                        <div className="enq-details-label" style={{ color: '#06b6d4', fontSize: '0.65rem' }}>RFQ No</div>
-                                        <div className="enq-details-value text-dark" style={{ fontSize: '0.9rem' }}>{enq.rfq_no}</div>
-                                    </div>
-                                </div>
-                                <div className="col-md-4">
-                                    <div className="enq-details-card bg-white border-0 shadow-sm" style={{ borderLeft: '4px solid #10b981', padding: '12px 16px' }}>
-                                        <div className="enq-details-label" style={{ color: '#10b981', fontSize: '0.65rem' }}>RFQ Date</div>
-                                        <div className="enq-details-value text-dark" style={{ fontSize: '0.9rem' }}>{enq.rfq_date}</div>
-                                    </div>
-                                </div>
-                                <div className="col-md-4">
-                                    <div className="enq-details-card bg-white border-0 shadow-sm" style={{ borderLeft: '4px solid #f59e0b', padding: '12px 16px' }}>
-                                        <div className="enq-details-label" style={{ color: '#f59e0b', fontSize: '0.65rem' }}>RFQ Due Date</div>
-                                        <div className="enq-details-value text-dark" style={{ fontSize: '0.85rem' }}>{enq.rfq_due_date} ({enq.rfq_due_time?.substring(0, 5)})</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <h6 className="font-weight-bold mb-3 pb-2 border-bottom" style={{ color: '#9a55ff', fontSize: '0.95rem' }}>Costing Status & Action</h6>
+                            {/* Top Info Cards (2 Columns) */}
                             <div className="row g-3 mb-4">
                                 <div className="col-md-6">
-                                    <label className="form-label font-weight-semibold text-secondary small uppercase" style={{ letterSpacing: '0.5px' }}>Expected Date of Costing</label>
-                                    <input
-                                        type="date"
-                                        className="form-control border-0 shadow-sm"
-                                        style={{ padding: '0.75rem 1rem', borderRadius: '10px' }}
-                                        value={edOfCosting}
-                                        onChange={(e) => setEdOfCosting(e.target.value)}
-                                        disabled={!canEdit || viewOnly}
-                                    />
+                                    <div className="enq-details-card bg-white border-0 shadow-sm" style={{ borderLeft: '4px solid #da8cff' }}>
+                                        <div className="enq-details-label" style={{ color: '#9a55ff' }}>Customer Name</div>
+                                        <div className="enq-details-value text-dark">{enq.customer?.name || 'N/A'}</div>
+                                    </div>
                                 </div>
                                 <div className="col-md-6">
-                                    <label className="form-label font-weight-semibold text-secondary small uppercase" style={{ letterSpacing: '0.5px' }}>Actual Date of Costing</label>
-                                    <input
-                                        type="date"
-                                        className="form-control border-0 shadow-sm"
-                                        style={{ padding: '0.75rem 1rem', borderRadius: '10px' }}
-                                        value={actualDateOfCosting}
-                                        onChange={(e) => setActualDateOfCosting(e.target.value)}
-                                        disabled={!canEdit || viewOnly}
-                                    />
+                                    <div className="enq-details-card bg-white border-0 shadow-sm" style={{ borderLeft: '4px solid #9a55ff' }}>
+                                        <div className="enq-details-label" style={{ color: '#7f39fb' }}>SBU</div>
+                                        <div className="enq-details-value text-dark">{enq.sbu?.name || 'N/A'}</div>
+                                    </div>
                                 </div>
                             </div>
 
+                            {/* Inline Badges */}
+                            <div className="d-flex flex-wrap gap-4 mb-4 font-weight-semibold" style={{ fontSize: '0.85rem' }}>
+                                <div>
+                                    <span className="text-secondary">Division: </span>
+                                    <span className="badge bg-white text-dark shadow-sm border px-3 py-2 rounded-pill">{enq.division?.name || 'N/A'}</span>
+                                </div>
+                                <div>
+                                    <span className="text-secondary">RFQ Type: </span>
+                                    <span className="badge bg-white text-dark shadow-sm border px-3 py-2 rounded-pill">{enq.rfq_type?.name || 'N/A'}</span>
+                                </div>
+                                <div>
+                                    <span className="text-secondary">RFQ No: </span>
+                                    <span className="badge bg-white text-dark shadow-sm border px-3 py-2 rounded-pill">{enq.rfq_no}</span>
+                                </div>
+                            </div>
+
+                            {/* Time Blocks (3 Columns) */}
+                            <div className="row g-3 mb-4">
+                                <div className="col-md-4">
+                                    <div className="enq-time-block shadow-sm border-0" style={{ background: 'linear-gradient(to right, #84d9d2, #07cdae)', color: '#fff', padding: '1.25rem' }}>
+                                        <div className="enq-time-block-label" style={{ opacity: 0.85 }}>RFQ Date</div>
+                                        <div className="enq-time-block-value">
+                                            {new Date(enq.rfq_date).toLocaleDateString(undefined, {
+                                                month: 'short', day: 'numeric', year: '2-digit'
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-md-4">
+                                    <div className="enq-time-block shadow-sm border-0" style={{ background: 'linear-gradient(to right, #ffbf96, #fe7096)', color: '#fff', padding: '1.25rem' }}>
+                                        <div className="enq-time-block-label" style={{ opacity: 0.85 }}>RFQ Due Date</div>
+                                        <div className="enq-time-block-value" style={{ fontSize: '0.9rem' }}>
+                                            {new Date(enq.rfq_due_date).toLocaleDateString(undefined, {
+                                                month: 'short', day: 'numeric', year: '2-digit'
+                                            })}, {enq.rfq_due_time?.substring(0, 5) || ''}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-md-4">
+                                    <div className="enq-time-block shadow-sm border-0" style={{ background: 'linear-gradient(to right, #90caf9, #047edf)', color: '#fff', padding: '1.25rem' }}>
+                                        <div className="enq-time-block-label" style={{ opacity: 0.85 }}>RFQ Aging</div>
+                                        <div className="enq-time-block-value">
+                                            {enq.rfq_aging} Days
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Clarifications */}
+                            <div className="row g-3 mb-4">
+                                <div className="col-md-6">
+                                    <div className="enq-details-card bg-white border-0 shadow-sm">
+                                        <div className="enq-details-label" style={{ color: '#e056fd' }}>Clarification To CS</div>
+                                        <div className="enq-details-value text-wrap text-secondary" style={{ fontSize: '0.9rem', fontWeight: 'normal' }}>
+                                            {enq.clarification_to_cs || 'No clarification requested.'}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-md-6">
+                                    <div className="enq-details-card bg-white border-0 shadow-sm">
+                                        <div className="enq-details-label" style={{ color: '#e056fd' }}>Clarification From CS</div>
+                                        <div className="enq-details-value text-wrap text-secondary" style={{ fontSize: '0.9rem', fontWeight: 'normal' }}>
+                                            {enq.clarification_from_cs || 'No response received.'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Remarks */}
+                            <div className="mb-4">
+                                <div className="enq-details-label" style={{ color: '#64748b' }}>Remarks / Description</div>
+                                <div className="enq-remarks-box bg-white border-0 shadow-sm rounded-lg" style={{ minHeight: '80px', color: '#475569' }}>
+                                    {enq.remarks || 'No remarks provided.'}
+                                </div>
+                            </div>
+
+                            {/* Settings & Status */}
+                            <h6 className="font-weight-bold mb-3 pb-2 border-bottom" style={{ color: '#9a55ff', fontSize: '0.95rem' }}>Pipeline Settings</h6>
                             <div className="row g-3 mb-4">
                                 <div className="col-md-6">
                                     <label className="form-label font-weight-semibold text-secondary small uppercase" style={{ letterSpacing: '0.5px' }}>Sales Representative <span className="text-danger">*</span></label>
@@ -269,6 +294,59 @@ const EditCostingModal = ({ enq, show, onClose, onSuccess, onRefresh, canEdit, v
                                 </div>
                             </div>
 
+                            {/* Engineering Estimation Details (READ ONLY) */}
+                            <h6 className="font-weight-bold mb-3 pb-2 border-bottom" style={{ color: '#9a55ff', fontSize: '0.95rem' }}>Engineering Estimation Details</h6>
+                            <div className="row g-3 mb-4">
+                                <div className="col-md-6">
+                                    <div className="enq-details-card bg-white border-0 shadow-sm">
+                                        <div className="enq-details-label">Expected Date of Engineering</div>
+                                        <div className="enq-details-value text-secondary" style={{ fontSize: '0.9rem' }}>
+                                            {enq.ed_of_engg || 'N/A'}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-md-6">
+                                    <div className="enq-details-card bg-white border-0 shadow-sm">
+                                        <div className="enq-details-label">Actual Date of Engineering</div>
+                                        <div className="enq-details-value text-secondary" style={{ fontSize: '0.9rem' }}>
+                                            {enq.actual_date_of_engg || 'N/A'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mb-4">
+                                <div className="enq-details-label">Engineering Remarks</div>
+                                <div className="enq-remarks-box bg-white border-0 shadow-sm rounded-lg" style={{ color: '#475569' }}>
+                                    {enq.engg_remarks || 'No engineering remarks recorded.'}
+                                </div>
+                            </div>
+
+                            {/* Costing Estimation Details (EDITABLE) */}
+                            <h6 className="font-weight-bold mb-3 pb-2 border-bottom" style={{ color: '#9a55ff', fontSize: '0.95rem' }}>Costing Estimation Details</h6>
+                            <div className="row g-3 mb-4">
+                                <div className="col-md-6">
+                                    <label className="form-label font-weight-semibold text-secondary small uppercase" style={{ letterSpacing: '0.5px' }}>Expected Date of Costing</label>
+                                    <input
+                                        type="date"
+                                        className="form-control border-0 shadow-sm"
+                                        style={{ padding: '0.75rem 1rem', borderRadius: '10px' }}
+                                        value={edOfCosting}
+                                        onChange={(e) => setEdOfCosting(e.target.value)}
+                                        disabled={!canEdit || viewOnly}
+                                    />
+                                </div>
+                                <div className="col-md-6">
+                                    <label className="form-label font-weight-semibold text-secondary small uppercase" style={{ letterSpacing: '0.5px' }}>Actual Date of Costing</label>
+                                    <input
+                                        type="date"
+                                        className="form-control border-0 shadow-sm"
+                                        style={{ padding: '0.75rem 1rem', borderRadius: '10px' }}
+                                        value={actualDateOfCosting}
+                                        onChange={(e) => setActualDateOfCosting(e.target.value)}
+                                        disabled={!canEdit || viewOnly}
+                                    />
+                                </div>
+                            </div>
                             <div className="mb-4">
                                 <label className="form-label font-weight-semibold text-secondary small uppercase" style={{ letterSpacing: '0.5px' }}>Costing Remarks</label>
                                 <textarea
@@ -280,6 +358,37 @@ const EditCostingModal = ({ enq, show, onClose, onSuccess, onRefresh, canEdit, v
                                     onChange={(e) => setCostingRemarks(e.target.value)}
                                     disabled={!canEdit || viewOnly}
                                 />
+                            </div>
+
+                            {/* Finished Goods Details (READ ONLY) */}
+                            <div className="mb-4">
+                                <div className="enq-details-label">Finished Goods (FG) Details</div>
+                                <div className="table-responsive bg-white rounded-lg shadow-sm border-0">
+                                    <table className="table table-hover mb-0">
+                                        <thead style={{ backgroundColor: 'rgba(154, 85, 255, 0.05)' }}>
+                                            <tr>
+                                                <th className="ps-3 text-secondary py-2 border-0" style={{ fontSize: '0.75rem' }}>FG Part No</th>
+                                                <th className="text-secondary py-2 border-0" style={{ fontSize: '0.75rem' }}>Description</th>
+                                                <th className="text-secondary pe-3 text-end py-2 border-0" style={{ fontSize: '0.75rem' }}>Quantity</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {enq.fg_details?.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan="3" className="text-center p-3 text-muted">No FG details associated.</td>
+                                                </tr>
+                                            ) : (
+                                                enq.fg_details?.map((detail, idx) => (
+                                                    <tr key={detail.id || idx}>
+                                                        <td className="ps-3 font-weight-semibold text-dark py-2 border-0" style={{ fontSize: '0.85rem' }}>{detail.fg_part_no}</td>
+                                                        <td className="text-muted py-2 border-0" style={{ fontSize: '0.85rem' }}>{detail.description || 'N/A'}</td>
+                                                        <td className="pe-3 text-end font-weight-bold py-2 border-0" style={{ fontSize: '0.85rem' }}>{detail.qty}</td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 

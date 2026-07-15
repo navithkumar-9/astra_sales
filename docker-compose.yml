@@ -88,6 +88,8 @@ services:
     container_name: astra_backend
     restart: unless-stopped
     env_file: .env.docker
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
     ports:
       - "8000:8000"
     volumes:
@@ -117,6 +119,9 @@ services:
     container_name: astra_celery_worker
     restart: unless-stopped
     env_file: .env.docker
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - SKIP_MIGRATIONS=1
     command: celery -A astra_sales worker --loglevel=info
     volumes:
       - ./Backend/astra_sales:/app

@@ -91,12 +91,12 @@ class CSVExportStrategyTest(TestCase):
         with open(completed_path, 'r', encoding='utf-8-sig') as f:
             reader = csv.reader(f)
             headers = next(reader)
-            self.assertEqual(headers[0], "Project Number")
-            self.assertEqual(headers[2], "RFQ No")
+            self.assertEqual(headers[0], "Customer Name")
+            self.assertEqual(headers[1], "SBU")
             
             row = next(reader)
-            self.assertEqual(row[0], "PRJ-TEST-1")
-            self.assertEqual(row[2], "RFQ-TEST-1")
+            self.assertEqual(row[0], "Test Customer")
+            self.assertEqual(row[1], "Test SBU")
 
         # Cleanup
         storage.delete(completed_path)

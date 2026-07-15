@@ -73,5 +73,17 @@ def register_collectors():
     if getattr(register_collectors, "_registered", False):
         return
 
+    # PREVENT DEADLOCK: 
+    # django-prometheus registers its own metrics when the cache is initialized.
+    # If we register our collector first, prometheus_client acquires a lock and calls collect().
+    # collect() hits the cache, which triggers django-prometheus to register its metrics.
+    # This causes a deadlock on prometheus_client's internal registry lock.
+    # We fix this by forcing cache initialization BEFORE registering our collector.
+    from django.core.cache import cache
+    try:
+        cache.get("dummy_init_key")
+    except Exception:
+        pass
+
     REGISTRY.register(UserAccountsCollector())
     register_collectors._registered = True

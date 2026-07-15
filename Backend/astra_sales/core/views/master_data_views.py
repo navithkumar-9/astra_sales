@@ -79,20 +79,48 @@ class CustomerViewSet(BaseModelViewSet):
 
 
 from rest_framework.decorators import action
-from core.tasks.mail_tasks import send_mail_all_task
+from django.core.cache import cache
+from core.tasks.mail_tasks import send_mail_all_task, MAIL_COOLDOWN_CACHE_KEY, MAIL_COOLDOWN_SECONDS
 
 class MailViewSet(BaseModelViewSet):
     queryset = Mail.objects.all()
     serializer_class = MailSerializer
 
+    def get_permissions(self):
+        if self.action == 'mail_all':
+            return [IsAuthenticated()]
+        return super().get_permissions()
+
     @action(detail=False, methods=['post'], url_path='mail-all')
     def mail_all(self, request):
         """
         Triggers an asynchronous task to send CRM pipeline report to all registered email addresses.
+        Only accessible by SUPERADMIN, ADMIN, or RFQ_TRACKER.
+        Includes 60-second cooldown to prevent duplicate sends (Bug #6 fix).
         """
-        send_mail_all_task.delay()
+        from core.models.user import RoleChoices
+        if request.user.role not in (RoleChoices.SUPERADMIN, RoleChoices.ADMIN, RoleChoices.RFQ_TRACKER):
+            return Response({
+                "success": False,
+                "error": "You do not have permission to trigger this action."
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        # Idempotency / cooldown check (Bug #6 fix)
+        if cache.get(MAIL_COOLDOWN_CACHE_KEY):
+            return Response({
+                "success": False,
+                "error": "A mail report was recently triggered. Please wait 60 seconds before trying again."
+            }, status=status.HTTP_429_TOO_MANY_REQUESTS)
+
+        # Set cooldown lock
+        cache.set(MAIL_COOLDOWN_CACHE_KEY, True, timeout=MAIL_COOLDOWN_SECONDS)
+
+        # Pass user ID so EmailLog can track who triggered
+        send_mail_all_task.delay(triggered_by_id=request.user.id)
+
         return Response({
             "success": True,
             "message": "Mail report successfully triggered in the background."
         }, status=status.HTTP_202_ACCEPTED)
+
 

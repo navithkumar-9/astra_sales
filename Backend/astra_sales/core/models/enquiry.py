@@ -36,7 +36,25 @@ class Enquiry(TimeStampedModel):
     actual_date_of_sales = models.DateField(null=True, blank=True) # Actual Date of Sales
     sales_remarks = models.TextField(blank=True, default='') # Sales Remarks
     
-    status = models.CharField(max_length=50, default='Pending with Engg', db_index=True)
+    class StatusChoices(models.TextChoices):
+        PENDING_ENGG = 'Pending with Engg', 'Pending with Engineering'
+        PENDING_COSTING = 'Pending with Costing', 'Pending with Costing'
+        SALES_TO_QUOTE = 'Sales to Quote', 'Sales to Quote'
+        PENDING_SALES = 'Pending with Sales', 'Pending with Sales'
+        QUOTE_SUBMITTED = 'Quote Submitted', 'Quote Submitted'
+        ON_HOLD = 'On Hold', 'On Hold'
+        OPEN_L1 = 'Open - L1', 'Open - L1'
+        WON = 'Won', 'Won'
+        LOST = 'Lost', 'Lost'
+        REGRETTED = 'Regretted', 'Regretted'
+        QUOTE_REGRETTED = 'Quote Regretted', 'Quote Regretted'
+
+    status = models.CharField(
+        max_length=50,
+        choices=StatusChoices.choices,
+        default=StatusChoices.PENDING_ENGG,
+        db_index=True
+    )
     clarification_to_cs = models.TextField(blank=True, default='')
     clarification_from_cs = models.TextField(blank=True, default='')
     remarks = models.TextField(blank=True, default='')

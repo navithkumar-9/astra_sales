@@ -16,8 +16,8 @@ class DashboardService:
         pipeline_stages = [
             'Pending with Engg',
             'Pending with Costing',
-            'Pending with Sales',
             'Sales to Quote',
+            'Pending with Sales',
             'Quote Submitted',
             'Open - L1',
             'Won',
@@ -42,8 +42,11 @@ class DashboardService:
             po_value=Sum('po_value'),
             open_l1_value=Sum('open_l1_value'),
             lost_value=Sum('lost_value'),
+            hold_value=Sum('quote_value', filter=Q(status='On Hold')),
             todays_due=Count('id', filter=Q(rfq_due_date=now_date)),
             tomorrow_due=Count('id', filter=Q(rfq_due_date=tomorrow_date)),
+            recent_created_count=Count('id', filter=Q(created_at__gte=timezone.now() - timedelta(days=30))),
+            overdue_count=Count('id', filter=~Q(status__in=terminal_statuses) & Q(rfq_due_date__lt=now_date)),
             ageing_0_30=Count('id', filter=Q(rfq_date__gte=date_30_days_ago) & ~Q(status__in=terminal_statuses)),
             ageing_31_60=Count('id', filter=Q(rfq_date__lt=date_30_days_ago, rfq_date__gte=date_60_days_ago) & ~Q(status__in=terminal_statuses)),
             ageing_61_90=Count('id', filter=Q(rfq_date__lt=date_60_days_ago, rfq_date__gte=date_90_days_ago) & ~Q(status__in=terminal_statuses)),
@@ -53,6 +56,10 @@ class DashboardService:
             item['status']: item['value']
             for item in qs.values('status').annotate(value=Count('id'))
         }
+
+        won_cnt = aggregates['won_count'] or 0
+        lost_cnt = aggregates['lost_count'] or 0
+        win_rate = round((won_cnt / (won_cnt + lost_cnt)) * 100, 1) if (won_cnt + lost_cnt) > 0 else 0.0
 
         kpis = {
             "totalEnquiryCount": aggregates['total_enquiry_count'],
@@ -69,8 +76,12 @@ class DashboardService:
             "poValue": aggregates['po_value'] or 0,
             "openL1Value": aggregates['open_l1_value'] or 0,
             "lostValue": aggregates['lost_value'] or 0,
+            "holdValue": aggregates['hold_value'] or 0,
             "todaysDue": aggregates['todays_due'],
             "tomorrowDue": aggregates['tomorrow_due'],
+            "recentCreatedCount": aggregates['recent_created_count'],
+            "overdueCount": aggregates['overdue_count'],
+            "winRate": win_rate,
         }
 
         status_distribution = [
