@@ -51,6 +51,10 @@ class DashboardService:
             ageing_31_60=Count('id', filter=Q(rfq_date__lt=date_30_days_ago, rfq_date__gte=date_60_days_ago) & ~Q(status__in=terminal_statuses)),
             ageing_61_90=Count('id', filter=Q(rfq_date__lt=date_60_days_ago, rfq_date__gte=date_90_days_ago) & ~Q(status__in=terminal_statuses)),
             ageing_over_90=Count('id', filter=Q(rfq_date__lt=date_90_days_ago) & ~Q(status__in=terminal_statuses)),
+            total_quoted_records=Count('id', filter=Q(status='Quote Submitted')),
+            quoted_over_90=Count('id', filter=Q(status='Quote Submitted', quote_date__lt=date_90_days_ago)),
+            quoted_awaiting_reply=Count('id', filter=Q(status='Quote Submitted')),
+            quoted_client_response=Count('id', filter=Q(quote_date__isnull=False, status__in=['Open - L1', 'Won', 'Lost', 'Regretted', 'Quote Regretted'])),
         )
         status_counts = {
             item['status']: item['value']
@@ -82,6 +86,10 @@ class DashboardService:
             "recentCreatedCount": aggregates['recent_created_count'],
             "overdueCount": aggregates['overdue_count'],
             "winRate": win_rate,
+            "totalQuotedRecords": aggregates['total_quoted_records'],
+            "quotedOver90": aggregates['quoted_over_90'],
+            "quotedAwaitingReply": aggregates['quoted_awaiting_reply'],
+            "quotedClientResponse": aggregates['quoted_client_response'],
         }
 
         status_distribution = [

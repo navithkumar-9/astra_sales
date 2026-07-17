@@ -68,7 +68,7 @@ const ChartCard = ({ title, children }) => (
         <div className="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex align-items-center justify-content-between">
             <h6 className="font-weight-bold mb-0 text-dark" style={{ letterSpacing: '0.5px' }}>{title}</h6>
         </div>
-        <div className="card-body px-4 pb-4 pt-3" style={{ minHeight: '320px' }}>
+        <div className="card-body px-4 pb-4 pt-3" style={{ height: '320px', position: 'relative' }}>
             {children}
         </div>
     </div>

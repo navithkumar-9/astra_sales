@@ -23,6 +23,7 @@ const Won = lazy(() => import('./pages/Won'));
 const Regretted = lazy(() => import('./pages/Regretted'));
 const Lost = lazy(() => import('./pages/Lost'));
 const Hold = lazy(() => import('./pages/Hold'));
+const QuotedOver90 = lazy(() => import('./pages/QuotedOver90'));
 
 const LoadingFallback = () => (
     <div className="loading-fallback-container">
@@ -134,6 +135,16 @@ function App() {
                                     <ProtectedRoute>
                                         <Layout>
                                             <KanbanBoard />
+                                        </Layout>
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/pipeline/quoted-90"
+                                element={
+                                    <ProtectedRoute>
+                                        <Layout>
+                                            <QuotedOver90 />
                                         </Layout>
                                     </ProtectedRoute>
                                 }

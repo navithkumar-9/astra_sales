@@ -99,7 +99,7 @@ const ActivityFeedTab = ({ enq, onSuccess }) => {
             <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom">Activity Timeline</h6>
             
             {/* New Activity Form */}
-            <form onSubmit={handleSubmit} className="mb-4 bg-light p-3 rounded border">
+            <div className="mb-4 bg-light p-3 rounded border">
                 <div className="d-flex gap-2 mb-2">
                     <select 
                         className="form-select form-select-sm" 
@@ -121,11 +121,11 @@ const ActivityFeedTab = ({ enq, onSuccess }) => {
                     onChange={(e) => setDescription(e.target.value)}
                 />
                 <div className="d-flex justify-content-end">
-                    <button type="submit" className="btn btn-sm btn-primary px-4" disabled={submitting || !description.trim()}>
+                    <button type="button" onClick={handleSubmit} className="btn btn-sm btn-primary px-4" disabled={submitting || !description.trim()}>
                         {submitting ? 'Posting...' : 'Post Activity'}
                     </button>
                 </div>
-            </form>
+            </div>
 
             {/* Activity Feed */}
             {activities.length === 0 ? (

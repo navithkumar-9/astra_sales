@@ -57,7 +57,7 @@ const KanbanBoard = () => {
         return enq.rfq_aging || 0;
     };
 
-    const handleCardClick = (enq) => {
+    const handleCardClick = async (enq) => {
         setSelectedEnq(enq);
         
         if (enq.status === 'Pending with Engg') {
@@ -72,6 +72,13 @@ const KanbanBoard = () => {
         } else {
             setShowModalType('ENGG');
             setViewOnly(true);
+        }
+
+        try {
+            const detail = await enquiryService.getById(enq.id);
+            setSelectedEnq(detail);
+        } catch (err) {
+            console.error('Failed to fetch detailed enquiry info.', err);
         }
     };
 
@@ -92,7 +99,7 @@ const KanbanBoard = () => {
             setEnquiries(latestEnquiries);
             
             if (selectedEnq) {
-                const updatedEnq = latestEnquiries.find(e => e.id === selectedEnq.id);
+                const updatedEnq = await enquiryService.getById(selectedEnq.id);
                 if (updatedEnq) {
                     setSelectedEnq(updatedEnq);
                 }

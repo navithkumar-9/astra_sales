@@ -1,6 +1,6 @@
 import React from 'react';
 
-const EnquiryTable = ({ columns, data, loading, emptyMessage, renderRow }) => {
+const EnquiryTable = ({ columns, data, loading, emptyMessage, renderRow, sortField, sortDirection, onSort }) => {
     if (loading && data.length === 0) {
         return (
             <div className="d-flex flex-column align-items-center justify-content-center min-vh-50 mt-5">
@@ -9,6 +9,15 @@ const EnquiryTable = ({ columns, data, loading, emptyMessage, renderRow }) => {
             </div>
         );
     }
+
+    const handleSort = (field) => {
+        if (!onSort || !field) return;
+        if (sortField === field) {
+            onSort(field, sortDirection === 'asc' ? 'desc' : 'asc');
+        } else {
+            onSort(field, 'desc');
+        }
+    };
 
     return (
         <div className="card shadow border-0 overflow-hidden" style={{ borderRadius: '16px' }}>
@@ -20,9 +29,23 @@ const EnquiryTable = ({ columns, data, loading, emptyMessage, renderRow }) => {
                                 <th 
                                     key={idx}
                                     className={`text-uppercase text-secondary font-weight-bold py-3 ${col.className || ''}`}
-                                    style={{ fontSize: '0.72rem', letterSpacing: '0.8px', ...col.style }}
+                                    style={{ 
+                                        fontSize: '0.72rem', 
+                                        letterSpacing: '0.8px', 
+                                        cursor: col.sortField ? 'pointer' : 'default',
+                                        ...col.style 
+                                    }}
+                                    onClick={() => col.sortField && handleSort(col.sortField)}
                                 >
-                                    {col.label}
+                                    <div className="d-flex align-items-center">
+                                        {col.label}
+                                        {col.sortField && (
+                                            <span className="ms-1 d-inline-flex flex-column" style={{ fontSize: '10px', lineHeight: '0.8' }}>
+                                                <i className={`fas fa-caret-up ${sortField === col.sortField && sortDirection === 'asc' ? 'text-primary' : 'text-muted opacity-25'}`}></i>
+                                                <i className={`fas fa-caret-down ${sortField === col.sortField && sortDirection === 'desc' ? 'text-primary' : 'text-muted opacity-25'}`}></i>
+                                            </span>
+                                        )}
+                                    </div>
                                 </th>
                             ))}
                         </tr>

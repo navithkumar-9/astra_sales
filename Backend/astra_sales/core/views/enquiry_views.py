@@ -1,4 +1,4 @@
-from rest_framework import permissions
+from rest_framework import permissions, filters
 from rest_framework.response import Response
 from core.views.master_data_views import BaseModelViewSet
 from core.models.enquiry import Enquiry
@@ -20,7 +20,9 @@ ENQUIRY_SELECT_RELATED = (
 class EnquiryViewSet(BaseModelViewSet):
     queryset = Enquiry.objects.all().order_by('-created_at')
     permission_classes = [permissions.IsAuthenticated, CanEditEnquiry]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['project_number', 'project_name', 'rfq_no']
+    ordering_fields = ['project_number', 'rfq_date', 'rfq_no', 'customer__name', 'division__name', 'ed_of_engg', 'ed_of_costing', 'ed_of_sales', 'status', 'enquiry_aging', 'quote_submission_aging', 'created_at']
 
     def get_queryset(self):
         queryset = (
@@ -40,9 +42,54 @@ class EnquiryViewSet(BaseModelViewSet):
 
     def filter_queryset(self, queryset):
         queryset = super().filter_queryset(queryset)
-        status = self.request.query_params.get('status', '').strip()
+        params = self.request.query_params
+
+        # Exact and contains filters
+        status = params.get('status', '').strip()
         if status:
             queryset = queryset.filter(status=status)
+            
+        rfq_no = params.get('rfq_no', '').strip()
+        if rfq_no:
+            queryset = queryset.filter(rfq_no__icontains=rfq_no)
+            
+        project_name = params.get('project_name', '').strip()
+        if project_name:
+            queryset = queryset.filter(project_name__icontains=project_name)
+
+        # Foreign Key exact matches
+        for fk_field in ['customer', 'sales_rep', 'division', 'sbu']:
+            val = params.get(fk_field, '').strip()
+            if val and val.isdigit():
+                queryset = queryset.filter(**{f"{fk_field}_id": int(val)})
+
+        # Date Range filters
+        rfq_date_from = params.get('rfq_date_from', '').strip()
+        if rfq_date_from:
+            queryset = queryset.filter(rfq_date__gte=rfq_date_from)
+            
+        rfq_date_to = params.get('rfq_date_to', '').strip()
+        if rfq_date_to:
+            queryset = queryset.filter(rfq_date__lte=rfq_date_to)
+
+        # Aging Range filters
+        aging_type = params.get('aging_type', 'enquiry_aging').strip() # 'enquiry_aging' or 'quote_submission_aging'
+        if aging_type in ['enquiry_aging', 'quote_submission_aging']:
+            aging_min = params.get('aging_min', '').strip()
+            if aging_min and aging_min.isdigit():
+                queryset = queryset.filter(**{f"{aging_type}__gte": int(aging_min)})
+                
+            aging_max = params.get('aging_max', '').strip()
+            if aging_max and aging_max.isdigit():
+                queryset = queryset.filter(**{f"{aging_type}__lte": int(aging_max)})
+
+        quoted_over_90 = params.get('quoted_over_90', '').strip()
+        if quoted_over_90.lower() == 'true':
+            from django.utils import timezone
+            from datetime import timedelta
+            date_90_days_ago = timezone.now().date() - timedelta(days=90)
+            queryset = queryset.filter(status='Quote Submitted', quote_date__lt=date_90_days_ago)
+
         return queryset
 
     def get_serializer_class(self):

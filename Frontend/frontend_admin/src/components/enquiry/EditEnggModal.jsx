@@ -21,6 +21,9 @@ const EditEnggModal = ({ enq, show, onClose, onSuccess, onRefresh, canEdit, view
     const [enggRemarks, setEnggRemarks] = useState('');
     const [selectedSalesRep, setSelectedSalesRep] = useState('');
     const [status, setStatus] = useState('Pending with Engg');
+    const [clarificationToCs, setClarificationToCs] = useState('');
+    const [clarificationFromCs, setClarificationFromCs] = useState('');
+    const [remarks, setRemarks] = useState('');
 
     const [wasOpen, setWasOpen] = useState(false);
 
@@ -37,6 +40,9 @@ const EditEnggModal = ({ enq, show, onClose, onSuccess, onRefresh, canEdit, view
             setEnggRemarks(enq.engg_remarks || '');
             setSelectedSalesRep(enq.sales_rep?.id || '');
             setStatus(enq.status || 'Pending with Engg');
+            setClarificationToCs(enq.clarification_to_cs || '');
+            setClarificationFromCs(enq.clarification_from_cs || '');
+            setRemarks(enq.remarks || '');
             fetchSalesReps();
         } else if (!show) {
             setWasOpen(false);
@@ -77,7 +83,10 @@ const EditEnggModal = ({ enq, show, onClose, onSuccess, onRefresh, canEdit, view
             ed_of_engg: edOfEngg || null,
             actual_date_of_engg: actualDateOfEngg || null,
             engg_remarks: enggRemarks || '',
-            status: targetStatus
+            status: targetStatus,
+            clarification_to_cs: clarificationToCs || '',
+            clarification_from_cs: clarificationFromCs || '',
+            remarks: remarks || ''
         };
 
         try {
@@ -236,28 +245,61 @@ const EditEnggModal = ({ enq, show, onClose, onSuccess, onRefresh, canEdit, view
                             <div className="row g-3 mb-4">
                                 <div className="col-md-6">
                                     <div className="enq-details-card bg-white border-0 shadow-sm">
-                                        <div className="enq-details-label" style={{ color: '#e056fd' }}>Clarification To CS</div>
-                                        <div className="enq-details-value text-wrap text-secondary" style={{ fontSize: '0.9rem', fontWeight: 'normal' }}>
-                                            {enq.clarification_to_cs || 'No clarification requested.'}
-                                        </div>
+                                        <label className="enq-details-label form-label font-weight-semibold text-secondary small uppercase" style={{ color: '#e056fd', letterSpacing: '0.5px', marginBottom: '8px', display: 'block' }}>Clarification To CS</label>
+                                        {!viewOnly ? (
+                                            <textarea
+                                                className="form-control border shadow-sm"
+                                                style={{ borderRadius: '10px', fontSize: '0.9rem', padding: '0.75rem' }}
+                                                rows="3"
+                                                value={clarificationToCs}
+                                                onChange={(e) => setClarificationToCs(e.target.value)}
+                                                placeholder="Enter clarification to CS..."
+                                            />
+                                        ) : (
+                                            <div className="enq-details-value text-wrap text-secondary" style={{ fontSize: '0.9rem', fontWeight: 'normal' }}>
+                                                {enq.clarification_to_cs || 'No clarification requested.'}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="col-md-6">
                                     <div className="enq-details-card bg-white border-0 shadow-sm">
-                                        <div className="enq-details-label" style={{ color: '#e056fd' }}>Clarification From CS</div>
-                                        <div className="enq-details-value text-wrap text-secondary" style={{ fontSize: '0.9rem', fontWeight: 'normal' }}>
-                                            {enq.clarification_from_cs || 'No response received.'}
-                                        </div>
+                                        <label className="enq-details-label form-label font-weight-semibold text-secondary small uppercase" style={{ color: '#e056fd', letterSpacing: '0.5px', marginBottom: '8px', display: 'block' }}>Clarification From CS</label>
+                                        {!viewOnly ? (
+                                            <textarea
+                                                className="form-control border shadow-sm"
+                                                style={{ borderRadius: '10px', fontSize: '0.9rem', padding: '0.75rem' }}
+                                                rows="3"
+                                                value={clarificationFromCs}
+                                                onChange={(e) => setClarificationFromCs(e.target.value)}
+                                                placeholder="Enter clarification from CS..."
+                                            />
+                                        ) : (
+                                            <div className="enq-details-value text-wrap text-secondary" style={{ fontSize: '0.9rem', fontWeight: 'normal' }}>
+                                                {enq.clarification_from_cs || 'No response received.'}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
 
                             {/* Remarks */}
                             <div className="mb-4">
-                                <div className="enq-details-label" style={{ color: '#64748b' }}>Remarks / Description</div>
-                                <div className="enq-remarks-box bg-white border-0 shadow-sm rounded-lg" style={{ minHeight: '80px', color: '#475569' }}>
-                                    {enq.remarks || 'No remarks provided.'}
-                                </div>
+                                <label className="enq-details-label form-label font-weight-semibold text-secondary small uppercase" style={{ color: '#64748b', letterSpacing: '0.5px', marginBottom: '8px', display: 'block' }}>Remarks / Description</label>
+                                {!viewOnly ? (
+                                    <textarea
+                                        className="form-control border shadow-sm"
+                                        style={{ borderRadius: '10px', fontSize: '0.9rem', padding: '0.75rem' }}
+                                        rows="3"
+                                        value={remarks}
+                                        onChange={(e) => setRemarks(e.target.value)}
+                                        placeholder="Enter remarks/description..."
+                                    />
+                                ) : (
+                                    <div className="enq-remarks-box bg-white border-0 shadow-sm rounded-lg" style={{ minHeight: '80px', color: '#475569', padding: '16px 20px' }}>
+                                        {enq.remarks || 'No remarks provided.'}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Settings & Status */}

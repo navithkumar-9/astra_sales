@@ -165,6 +165,7 @@ const Sidebar = () => {
                 </svg>
             ),
             children: [
+                { path: '/pipeline/quoted-90', label: 'Quoted (>90 Days)' },
                 { path: '/pipeline/open-l1', label: 'Open L1' },
                 { path: '/pipeline/won', label: 'Won' },
                 { path: '/pipeline/regretted', label: 'Regretted' },

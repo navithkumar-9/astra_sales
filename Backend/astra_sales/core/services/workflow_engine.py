@@ -178,10 +178,22 @@ class WorkflowEngine:
 
     @staticmethod
     def check_modified_fields(validated_data: dict, enquiry: Enquiry, restricted_fields: set, error_message: str):
+        from django.db.models.fields.files import FieldFile
         for field in restricted_fields:
             if field in validated_data:
                 # Compare value with existing instance
                 existing_val = getattr(enquiry, field)
                 new_val = validated_data[field]
                 if existing_val != new_val:
+                    # Treat None, '', and empty FieldFiles as equivalently empty
+                    if not existing_val and not new_val:
+                        continue
+                    
+                    # Prevent false positive if frontend passes back the absolute URL to a FieldFile
+                    if isinstance(existing_val, FieldFile) and isinstance(new_val, str):
+                        if existing_val.name == new_val or (existing_val and existing_val.url == new_val):
+                            continue
+                        if existing_val and existing_val.name and new_val.endswith(existing_val.name):
+                            continue
+                            
                     raise PermissionDenied(f"Permission Denied: {error_message} (field: '{field}')")

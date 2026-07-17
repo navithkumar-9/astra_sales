@@ -29,28 +29,50 @@ def streaming_export(queryset):
     yield b'\xef\xbb\xbf'
     
     headers = [
-        "Project Number", "RFQ Date", "RFQ No", "Customer", "SBU", 
-        "Project Name", "Division", "Status", "Sales Rep", "RFQ Due Date",
-        "Quote Value", "PO Value", "Created At"
+        "Customer Name", "SBU", "Division", "RFQ Type", "Status", "RFQ Date", "RFQ Due Date", 
+        "RFQ Aging", "Clarification To CS", "Clarification From CS", "Remarks / Description", 
+        "Expected Date of Engineering", "Actual Date of Engineering", "Engineering Remarks", 
+        "Expected Date of Costing", "Actual Date of Costing", "Costing Remarks", 
+        "FG Part No Description Quantity", "Quote Date", "Quote Value ($)", "Open-L1 Value ($)", 
+        "Open-L1 Date", "Lost Value ($)", "PO No", "PO Receipt Date", "PO Value ($)", "created date"
     ]
     yield writer.writerow(headers).encode('utf-8')
     
-    optimized_qs = queryset.select_related('customer', 'sbu', 'division', 'sales_rep')
+    optimized_qs = queryset.select_related('customer', 'sbu', 'division', 'rfq_type').prefetch_related('fg_details')
     
     # Batch query records using database cursor
     for enquiry in optimized_qs.iterator(chunk_size=1000):
+        fg_str = " | ".join([
+            f"{fg.fg_part_no} - {fg.description} (Qty: {fg.qty})" 
+            for fg in enquiry.fg_details.all()
+        ])
+        
         row = [
-            enquiry.project_number,
-            str(enquiry.rfq_date) if enquiry.rfq_date else "",
-            enquiry.rfq_no,
             enquiry.customer.name if enquiry.customer else "",
             enquiry.sbu.name if enquiry.sbu else "",
-            enquiry.project_name,
             enquiry.division.name if enquiry.division else "",
+            enquiry.rfq_type.name if enquiry.rfq_type else "",
             enquiry.status,
-            enquiry.sales_rep.username if enquiry.sales_rep else "",
+            str(enquiry.rfq_date) if enquiry.rfq_date else "",
             str(enquiry.rfq_due_date) if enquiry.rfq_due_date else "",
+            str(enquiry.rfq_aging),
+            enquiry.clarification_to_cs,
+            enquiry.clarification_from_cs,
+            enquiry.remarks,
+            str(enquiry.ed_of_engg) if enquiry.ed_of_engg else "",
+            str(enquiry.actual_date_of_engg) if enquiry.actual_date_of_engg else "",
+            enquiry.engg_remarks,
+            str(enquiry.ed_of_costing) if enquiry.ed_of_costing else "",
+            str(enquiry.actual_date_of_costing) if enquiry.actual_date_of_costing else "",
+            enquiry.costing_remarks,
+            fg_str,
+            str(enquiry.quote_date) if enquiry.quote_date else "",
             str(enquiry.quote_value) if enquiry.quote_value is not None else "",
+            str(enquiry.open_l1_value) if enquiry.open_l1_value is not None else "",
+            str(enquiry.open_l1_date) if enquiry.open_l1_date else "",
+            str(enquiry.lost_value) if enquiry.lost_value is not None else "",
+            enquiry.po_no,
+            str(enquiry.po_receipt_date) if enquiry.po_receipt_date else "",
             str(enquiry.po_value) if enquiry.po_value is not None else "",
             enquiry.created_at.strftime('%Y-%m-%d %H:%M:%S') if enquiry.created_at else ""
         ]

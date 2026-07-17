@@ -73,6 +73,10 @@ class Enquiry(TimeStampedModel):
     rfq_document = models.FileField(upload_to='documents/rfq/', null=True, blank=True)
     po_document = models.FileField(upload_to='documents/po/', null=True, blank=True)
 
+    # Aging calculations
+    enquiry_aging = models.IntegerField(null=True, blank=True, db_index=True)
+    quote_submission_aging = models.IntegerField(null=True, blank=True, db_index=True)
+
     class Meta:
         db_table = 'enquiries'
         indexes = [
@@ -89,10 +93,47 @@ class Enquiry(TimeStampedModel):
             models.CheckConstraint(condition=models.Q(po_value__gte=0), name='check_po_value_non_negative'),
         ]
 
+    def _parse_date(self, date_val):
+        if isinstance(date_val, str):
+            from datetime import datetime
+            try:
+                return datetime.strptime(date_val, '%Y-%m-%d').date()
+            except ValueError:
+                # Fallback if time is included or different format
+                try:
+                    return datetime.fromisoformat(date_val).date()
+                except ValueError:
+                    return None
+        return date_val
+
     @property
     def rfq_aging(self):
-        delta = timezone.now().date() - self.rfq_date
+        r_date = self._parse_date(self.rfq_date)
+        if not r_date:
+            return 0
+        delta = timezone.now().date() - r_date
         return max(delta.days, 0)
+
+    def save(self, *args, **kwargs):
+        q_date = self._parse_date(self.quote_date)
+        r_date = self._parse_date(self.rfq_date)
+        a_date = self._parse_date(self.actual_date_of_sales)
+
+        # Calculate Enquiry Aging
+        if q_date and r_date:
+            delta = q_date - r_date
+            self.enquiry_aging = max(delta.days, 0)
+        else:
+            self.enquiry_aging = None
+
+        # Calculate Quote Submission Aging
+        if a_date and q_date:
+            delta = a_date - q_date
+            self.quote_submission_aging = max(delta.days, 0)
+        else:
+            self.quote_submission_aging = None
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.project_number} - {self.project_name}"

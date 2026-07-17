@@ -3,6 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { getAvatarStyle } from '../utils/avatar';
 import EnquiryTable from '../components/common/EnquiryTable';
+import FilterPanel from '../components/common/FilterPanel';
+import Pagination from '../components/common/Pagination';
 import { enquiryService } from '../services/enquiryService';
 import { userService } from '../services/userService';
 
@@ -18,7 +20,12 @@ const Won = () => {
 
     const [enquiries, setEnquiries] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState('');
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalCount, setTotalCount] = useState(0);
+    const [filters, setFilters] = useState({});
+    const [sortField, setSortField] = useState('created_at');
+    const [sortDirection, setSortDirection] = useState('desc');
     const [salesReps, setSalesReps] = useState([]);
 
     // Modal state
@@ -45,12 +52,21 @@ const Won = () => {
     // Fetch Sales to Quote enquiries
     const fetchEnquiries = async () => {
         try {
-            const list = await enquiryService.getAll({ 
-                status: 'Won', 
-                page_size: 100, 
-                search 
-            });
-            setEnquiries(list.results || list || []);
+            const params = {
+                page,
+                page_size: pageSize,
+                ordering: sortField ? `${sortDirection === 'desc' ? '-' : ''}${sortField}` : undefined,
+                ...filters
+            };
+            if (!params.status) params.status = 'Won';
+            const list = await enquiryService.getAll(params);
+            if (list && list.results) {
+                setEnquiries(list.results);
+                setTotalCount(list.count || 0);
+            } else {
+                setEnquiries(Array.isArray(list) ? list : []);
+                setTotalCount(Array.isArray(list) ? list.length : 0);
+            }
         } catch (err) {
             showToast('Failed to fetch Sales to Quote enquiries.', 'error');
         } finally {
@@ -73,12 +89,16 @@ const Won = () => {
     }, []);
 
     useEffect(() => {
+        setPage(1);
+    }, [filters, sortField, sortDirection, pageSize]);
+
+    useEffect(() => {
         setLoading(true);
         const delayDebounce = setTimeout(() => {
             fetchEnquiries();
         }, 300);
         return () => clearTimeout(delayDebounce);
-    }, [search]);
+    }, [page, pageSize, filters, sortField, sortDirection]);
 
     const handleActionClick = (enq, viewOnlyMode = false) => {
         setSelectedEnq(enq);
@@ -151,35 +171,22 @@ const Won = () => {
                 </div>
             </div>
 
-            {/* Search Input */}
-            <div className="row mb-4">
-                <div className="col-md-4">
-                    <div className="modern-search-wrapper shadow-sm">
-                        <span className="modern-search-icon">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-muted">
-                                <circle cx="11" cy="11" r="8" />
-                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                            </svg>
-                        </span>
-                        <input
-                            type="text"
-                            className="form-control modern-search-input border-0"
-                            placeholder="Search by project no or rfq..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                    </div>
-                </div>
-            </div>
+            <div className="row mb-4"><div className="col-12"><FilterPanel filters={filters} onFilterChange={setFilters} showStatusFilter={false} /></div></div>
 
             {/* Table Listing */}
             <EnquiryTable 
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={(field, dir) => {
+                    setSortField(field);
+                    setSortDirection(dir);
+                }} 
                 columns={[
                     { label: 'S.No', className: 'ps-4' },
-                    { label: 'Project No' },
-                    { label: 'RFQ Date' },
-                    { label: 'RFQ No' },
-                    { label: 'Customer Name' },
+                    { label: 'Project No', sortField: 'project_number' },
+                    { label: 'RFQ Date', sortField: 'rfq_date' },
+                    { label: 'RFQ No', sortField: 'rfq_no' },
+                    { label: 'Customer Name', sortField: 'customer__name' },
                     { label: 'Division' },
                     { label: 'Sales Rep' },
                     { label: 'Action', className: 'text-center pe-4' }

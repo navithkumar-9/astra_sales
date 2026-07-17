@@ -80,28 +80,32 @@ class EnquiryService:
         # Enforce field permissions based on current stage and user role
         WorkflowEngine.enforce_field_permissions(instance, validated_data, user)
         
-        # Enforce status change logic
+        # Track audit logs BEFORE mutating the instance in-memory
+        AuditService.log_enquiry_changes(instance, validated_data, user)
+        
         old_status = instance.status
         new_status = validated_data.get('status', old_status)
+
+        # Apply updates in memory so validate_transition sees the new field values (e.g. dates)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+            
+        # Enforce status change logic
         if old_status != new_status:
             WorkflowEngine.validate_transition(instance, old_status, new_status, user)
             
+            # Reset subsequent stage dates if moving backwards
             if new_status == 'Pending with Engg':
-                validated_data['ed_of_engg'] = None
-                validated_data['actual_date_of_engg'] = None
+                instance.ed_of_engg = None
+                instance.actual_date_of_engg = None
             elif new_status == 'Pending with Costing':
-                validated_data['ed_of_costing'] = None
-                validated_data['actual_date_of_costing'] = None
+                instance.ed_of_costing = None
+                instance.actual_date_of_costing = None
             elif new_status in ['Sales to Quote', 'Pending with Sales']:
-                validated_data['ed_of_sales'] = None
-                validated_data['actual_date_of_sales'] = None
+                instance.ed_of_sales = None
+                instance.actual_date_of_sales = None
 
-        # Track audit logs
-        AuditService.log_enquiry_changes(instance, validated_data, user)
-
-        # Update fields
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
+        # Save the instance
         instance.save()
 
         # Log manual status changes and trigger notifications
