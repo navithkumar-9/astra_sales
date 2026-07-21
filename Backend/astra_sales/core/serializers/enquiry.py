@@ -125,14 +125,16 @@ class EnquirySerializer(serializers.ModelSerializer):
             if status_after_update != 'Won':
                 modified_fields = []
                 if has_rfq_doc:
-                    existing_rfq = getattr(self.instance, 'rfq_document') if self.instance else None
+                    existing_rfq_name = self.instance.rfq_document.name if self.instance and getattr(self.instance, 'rfq_document') else None
                     new_rfq = data.get('rfq_document')
-                    if existing_rfq != new_rfq:
+                    new_rfq_name = new_rfq.name if hasattr(new_rfq, 'name') else new_rfq
+                    if (existing_rfq_name or None) != (new_rfq_name or None):
                         modified_fields.append('rfq_document')
                 if has_po_doc:
-                    existing_po = getattr(self.instance, 'po_document') if self.instance else None
+                    existing_po_name = self.instance.po_document.name if self.instance and getattr(self.instance, 'po_document') else None
                     new_po = data.get('po_document')
-                    if existing_po != new_po:
+                    new_po_name = new_po.name if hasattr(new_po, 'name') else new_po
+                    if (existing_po_name or None) != (new_po_name or None):
                         modified_fields.append('po_document')
                 
                 if modified_fields:

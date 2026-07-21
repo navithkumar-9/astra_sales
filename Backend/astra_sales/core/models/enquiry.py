@@ -161,6 +161,13 @@ class Enquiry(TimeStampedModel):
 
         super().save(*args, **kwargs)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['status', 'sales_rep', 'rfq_date']),
+            models.Index(fields=['sales_rep', 'rfq_date']),
+            models.Index(fields=['status', 'customer', 'rfq_date']),
+        ]
+
     def __str__(self):
         return f"{self.project_number} - {self.project_name}"
 

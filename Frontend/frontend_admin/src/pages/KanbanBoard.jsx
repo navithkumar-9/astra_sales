@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import EditEnggModal from '../components/enquiry/EditEnggModal';
 import EditCostingModal from '../components/enquiry/EditCostingModal';
 import EditSalesModal from '../components/enquiry/EditSalesModal';
+import FilterPanel from '../components/common/FilterPanel';
 import { hasPermission, PERMISSIONS } from '../config/permissions';
 
 const PIPELINE_STAGES = [
@@ -22,6 +23,7 @@ const KanbanBoard = () => {
     
     const [loading, setLoading] = useState(true);
     const [enquiries, setEnquiries] = useState([]);
+    const [filters, setFilters] = useState({});
 
     // Modal & Interaction States
     const [selectedEnq, setSelectedEnq] = useState(null);
@@ -36,12 +38,12 @@ const KanbanBoard = () => {
 
     useEffect(() => {
         fetchEnquiries();
-    }, []);
+    }, [filters]);
 
     const fetchEnquiries = async () => {
         setLoading(true);
         try {
-            const res = await enquiryService.getAll({ page_size: 1000 });
+            const res = await enquiryService.getAll({ page_size: 1000, ...filters });
             setEnquiries(res.results || res || []);
         } catch (err) {
             showToast('Failed to load enquiries for Kanban Board.', 'error');
@@ -95,7 +97,7 @@ const KanbanBoard = () => {
 
     const handleModalRefresh = async () => {
         try {
-            const res = await enquiryService.getAll({ page_size: 1000 });
+            const res = await enquiryService.getAll({ page_size: 1000, ...filters });
             const latestEnquiries = res.results || res || [];
             setEnquiries(latestEnquiries);
             
@@ -128,7 +130,7 @@ const KanbanBoard = () => {
     };
 
     return (
-        <div className="page container-fluid px-4 py-4 h-100 d-flex flex-column bg-light" style={{ overflow: 'hidden', minHeight: '90vh' }}>
+        <div className="page container-fluid px-4 py-4 h-100 d-flex flex-column bg-light" style={{ overflow: 'hidden', height: 'calc(100vh - 70px)' }}>
             <div className="page-header mb-4 flex-shrink-0 border-bottom pb-3 d-flex justify-content-between align-items-center">
                 <div>
                     <h2 className="font-weight-bold mb-1 text-dark" style={{ letterSpacing: '-0.5px' }}>Interactive CRM Pipeline</h2>
@@ -138,6 +140,12 @@ const KanbanBoard = () => {
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
                     Refresh Board
                 </button>
+            </div>
+
+            <div className="row mb-3 flex-shrink-0">
+                <div className="col-12">
+                    <FilterPanel filters={filters} onFilterChange={setFilters} showStatusFilter={false} />
+                </div>
             </div>
 
             {loading ? (
