@@ -143,7 +143,7 @@ class EmailReportingTestCase(TestCase):
         self.assertIn("Globex Corp", content)
         self.assertIn("Mysore Division", content)
         self.assertIn("Pending with Engg", content)
-        self.assertIn("Won", content)
+        self.assertNotIn("Won", content)
         
         # Clean up generated file
         if os.path.exists(report_path):

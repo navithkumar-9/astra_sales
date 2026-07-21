@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils import timezone
 from core.models.base import TimeStampedModel
 from core.models.user import User
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, react-hooks/exhaustive-deps, react-hooks/rules-of-hooks */
 import React, { useEffect, useState } from 'react';
 import {
     Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart,

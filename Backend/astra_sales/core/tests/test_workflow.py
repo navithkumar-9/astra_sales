@@ -8,7 +8,6 @@ from core.models.division import Division
 from core.models.rfq import RFQ
 from core.models.fg import FG
 from core.services.enquiry_service import EnquiryService
-from core.services.workflow_engine import WorkflowEngine
 
 User = get_user_model()
 

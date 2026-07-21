@@ -15,12 +15,9 @@ from core.models.fg import FG
 from core.models.rfq import RFQ
 from core.models.enquiry import Enquiry
 from core.models.export_job import ExportJob
-from core.repositories.export_repository import ExportRepository
 from core.services.export.writers.csv_writer import ChunkedCSVWriter
 from core.services.export.strategies.csv_strategy import CSVExportStrategy
 from core.services.export.storage.local_storage import LocalStorageProvider
-from core.services.export.notifications.database_notifier import DatabaseNotificationService
-from core.services.export_service import ExportService
 from core.tasks.export_tasks import run_export_task
 
 class ChunkedCSVWriterTest(TestCase):

@@ -2,7 +2,7 @@ from django.db.models import Count
 from prometheus_client import Counter
 from prometheus_client.core import GaugeMetricFamily, REGISTRY
 
-from core.models.user import RoleChoices, User
+from core.models.user import User
 
 USER_METRICS_CACHE_KEY = "metrics:user_accounts_snapshot"
 USER_METRICS_CACHE_TTL = 60

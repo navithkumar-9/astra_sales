@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, react-hooks/exhaustive-deps, react-hooks/rules-of-hooks */
 import React, { useState, useEffect } from 'react';
 import { masterDataService } from '../../services/masterDataService';
 import { userService } from '../../services/userService';

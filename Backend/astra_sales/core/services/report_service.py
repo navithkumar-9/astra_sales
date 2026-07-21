@@ -1,4 +1,3 @@
-import os
 from django.utils import timezone
 from core.models.enquiry import Enquiry
 from core.services.export.strategies.csv_strategy import CSVExportStrategy
@@ -26,8 +25,9 @@ class ReportService:
         current_date_str = timezone.now().strftime("%d-%m-%Y")
         file_key = f"Daily-Tracker-{current_date_str}.csv"
         
-        # Always retrieve the latest data
-        queryset = Enquiry.objects.all().order_by('-created_at')
+        # Exclude terminal statuses to send only pending/open records
+        terminal_statuses = ['Won', 'Lost', 'Regretted', 'Quote Regretted']
+        queryset = Enquiry.objects.exclude(status__in=terminal_statuses).order_by('-created_at')
         
         # Export using strategy and storage provider
         completed_path = strategy.export(

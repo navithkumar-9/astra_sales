@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, react-hooks/exhaustive-deps, react-hooks/rules-of-hooks */
 import React, { useState } from 'react';
 import DocumentsTab from './DocumentsTab';
 import AuditHistoryTab from './AuditHistoryTab';

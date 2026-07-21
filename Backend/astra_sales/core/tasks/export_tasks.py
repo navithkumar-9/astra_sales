@@ -2,7 +2,6 @@ import logging
 import traceback
 from celery import shared_task
 from django.utils import timezone
-from core.models.export_job import ExportJob
 from core.models.enquiry import Enquiry
 from core.repositories.export_repository import ExportRepository
 from core.services.export.storage.local_storage import LocalStorageProvider

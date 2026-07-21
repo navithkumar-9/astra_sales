@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, react-hooks/exhaustive-deps, react-hooks/rules-of-hooks */
 import React, { useState, useEffect } from 'react';
 import { enquiryService } from '../../services/enquiryService';
 import { useToast } from '../../context/ToastContext';

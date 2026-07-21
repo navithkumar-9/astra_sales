@@ -1,6 +1,6 @@
 import hashlib
 from django.core.cache import cache
-from django.conf import settings
+
 
 class CacheService:
     DASHBOARD_CACHE_KEY = "dashboard_stats_data"

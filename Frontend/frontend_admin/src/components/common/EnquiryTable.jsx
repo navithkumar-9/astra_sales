@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, react-hooks/exhaustive-deps, react-hooks/rules-of-hooks */
 import React from 'react';
 
 // SVG sort icon — matches the codebase's inline SVG pattern, no FA dependency

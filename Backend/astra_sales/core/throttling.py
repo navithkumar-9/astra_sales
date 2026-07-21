@@ -1,5 +1,4 @@
 import time
-from django.core.cache import cache
 from rest_framework.throttling import BaseThrottle
 from django_redis import get_redis_connection
 

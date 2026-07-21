@@ -1,6 +1,5 @@
 from django.db import transaction
 import logging
-from rest_framework.exceptions import PermissionDenied
 from core.models.enquiry import Enquiry, EnquiryFGDetail
 from core.services.audit_service import AuditService
 from core.services.cache_service import CacheService

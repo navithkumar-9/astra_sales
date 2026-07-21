@@ -2,7 +2,6 @@ from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.contrib.auth import get_user_model
-from rest_framework.exceptions import ValidationError as DRFValidationError
 from core.models.enquiry import Enquiry
 from core.models.customer import Customer
 from core.models.sbu import SBU

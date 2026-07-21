@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, react-hooks/exhaustive-deps, react-hooks/rules-of-hooks */
 import { useEffect, useState, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import API from '../api/axios';

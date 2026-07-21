@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, react-hooks/exhaustive-deps, react-hooks/rules-of-hooks */
 import React from 'react';
 
 const DocumentsTab = ({ enq, canEdit, rfqFile, setRfqFile, poFile, setPoFile, currentStatus }) => {

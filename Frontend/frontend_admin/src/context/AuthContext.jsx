@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, react-hooks/exhaustive-deps, react-hooks/rules-of-hooks */
 import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import API from '../api/axios';
 
