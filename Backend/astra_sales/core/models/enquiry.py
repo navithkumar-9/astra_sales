@@ -115,6 +115,8 @@ class Enquiry(TimeStampedModel):
         return max(delta.days, 0)
 
     def save(self, *args, **kwargs):
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
         q_date = self._parse_date(self.quote_date)
         r_date = self._parse_date(self.rfq_date)
         a_date = self._parse_date(self.actual_date_of_sales)
@@ -132,6 +134,30 @@ class Enquiry(TimeStampedModel):
             self.quote_submission_aging = max(delta.days, 0)
         else:
             self.quote_submission_aging = None
+
+        # Restrict RFQ & PO documents to status='Won'
+        if self.pk:
+            try:
+                orig = Enquiry.objects.get(pk=self.pk)
+                orig_rfq = orig.rfq_document.name or ''
+                self_rfq = self.rfq_document.name or ''
+                orig_po = orig.po_document.name or ''
+                self_po = self.po_document.name or ''
+                
+                rfq_changed = orig_rfq != self_rfq
+                po_changed = orig_po != self_po
+                
+                if (rfq_changed or po_changed) and self.status != 'Won':
+                    raise DjangoValidationError(
+                        "RFQ and PO documents can only be uploaded after the RFQ status is marked as Won."
+                    )
+            except Enquiry.DoesNotExist:
+                pass
+        else:
+            if (self.rfq_document or self.po_document) and self.status != 'Won':
+                raise DjangoValidationError(
+                    "RFQ and PO documents can only be uploaded after the RFQ status is marked as Won."
+                )
 
         super().save(*args, **kwargs)
 

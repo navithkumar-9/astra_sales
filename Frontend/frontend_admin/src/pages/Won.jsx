@@ -6,7 +6,7 @@ import EnquiryTable from '../components/common/EnquiryTable';
 import FilterPanel from '../components/common/FilterPanel';
 import Pagination from '../components/common/Pagination';
 import { enquiryService } from '../services/enquiryService';
-import { userService } from '../services/userService';
+import EditSalesModal from '../components/enquiry/EditSalesModal';
 
 const Won = () => {
     const { user } = useAuth();
@@ -26,28 +26,10 @@ const Won = () => {
     const [filters, setFilters] = useState({});
     const [sortField, setSortField] = useState('created_at');
     const [sortDirection, setSortDirection] = useState('desc');
-    const [salesReps, setSalesReps] = useState([]);
-
     // Modal state
     const [showModal, setShowModal] = useState(false);
     const [viewOnly, setViewOnly] = useState(false);
     const [selectedEnq, setSelectedEnq] = useState(null);
-    const [submitting, setSubmitting] = useState(false);
-
-    // Edit form states
-    const [salesRemarks, setSalesRemarks] = useState('');
-    const [selectedSalesRep, setSelectedSalesRep] = useState('');
-    const [status, setStatus] = useState('Sales to Quote');
-
-    // Quote & PO fields
-    const [quoteDate, setQuoteDate] = useState('');
-    const [quoteValue, setQuoteValue] = useState('');
-    const [openL1Value, setOpenL1Value] = useState('');
-    const [openL1Date, setOpenL1Date] = useState('');
-    const [lostValue, setLostValue] = useState('');
-    const [poNo, setPoNo] = useState('');
-    const [poReceiptDate, setPoReceiptDate] = useState('');
-    const [poValue, setPoValue] = useState('');
 
     // Fetch Sales to Quote enquiries
     const fetchEnquiries = async () => {
@@ -74,19 +56,7 @@ const Won = () => {
         }
     };
 
-    // Load sales reps lookup
-    const fetchSalesReps = async () => {
-        try {
-            const list = await userService.getSalesReps();
-            setSalesReps(list.results || list || []);
-        } catch (err) {
-            showToast('Failed to load Sales Representatives.', 'error');
-        }
-    };
 
-    useEffect(() => {
-        fetchSalesReps();
-    }, []);
 
     useEffect(() => {
         setPage(1);
@@ -102,64 +72,8 @@ const Won = () => {
 
     const handleActionClick = (enq, viewOnlyMode = false) => {
         setSelectedEnq(enq);
-        setSalesRemarks(enq.sales_remarks || '');
-        setSelectedSalesRep(enq.sales_rep?.id || '');
-        setStatus(enq.status || 'Sales to Quote');
-        
-        setQuoteDate(enq.quote_date || '');
-        setQuoteValue(enq.quote_value || '');
-        setOpenL1Value(enq.open_l1_value || '');
-        setOpenL1Date(enq.open_l1_date || '');
-        setLostValue(enq.lost_value || '');
-        setPoNo(enq.po_no || '');
-        setPoReceiptDate(enq.po_receipt_date || '');
-        setPoValue(enq.po_value || '');
-
         setViewOnly(viewOnlyMode);
         setShowModal(true);
-    };
-
-    const handleSave = async (e) => {
-        e.preventDefault();
-        if (!selectedSalesRep) {
-            showToast('Please assign a Sales Representative.', 'warning');
-            return;
-        }
-
-        setSubmitting(true);
-        let newStatus = status;
-
-        const payload = {
-            ...selectedEnq,
-            customer: selectedEnq.customer?.id,
-            sbu: selectedEnq.sbu?.id,
-            division: selectedEnq.division?.id,
-            rfq_type: selectedEnq.rfq_type?.id,
-            fg_type: selectedEnq.fg_type?.id,
-            fg_details: selectedEnq.fg_details || [],
-            sales_rep: parseInt(selectedSalesRep),
-            sales_remarks: salesRemarks || '',
-            quote_date: quoteDate || null,
-            quote_value: quoteValue || null,
-            open_l1_value: openL1Value || null,
-            open_l1_date: openL1Date || null,
-            lost_value: lostValue || null,
-            po_no: poNo || '',
-            po_receipt_date: poReceiptDate || null,
-            po_value: poValue || null,
-            status: newStatus
-        };
-
-        try {
-            await enquiryService.update(selectedEnq.id, payload);
-            showToast('Sales details saved successfully!', 'success');
-            setShowModal(false);
-            fetchEnquiries();
-        } catch (err) {
-            showToast(err.response?.data?.message || 'Failed to update sales details.', 'error');
-        } finally {
-            setSubmitting(false);
-        }
     };
 
     return (
@@ -246,217 +160,23 @@ const Won = () => {
                 onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}
             />
 
-            {/* Edit / View Modal */}
             {showModal && selectedEnq && (
-                <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.55)', zIndex: 1050 }}>
-                    <div className="modal-dialog modal-lg modal-dialog-centered">
-                        <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '12px', overflow: 'hidden' }}>
-                            <div className="enq-modal-header text-white d-flex align-items-center justify-content-between">
-                                <div className="d-flex align-items-center gap-3">
-                                    <div className="enq-modal-icon-wrap shadow-sm">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                            <polyline points="14 2 14 8 20 8" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h5 className="modal-title font-weight-bold mb-0">
-                                            {canEdit && !viewOnly ? "Edit Sales Details" : "Sales Details Summary"}
-                                        </h5>
-                                        <span className="small text-white-50">{selectedEnq.project_number} - {selectedEnq.project_name}</span>
-                                    </div>
-                                </div>
-                                <button type="button" className="enq-modal-close-icon" onClick={() => setShowModal(false)}>
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                        <line x1="18" y1="6" x2="6" y2="18" />
-                                        <line x1="6" y1="6" x2="18" y2="18" />
-                                    </svg>
-                                </button>
-                            </div>
-                            <form onSubmit={handleSave} className="modal-body p-4" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-                                {/* Enquiry Details (ReadOnly) */}
-                                <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom">Project Information</h6>
-                                <div className="row g-3 mb-4">
-                                    <div className="col-md-4">
-                                        <div className="enq-details-card">
-                                            <div className="enq-details-label">Customer Name</div>
-                                            <div className="enq-details-value" style={{ fontSize: '0.9rem' }}>{selectedEnq.customer?.name || 'N/A'}</div>
-                                        </div>
-                                    </div>
-                                    <div className="col-md-4">
-                                        <div className="enq-details-card">
-                                            <div className="enq-details-label">SBU</div>
-                                            <div className="enq-details-value" style={{ fontSize: '0.9rem' }}>{selectedEnq.sbu?.name || 'N/A'}</div>
-                                        </div>
-                                    </div>
-                                    <div className="col-md-4">
-                                        <div className="enq-details-card">
-                                            <div className="enq-details-label">Division</div>
-                                            <div className="enq-details-value" style={{ fontSize: '0.9rem' }}>{selectedEnq.division?.name || 'N/A'}</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="row g-3 mb-4">
-                                    <div className="col-md-4">
-                                        <div className="enq-details-card">
-                                            <div className="enq-details-label">RFQ No</div>
-                                            <div className="enq-details-value" style={{ fontSize: '0.9rem' }}>{selectedEnq.rfq_no}</div>
-                                        </div>
-                                    </div>
-                                    <div className="col-md-4">
-                                        <div className="enq-details-card">
-                                            <div className="enq-details-label">RFQ Date</div>
-                                            <div className="enq-details-value" style={{ fontSize: '0.9rem' }}>{selectedEnq.rfq_date}</div>
-                                        </div>
-                                    </div>
-                                    <div className="col-md-4">
-                                        <div className="enq-details-card">
-                                            <div className="enq-details-label">RFQ Due Date</div>
-                                            <div className="enq-details-value" style={{ fontSize: '0.9rem' }}>{selectedEnq.rfq_due_date} ({selectedEnq.rfq_due_time?.substring(0, 5)})</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Sales Fields */}
-                                <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom">Sales Estimation & Action</h6>
-                                <div className="row g-3 mb-4">
-                                    {/* Sales Representative */}
-                                    <div className="col-md-6">
-                                        <label className="form-label font-weight-semibold">Sales Representative <span className="text-danger">*</span></label>
-                                        <select
-                                            className="form-select"
-                                            value={selectedSalesRep}
-                                            onChange={(e) => setSelectedSalesRep(e.target.value)}
-                                            disabled={!canEdit || viewOnly}
-                                            required
-                                        >
-                                            <option value="">Select Sales Rep</option>
-                                            {salesReps.map(rep => (
-                                                <option key={rep.id} value={rep.id}>{rep.name || rep.username}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    {/* Status */}
-                                    <div className="col-md-6">
-                                        <label className="form-label font-weight-semibold">Status</label>
-                                                                                <select
-                                            className="form-select"
-                                            value={status}
-                                            onChange={(e) => setStatus(e.target.value)}
-                                            disabled={!canEdit || viewOnly}
-                                        >
-                                            <option value="Won">Won</option>
-                                            <option value="On Hold">On Hold</option>
-                                            <option value="Regretted">Regretted</option>
-                                            <option value="Open - L1">Open - L1</option>
-                                            <option value="Lost">Lost</option>
-                                            <option value="Quote Regretted">Quote Regretted</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                {/* Sales Remarks */}
-                                <div className="mb-4">
-                                    <label className="form-label font-weight-semibold">Sales Team Remarks</label>
-                                    <textarea
-                                        className="form-control"
-                                        rows="3"
-                                        placeholder="Add sales remarks / notes"
-                                        value={salesRemarks}
-                                        onChange={(e) => setSalesRemarks(e.target.value)}
-                                        disabled={!canEdit || viewOnly}
-                                    />
-                                </div>
-
-                                {/* Quote & PO Details */}
-                                <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom">Quote & PO Tracking</h6>
-                                <div className="row g-3 mb-4">
-                                    <div className="col-md-4">
-                                        <label className="form-label font-weight-semibold">Quote Date</label>
-                                        <input type="date" className="form-control" value={quoteDate} onChange={(e) => setQuoteDate(e.target.value)} disabled={!canEdit || viewOnly} />
-                                    </div>
-                                    <div className="col-md-4">
-                                        <label className="form-label font-weight-semibold">Quote Value</label>
-                                        <input type="number" className="form-control" value={quoteValue} onChange={(e) => setQuoteValue(e.target.value)} disabled={!canEdit || viewOnly} />
-                                    </div>
-                                    <div className="col-md-4">
-                                        <label className="form-label font-weight-semibold">Open-L1 Value</label>
-                                        <input type="number" className="form-control" value={openL1Value} onChange={(e) => setOpenL1Value(e.target.value)} disabled={!canEdit || viewOnly} />
-                                    </div>
-                                    <div className="col-md-4">
-                                        <label className="form-label font-weight-semibold">Open-L1 Date</label>
-                                        <input type="date" className="form-control" value={openL1Date} onChange={(e) => setOpenL1Date(e.target.value)} disabled={!canEdit || viewOnly} />
-                                    </div>
-                                    <div className="col-md-4">
-                                        <label className="form-label font-weight-semibold">Lost Value</label>
-                                        <input type="number" className="form-control" value={lostValue} onChange={(e) => setLostValue(e.target.value)} disabled={!canEdit || viewOnly} />
-                                    </div>
-                                    <div className="col-md-4">
-                                        <label className="form-label font-weight-semibold">PO No</label>
-                                        <input type="text" className="form-control" value={poNo} onChange={(e) => setPoNo(e.target.value)} disabled={!canEdit || viewOnly} />
-                                    </div>
-                                    <div className="col-md-4">
-                                        <label className="form-label font-weight-semibold">PO Receipt Date</label>
-                                        <input type="date" className="form-control" value={poReceiptDate} onChange={(e) => setPoReceiptDate(e.target.value)} disabled={!canEdit || viewOnly} />
-                                    </div>
-                                    <div className="col-md-4">
-                                        <label className="form-label font-weight-semibold">PO Value</label>
-                                        <input type="number" className="form-control" value={poValue} onChange={(e) => setPoValue(e.target.value)} disabled={!canEdit || viewOnly} />
-                                    </div>
-                                </div>
-
-                                {/* Dynamic FG details sub-table (Read-only reference) */}
-                                <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom">Finished Goods (FG) List</h6>
-                                <div className="table-responsive bg-light rounded shadow-sm border mb-2">
-                                    <table className="table table-sm table-hover mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th className="ps-3 text-secondary py-2">FG Part No</th>
-                                                <th className="text-secondary py-2">Description</th>
-                                                <th className="text-secondary pe-3 text-end py-2">Quantity</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {selectedEnq.fg_details?.length === 0 ? (
-                                                <tr>
-                                                    <td colSpan="3" className="text-center p-3 text-muted">No FG details associated.</td>
-                                                </tr>
-                                            ) : (
-                                                selectedEnq.fg_details?.map((detail, idx) => (
-                                                    <tr key={detail.id || idx}>
-                                                        <td className="ps-3 font-weight-semibold text-dark py-2">{detail.fg_part_no}</td>
-                                                        <td className="text-muted py-2">{detail.description || 'N/A'}</td>
-                                                        <td className="pe-3 text-end font-weight-bold py-2">{detail.qty}</td>
-                                                    </tr>
-                                                ))
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <div className="d-flex gap-2 justify-content-end mt-4 pt-3 border-top">
-                                    <button
-                                        type="button"
-                                        className="btn btn-secondary px-4"
-                                        onClick={() => setShowModal(false)}
-                                    >
-                                        Close
-                                    </button>
-                                    {canEdit && !viewOnly && (
-                                        <button
-                                            type="submit"
-                                            className="btn btn-gradient-primary border-0 shadow px-4"
-                                            disabled={submitting}
-                                        >
-                                            {submitting ? 'Saving...' : 'Save Changes'}
-                                        </button>
-                                    )}
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+                <EditSalesModal 
+                    enq={selectedEnq} 
+                    show={showModal} 
+                    onClose={() => {
+                        setShowModal(false);
+                        setSelectedEnq(null);
+                    }}
+                    onSuccess={() => {
+                        setShowModal(false);
+                        setSelectedEnq(null);
+                        fetchEnquiries();
+                    }}
+                    onRefresh={fetchEnquiries} 
+                    canEdit={canEdit} 
+                    viewOnly={viewOnly} 
+                />
             )}
         </div>
     );

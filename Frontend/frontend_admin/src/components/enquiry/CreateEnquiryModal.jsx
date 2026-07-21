@@ -477,33 +477,15 @@ const CreateEnquiryModal = ({ show, onClose, onSuccess }) => {
                         </div>
 
                         <div className="row g-3 mb-4">
-                            <div className="col-md-6">
-                                <label className="form-label font-weight-semibold">RFQ Document</label>
-                                <input
-                                    type="file"
-                                    className={`form-control ${validationErrors.rfq_document ? 'is-invalid' : ''}`}
-                                    onChange={(e) => {
-                                        setRfqDocument(e.target.files[0]);
-                                        setValidationErrors(prev => ({ ...prev, rfq_document: undefined }));
-                                    }}
-                                    accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
-                                />
-                                {validationErrors.rfq_document && <div className="invalid-feedback">{validationErrors.rfq_document.join(', ')}</div>}
-                                <small className="text-muted" style={{ fontSize: '0.75rem' }}>Upload RFQ related files.</small>
-                            </div>
-                            <div className="col-md-6">
-                                <label className="form-label font-weight-semibold">PO Document</label>
-                                <input
-                                    type="file"
-                                    className={`form-control ${validationErrors.po_document ? 'is-invalid' : ''}`}
-                                    onChange={(e) => {
-                                        setPoDocument(e.target.files[0]);
-                                        setValidationErrors(prev => ({ ...prev, po_document: undefined }));
-                                    }}
-                                    accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
-                                />
-                                {validationErrors.po_document && <div className="invalid-feedback">{validationErrors.po_document.join(', ')}</div>}
-                                <small className="text-muted" style={{ fontSize: '0.75rem' }}>Upload PO related files.</small>
+                            <div className="col-12">
+                                <div className="alert alert-warning border-0 shadow-none d-flex align-items-center gap-2 mb-0" style={{ fontSize: '0.85rem', borderRadius: '8px' }}>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="flex-shrink-0">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <line x1="12" y1="16" x2="12" y2="12" />
+                                        <line x1="12" y1="8" x2="12.01" y2="8" />
+                                    </svg>
+                                    <span>RFQ and PO documents can only be uploaded after the RFQ status is marked as Won.</span>
+                                </div>
                             </div>
                         </div>
 

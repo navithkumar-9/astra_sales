@@ -75,6 +75,7 @@ const Sidebar = () => {
 
     const userRole = user?.role;
     const canManageMembers = hasPermission(userRole, PERMISSIONS.CAN_MANAGE_USERS);
+    const canViewReports = hasPermission(userRole, PERMISSIONS.CAN_VIEW_REPORTS);
 
     const displayName = user?.name || user?.username || 'User';
     const profilePic = user?.profile_picture || null;
@@ -174,6 +175,29 @@ const Sidebar = () => {
             ]
         },
     ];
+
+    if (canViewReports) {
+        navItems.push({
+            path: '/sales-rep-performance',
+            label: 'Sales Rep Performance',
+            icon: (
+                <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <line x1="18" y1="20" x2="18" y2="10" />
+                    <line x1="12" y1="20" x2="12" y2="4" />
+                    <line x1="6" y1="20" x2="6" y2="14" />
+                </svg>
+            ),
+        });
+    }
 
     if (canManageMembers) {
         navItems.push(

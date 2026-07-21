@@ -1,7 +1,10 @@
 import React from 'react';
 
-const DocumentsTab = ({ enq, canEdit, rfqFile, setRfqFile, poFile, setPoFile }) => {
+const DocumentsTab = ({ enq, canEdit, rfqFile, setRfqFile, poFile, setPoFile, currentStatus }) => {
     
+    const status = currentStatus || enq?.status;
+    const isWon = status === 'Won';
+
     const getFileName = (url) => {
         if (!url) return '';
         const parts = url.split('/');
@@ -10,8 +13,21 @@ const DocumentsTab = ({ enq, canEdit, rfqFile, setRfqFile, poFile, setPoFile }) 
 
     return (
         <div className="mt-3">
-            <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom">Project Documents</h6>
+            <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                <h6 className="font-weight-bold text-primary mb-0">Project Documents</h6>
+            </div>
             
+            {!isWon && (
+                <div className="alert alert-warning border-0 shadow-none d-flex align-items-center gap-2 mb-4" style={{ fontSize: '0.85rem', borderRadius: '8px' }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="flex-shrink-0">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="16" x2="12" y2="12" />
+                        <line x1="12" y1="8" x2="12.01" y2="8" />
+                    </svg>
+                    <span>RFQ and PO documents can only be uploaded after the RFQ status is marked as Won.</span>
+                </div>
+            )}
+
             <div className="row g-4">
                 {/* RFQ Document Section */}
                 <div className="col-md-6">
@@ -46,7 +62,7 @@ const DocumentsTab = ({ enq, canEdit, rfqFile, setRfqFile, poFile, setPoFile }) 
                                 </div>
                             )}
 
-                            {canEdit && (
+                            {canEdit && isWon && (
                                 <div className="mt-2">
                                     <label className="form-label small font-weight-medium text-secondary">
                                         {enq.rfq_document ? 'Upload New RFQ (overwrites existing)' : 'Upload RFQ Document'}
@@ -97,7 +113,7 @@ const DocumentsTab = ({ enq, canEdit, rfqFile, setRfqFile, poFile, setPoFile }) 
                                 </div>
                             )}
 
-                            {canEdit && (
+                            {canEdit && isWon && (
                                 <div className="mt-2">
                                     <label className="form-label small font-weight-medium text-secondary">
                                         {enq.po_document ? 'Upload New PO (overwrites existing)' : 'Upload PO Document'}

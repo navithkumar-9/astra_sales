@@ -24,6 +24,7 @@ const Regretted = lazy(() => import('./pages/Regretted'));
 const Lost = lazy(() => import('./pages/Lost'));
 const Hold = lazy(() => import('./pages/Hold'));
 const QuotedOver90 = lazy(() => import('./pages/QuotedOver90'));
+const SalesRepPerformance = lazy(() => import('./pages/SalesRepPerformance'));
 
 const LoadingFallback = () => (
     <div className="loading-fallback-container">
@@ -195,6 +196,16 @@ function App() {
                                     <ProtectedRoute>
                                         <Layout>
                                             <Hold />
+                                        </Layout>
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/sales-rep-performance"
+                                element={
+                                    <ProtectedRoute>
+                                        <Layout>
+                                            <SalesRepPerformance />
                                         </Layout>
                                     </ProtectedRoute>
                                 }

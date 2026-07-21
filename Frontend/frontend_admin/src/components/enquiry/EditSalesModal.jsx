@@ -554,6 +554,7 @@ const EditSalesModal = ({ enq, show, onClose, onSuccess, onRefresh, canEdit, vie
                         {activeTab === 'documents' && (
                             <DocumentsTab 
                                 enq={enq} 
+                                currentStatus={status}
                                 canEdit={canEdit && !viewOnly} 
                                 rfqFile={rfqFile} 
                                 setRfqFile={setRfqFile} 

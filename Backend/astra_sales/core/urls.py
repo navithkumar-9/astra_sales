@@ -28,7 +28,7 @@ router.register('mails', MailViewSet, basename='mail')
 router.register('enquiries', EnquiryViewSet, basename='enquiry')
 router.register('activities', ActivityViewSet, basename='activity')
 
-from core.views.dashboard_views import DashboardStatsView
+from core.views.dashboard_views import DashboardStatsView, SalesRepPerformanceView
 
 urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
@@ -37,6 +37,7 @@ urlpatterns = [
     path('users/<int:pk>/', UserDetailView.as_view(), name='users_detail'),
     path('profile/', ProfileView.as_view(), name='profile'),
     path('dashboard/stats/', DashboardStatsView.as_view(), name='dashboard_stats'),
+    path('dashboard/sales-rep-performance/', SalesRepPerformanceView.as_view(), name='sales_rep_performance'),
     path('exports/', ExportJobAPIView.as_view(), name='exports_list_create'),
     path('exports/<int:pk>/', ExportJobDetailAPIView.as_view(), name='exports_detail'),
     path('exports/<int:pk>/download/', ExportJobDownloadAPIView.as_view(), name='exports_download'),

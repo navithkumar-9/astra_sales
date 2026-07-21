@@ -3,8 +3,118 @@ from django.db.models import Count, Sum, F, Q
 from django.db.models.functions import TruncMonth
 from datetime import timedelta
 from core.models.enquiry import Enquiry
+from core.models.user import RoleChoices, User
 
 class DashboardService:
+    SALES_REP_TRACKED_STATUSES = [
+        'Pending with Engg',
+        'Pending with Costing',
+        'Sales to Quote',
+        'Pending with Sales',
+        'Quote Submitted',
+        'On Hold',
+        'Open - L1',
+        'Won',
+        'Lost',
+        'Regretted',
+        'Quote Regretted',
+    ]
+
+    @staticmethod
+    def calculate_sales_rep_performance():
+        """Return per-sales-rep enquiry counts and status distribution."""
+        reps = User.objects.filter(role=RoleChoices.SALES_REP).order_by('name', 'username')
+        status_rows = (
+            Enquiry.objects
+            .filter(sales_rep__role=RoleChoices.SALES_REP)
+            .values('sales_rep_id', 'status')
+            .annotate(count=Count('id'))
+        )
+        status_by_rep = {}
+        for row in status_rows:
+            status_by_rep.setdefault(row['sales_rep_id'], {})[row['status']] = row['count']
+
+        value_rows = {
+            row['sales_rep_id']: row
+            for row in (
+                Enquiry.objects
+                .filter(sales_rep__role=RoleChoices.SALES_REP)
+                .values('sales_rep_id')
+                .annotate(
+                    total_quote_value=Sum('quote_value'),
+                    total_po_value=Sum('po_value'),
+                    total_open_l1_value=Sum('open_l1_value'),
+                    total_lost_value=Sum('lost_value'),
+                )
+            )
+        }
+
+        rows = []
+        totals = {
+            'totalEnquiries': 0,
+            'wonCount': 0,
+            'regrettedCount': 0,
+            'lostCount': 0,
+            'openL1Count': 0,
+            'holdCount': 0,
+            'quoteSubmittedCount': 0,
+            'pendingCount': 0,
+        }
+
+        for rep in reps:
+            statuses = {
+                status: status_by_rep.get(rep.id, {}).get(status, 0)
+                for status in DashboardService.SALES_REP_TRACKED_STATUSES
+            }
+            total = sum(statuses.values())
+            won_count = statuses.get('Won', 0)
+            lost_count = statuses.get('Lost', 0)
+            regretted_count = statuses.get('Regretted', 0) + statuses.get('Quote Regretted', 0)
+            open_l1_count = statuses.get('Open - L1', 0)
+            hold_count = statuses.get('On Hold', 0)
+            quote_submitted_count = statuses.get('Quote Submitted', 0)
+            pending_count = total - won_count - lost_count - regretted_count
+            win_loss_denominator = won_count + lost_count + regretted_count
+            win_rate = round((won_count / win_loss_denominator) * 100, 1) if win_loss_denominator else 0.0
+            values = value_rows.get(rep.id, {})
+
+            totals['totalEnquiries'] += total
+            totals['wonCount'] += won_count
+            totals['regrettedCount'] += regretted_count
+            totals['lostCount'] += lost_count
+            totals['openL1Count'] += open_l1_count
+            totals['holdCount'] += hold_count
+            totals['quoteSubmittedCount'] += quote_submitted_count
+            totals['pendingCount'] += pending_count
+
+            rows.append({
+                'id': rep.id,
+                'username': rep.username,
+                'name': rep.name or rep.username,
+                'isActive': rep.is_active,
+                'totalEnquiries': total,
+                'wonCount': won_count,
+                'regrettedCount': regretted_count,
+                'lostCount': lost_count,
+                'openL1Count': open_l1_count,
+                'holdCount': hold_count,
+                'quoteSubmittedCount': quote_submitted_count,
+                'pendingCount': pending_count,
+                'winRate': win_rate,
+                'statuses': statuses,
+                'values': {
+                    'quoted': values.get('total_quote_value') or 0,
+                    'po': values.get('total_po_value') or 0,
+                    'openL1': values.get('total_open_l1_value') or 0,
+                    'lost': values.get('total_lost_value') or 0,
+                },
+            })
+
+        return {
+            'summary': totals,
+            'results': rows,
+        }
+
     @staticmethod
     def calculate_stats():
         """Calculate all dashboard KPIs and chart data from the database."""

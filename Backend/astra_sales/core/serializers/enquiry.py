@@ -115,6 +115,33 @@ class EnquirySerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError({
                         field: "Expected date cannot be in the past."
                     })
+
+        # Strict business rule: RFQ and PO documents can only be uploaded, edited or deleted in "Won" status
+        has_rfq_doc = 'rfq_document' in data
+        has_po_doc = 'po_document' in data
+        
+        if has_rfq_doc or has_po_doc:
+            status_after_update = data.get('status', self.instance.status if self.instance else 'Pending with Engg')
+            if status_after_update != 'Won':
+                modified_fields = []
+                if has_rfq_doc:
+                    existing_rfq = getattr(self.instance, 'rfq_document') if self.instance else None
+                    new_rfq = data.get('rfq_document')
+                    if existing_rfq != new_rfq:
+                        modified_fields.append('rfq_document')
+                if has_po_doc:
+                    existing_po = getattr(self.instance, 'po_document') if self.instance else None
+                    new_po = data.get('po_document')
+                    if existing_po != new_po:
+                        modified_fields.append('po_document')
+                
+                if modified_fields:
+                    errors = {
+                        f: "RFQ and PO documents can only be uploaded after the RFQ status is marked as Won."
+                        for f in modified_fields
+                    }
+                    raise serializers.ValidationError(errors)
+
         return data
 
     def create(self, validated_data):
