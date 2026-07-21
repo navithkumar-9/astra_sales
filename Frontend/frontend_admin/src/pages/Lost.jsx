@@ -236,6 +236,14 @@ const Lost = () => {
                         </td>
                     </tr>
                 )}
+                        />
+
+            <Pagination
+                count={totalCount}
+                page={page}
+                pageSize={pageSize}
+                onPageChange={setPage}
+                onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}
             />
 
             {/* Edit / View Modal */}
@@ -332,18 +340,17 @@ const Lost = () => {
                                     {/* Status */}
                                     <div className="col-md-6">
                                         <label className="form-label font-weight-semibold">Status</label>
-                                        <select
+                                                                                <select
                                             className="form-select"
                                             value={status}
                                             onChange={(e) => setStatus(e.target.value)}
                                             disabled={!canEdit || viewOnly}
                                         >
-                                            <option value="Sales to Quote">Lost</option>
+                                            <option value="Lost">Lost</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Regretted">Regretted</option>
                                             <option value="Open - L1">Open - L1</option>
                                             <option value="Won">Won</option>
-                                            <option value="Lost">Lost</option>
                                             <option value="Quote Regretted">Quote Regretted</option>
                                         </select>
                                     </div>

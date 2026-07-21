@@ -1,11 +1,46 @@
 import React from 'react';
 
+// SVG sort icon — matches the codebase's inline SVG pattern, no FA dependency
+const SortIcon = ({ active, direction }) => (
+    <span
+        className="ms-1"
+        style={{
+            display: 'inline-flex',
+            flexDirection: 'column',
+            gap: '1px',
+            verticalAlign: 'middle',
+            lineHeight: 0,
+        }}
+    >
+        {/* Up caret */}
+        <svg
+            width="8"
+            height="5"
+            viewBox="0 0 8 5"
+            fill={active && direction === 'asc' ? 'var(--primary, #9a55ff)' : '#ccd0d9'}
+            style={{ display: 'block' }}
+        >
+            <path d="M4 0L8 5H0L4 0Z" />
+        </svg>
+        {/* Down caret */}
+        <svg
+            width="8"
+            height="5"
+            viewBox="0 0 8 5"
+            fill={active && direction === 'desc' ? 'var(--primary, #9a55ff)' : '#ccd0d9'}
+            style={{ display: 'block' }}
+        >
+            <path d="M4 5L0 0H8L4 5Z" />
+        </svg>
+    </span>
+);
+
 const EnquiryTable = ({ columns, data, loading, emptyMessage, renderRow, sortField, sortDirection, onSort }) => {
     if (loading && data.length === 0) {
         return (
-            <div className="d-flex flex-column align-items-center justify-content-center min-vh-50 mt-5">
+            <div className="d-flex flex-column align-items-center justify-content-center mt-5" style={{ minHeight: '200px' }}>
                 <div className="page-loader-spinner mb-3"></div>
-                <div className="text-muted font-weight-bold">Loading enquiries...</div>
+                <div className="text-muted fw-semibold" style={{ fontSize: '0.88rem', letterSpacing: '0.5px' }}>Loading enquiries...</div>
             </div>
         );
     }
@@ -15,35 +50,52 @@ const EnquiryTable = ({ columns, data, loading, emptyMessage, renderRow, sortFie
         if (sortField === field) {
             onSort(field, sortDirection === 'asc' ? 'desc' : 'asc');
         } else {
-            onSort(field, 'desc');
+            onSort(field, 'asc');
         }
     };
 
     return (
-        <div className="card shadow border-0 overflow-hidden" style={{ borderRadius: '16px' }}>
+        <div
+            className="card border-0 overflow-hidden"
+            style={{
+                borderRadius: '14px',
+                boxShadow: '0 2px 12px rgba(15,23,42,0.07)',
+            }}
+        >
             <div className="table-responsive">
-                <table className="table table-hover align-middle mb-0" style={{ borderCollapse: 'separate', borderSpacing: '0 8px' }}>
-                    <thead style={{ background: '#f8fafc', borderBottom: '1px solid #edf2f7' }}>
+                <table className="table table-hover align-middle mb-0">
+                    <thead
+                        style={{
+                            background: '#f8fafc',
+                            borderBottom: '2px solid #edf2f7',
+                        }}
+                    >
                         <tr>
                             {columns.map((col, idx) => (
                                 <th 
                                     key={idx}
-                                    className={`text-uppercase text-secondary font-weight-bold py-3 ${col.className || ''}`}
-                                    style={{ 
-                                        fontSize: '0.72rem', 
-                                        letterSpacing: '0.8px', 
+                                    className={`py-3 ${col.className || ''}`}
+                                    style={{
+                                        fontSize: '0.72rem',
+                                        fontWeight: 700,
+                                        letterSpacing: '0.7px',
+                                        textTransform: 'uppercase',
+                                        color: '#64748b',
                                         cursor: col.sortField ? 'pointer' : 'default',
-                                        ...col.style 
+                                        userSelect: col.sortField ? 'none' : 'auto',
+                                        whiteSpace: 'nowrap',
+                                        ...col.style,
                                     }}
                                     onClick={() => col.sortField && handleSort(col.sortField)}
+                                    title={col.sortField ? `Sort by ${col.label}` : undefined}
                                 >
-                                    <div className="d-flex align-items-center">
+                                    <div className="d-flex align-items-center gap-1">
                                         {col.label}
                                         {col.sortField && (
-                                            <span className="ms-1 d-inline-flex flex-column" style={{ fontSize: '10px', lineHeight: '0.8' }}>
-                                                <i className={`fas fa-caret-up ${sortField === col.sortField && sortDirection === 'asc' ? 'text-primary' : 'text-muted opacity-25'}`}></i>
-                                                <i className={`fas fa-caret-down ${sortField === col.sortField && sortDirection === 'desc' ? 'text-primary' : 'text-muted opacity-25'}`}></i>
-                                            </span>
+                                            <SortIcon
+                                                active={sortField === col.sortField}
+                                                direction={sortDirection}
+                                            />
                                         )}
                                     </div>
                                 </th>
@@ -53,8 +105,16 @@ const EnquiryTable = ({ columns, data, loading, emptyMessage, renderRow, sortFie
                     <tbody style={{ background: '#fff' }}>
                         {data.length === 0 ? (
                             <tr>
-                                <td colSpan={columns.length} className="text-center p-5 text-muted">
-                                    {emptyMessage || 'No enquiries found.'}
+                                <td colSpan={columns.length} className="text-center py-5">
+                                    <div className="d-flex flex-column align-items-center gap-2" style={{ color: '#94a3b8' }}>
+                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" opacity="0.4">
+                                            <circle cx="11" cy="11" r="8" />
+                                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                                        </svg>
+                                        <span style={{ fontSize: '0.88rem', fontWeight: 500 }}>
+                                            {emptyMessage || 'No enquiries found.'}
+                                        </span>
+                                    </div>
                                 </td>
                             </tr>
                         ) : (

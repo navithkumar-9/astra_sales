@@ -203,6 +203,11 @@ services:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SMTP_ENABLED=true
+      - GF_SMTP_HOST=${EMAIL_HOST:-smtp.zoho.com}:${EMAIL_PORT:-587}
+      - GF_SMTP_USER=${EMAIL_HOST_USER:-navithkumar.n@wyzmindz.com}
+      - GF_SMTP_PASSWORD=${EMAIL_HOST_PASSWORD:-P0Zth76T2kLW}
+      - GF_SMTP_FROM_ADDRESS=${DEFAULT_FROM_EMAIL:-navithkumar.n@wyzmindz.com}
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro

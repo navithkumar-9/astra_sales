@@ -169,13 +169,14 @@ const Enquiries = () => {
                 <div className="col-12">
                     <EnquiryTable 
                         columns={[
-                            { label: 'RFQ No', sortField: 'rfq_no' },
+                            { label: 'S.No', className: 'ps-4' },
+                            { label: 'Project No', sortField: 'project_number' },
                             { label: 'RFQ Date', sortField: 'rfq_date' },
+                            { label: 'RFQ No', sortField: 'rfq_no' },
                             { label: 'Customer', sortField: 'customer__name' },
-                            { label: 'Project', sortField: 'project_name' },
+                            { label: 'Division' },
                             { label: 'Status', sortField: 'status' },
-                            { label: 'Sales Rep' },
-                            { label: 'Actions', className: 'text-end' }
+                            { label: 'Actions', className: 'text-center pe-4' }
                         ]}
                         data={enquiries}
                         loading={loading}

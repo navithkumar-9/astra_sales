@@ -3,6 +3,7 @@ from core.metrics import record_user_operation
 from core.policies import UserAuthorizationPolicy
 from core.services.enquiry_service import refresh_enquiry_caches_after_commit
 
+
 class UserService:
     policy = UserAuthorizationPolicy()
 
@@ -26,7 +27,9 @@ class UserService:
             raise
 
     @classmethod
-    def list_users(cls, requestor, search=None, role=None, is_active=None):
+    def list_users(
+        cls, requestor, search=None, role=None, is_active=None, ordering=None
+    ):
         cls.policy.assert_can_list(requestor)
 
         if requestor.role not in (RoleChoices.SUPERADMIN, RoleChoices.ADMIN):
@@ -35,15 +38,19 @@ class UserService:
         if requestor.role == RoleChoices.SUPERADMIN:
             queryset = User.objects.all().order_by("-date_joined")
         elif requestor.role == RoleChoices.ADMIN:
-            queryset = User.objects.exclude(role=RoleChoices.SUPERADMIN).order_by("-date_joined")
+            queryset = User.objects.exclude(role=RoleChoices.SUPERADMIN).order_by(
+                "-date_joined"
+            )
         else:
-            queryset = User.objects.filter(role=RoleChoices.SALES_REP).order_by("-date_joined")
+            queryset = User.objects.filter(role=RoleChoices.SALES_REP).order_by(
+                "-date_joined"
+            )
 
         if search:
             from django.db.models import Q
+
             queryset = queryset.filter(
-                Q(username__icontains=search) | 
-                Q(name__icontains=search)
+                Q(username__icontains=search) | Q(name__icontains=search)
             )
 
         if role:
@@ -51,6 +58,19 @@ class UserService:
 
         if is_active is not None:
             queryset = queryset.filter(is_active=is_active)
+
+        allowed_ordering_fields = {
+            "username",
+            "name",
+            "role",
+            "is_active",
+            "date_joined",
+        }
+        if ordering:
+            direction = "-" if ordering.startswith("-") else ""
+            field = ordering[1:] if direction else ordering
+            if field in allowed_ordering_fields:
+                queryset = queryset.order_by(f"{direction}{field}")
 
         return queryset
 

@@ -1,5 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from rest_framework_simplejwt.views import TokenRefreshView
 from core.metrics import register_collectors
 register_collectors()
 
@@ -31,6 +32,7 @@ from core.views.dashboard_views import DashboardStatsView
 
 urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('users/', UserListView.as_view(), name='users_list_create'),
     path('users/<int:pk>/', UserDetailView.as_view(), name='users_detail'),
     path('profile/', ProfileView.as_view(), name='profile'),
@@ -40,4 +42,3 @@ urlpatterns = [
     path('exports/<int:pk>/download/', ExportJobDownloadAPIView.as_view(), name='exports_download'),
     path('', include(router.urls)),
 ]
-

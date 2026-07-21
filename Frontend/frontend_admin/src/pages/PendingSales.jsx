@@ -315,6 +315,14 @@ const PendingSales = () => {
                         </td>
                     </tr>
                 )}
+                        />
+
+            <Pagination
+                count={totalCount}
+                page={page}
+                pageSize={pageSize}
+                onPageChange={setPage}
+                onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}
             />
 
             {/* Edit / View Modal */}
