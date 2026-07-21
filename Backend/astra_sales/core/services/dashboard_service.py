@@ -200,6 +200,10 @@ class DashboardService:
             "quotedOver90": aggregates['quoted_over_90'],
             "quotedAwaitingReply": aggregates['quoted_awaiting_reply'],
             "quotedClientResponse": aggregates['quoted_client_response'],
+            "salesToQuoteCount": status_counts.get('Sales to Quote', 0),
+            "pendingWithSalesCount": status_counts.get('Pending with Sales', 0),
+            "pendingWithEnggCount": status_counts.get('Pending with Engg', 0),
+            "pendingWithCostingCount": status_counts.get('Pending with Costing', 0),
         }
 
         status_distribution = [

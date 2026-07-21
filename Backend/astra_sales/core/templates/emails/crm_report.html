@@ -1,3 +1,4 @@
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
@@ -5,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="x-apple-disable-message-reformatting">
-    <title>Astra CRM - Daily Performance Report</title>
+    <title>RFQ Report </title>
     <!--[if mso]>
     <style>
         table {border-collapse:collapse;border-spacing:0;margin:0;}
@@ -21,8 +22,8 @@
     </noscript>
     <![endif]-->
     <style>
-        /* Mobile Responsive Styles */
-        @media screen and (max-width: 600px) {
+        /* Responsive Mobile Styles */
+        @media screen and (max-width: 768px) {
             .container {
                 width: 100% !important;
                 padding: 10px !important;
@@ -31,438 +32,199 @@
                 display: block !important;
                 width: 100% !important;
                 max-width: 100% !important;
-                padding-bottom: 15px !important;
             }
-            .card-wrapper {
-                padding: 0 !important;
-            }
-            .title-text {
-                font-size: 20px !important;
+            .scrollable-table-container {
+                width: 100% !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
             }
         }
     </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #F8FAFC; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; font-family: 'Inter', 'Segoe UI', Arial, sans-serif;">
-    <center style="width: 100%; table-layout: fixed; background-color: #F8FAFC; padding: 40px 0;">
-        <div class="container" style="max-width: 600px; margin: 0 auto; background-color: #F8FAFC; width: 100%;">
+<body style="margin: 0; padding: 0; background-color: #F8FAFC; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;">
+    <center style="width: 100%; table-layout: fixed; background-color: #F8FAFC; padding: 20px 0;">
+        <div class="container" style="max-width: 950px; margin: 0 auto; width: 100%; background-color: #FFFFFF; border-radius: 12px; box-shadow: 0 4px 15px rgba(154, 85, 255, 0.08), 0 2px 4px rgba(0,0,0,0.02); border: 1px solid #E2E8F0; padding: 28px;">
             <!--[if mso]>
-            <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="width:600px;"><tr><td style="padding:0;background-color:#F8FAFC;">
+            <table align="center" border="0" cellpadding="0" cellspacing="0" width="950" style="width:950px;"><tr><td style="padding:0;background-color:#FFFFFF;">
             <![endif]-->
             
-            <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto; background-color: #F8FAFC; border-collapse: collapse;">
+            <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
                 
-                <!-- HEADER SECTION -->
+                <!-- BRAND HEADER HERO -->
                 <tr>
-                    <td align="center" style="padding: 30px 20px; background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%); background-color: #2563EB; border-radius: 16px 16px 0 0; text-align: center;">
+                    <td style="padding: 24px; background: linear-gradient(135deg, #da8cff 0%, #9a55ff 100%); background-color: #9a55ff; border-radius: 8px; text-align: center; margin-bottom: 24px;">
                         <table width="100%" border="0" cellpadding="0" cellspacing="0">
                             <tr>
-                                <td align="center" style="padding-bottom: 15px;">
-                                    <div style="display: inline-block; background-color: rgba(255, 255, 255, 0.15); padding: 12px; border-radius: 12px;">
-                                        <span style="font-size: 28px; line-height: 28px; color: #FFFFFF;">🚀</span>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td align="center" style="color: #FFFFFF; font-family: 'Inter', 'Segoe UI', Arial, sans-serif;">
-                                    <h1 class="title-text" style="margin: 0 0 8px 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">Daily CRM Performance Report</h1>
-                                    <p style="margin: 0; font-size: 15px; font-weight: 400; color: #DBEAFE; opacity: 0.9;">Real-time Sales Pipeline Summary</p>
+                                <td align="center" style="color: #FFFFFF;">
+                                    <h1 style="margin: 0 0 4px 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">Astra CRM</h1>
+                                    <p style="margin: 0; font-size: 14px; font-weight: 400; color: #F3E8FF; opacity: 0.9;">Real-time RFQ Pipeline Summary</p>
                                 </td>
                             </tr>
                         </table>
                     </td>
                 </tr>
 
-                <!-- MAIN CONTENT WRAPPER -->
+                <!-- SPACER -->
+                <tr><td height="16" style="font-size: 16px; line-height: 16px;">&nbsp;</td></tr>
+
+                <!-- TOP INFO SECTION -->
                 <tr>
-                    <td style="padding: 20px 0; background-color: #FFFFFF; border-left: 1px solid #E2E8F0; border-right: 1px solid #E2E8F0;">
-                        
-                        <!-- SECTION: KPI DASHBOARD CARDS -->
-                        <table width="100%" border="0" cellpadding="0" cellspacing="0" style="padding: 10px 20px;">
-                            <tr>
-                                <td style="padding-bottom: 15px;">
-                                    <h2 style="margin: 0; font-family: 'Inter', 'Segoe UI', Arial, sans-serif; font-size: 16px; font-weight: 600; color: #0F172A; text-transform: uppercase; letter-spacing: 0.5px;">Pipeline Overview</h2>
-                                </td>
-                            </tr>
-                        </table>
-
-                        <!-- ROW 1 -->
-                        <table width="100%" border="0" cellpadding="0" cellspacing="0" style="padding: 0 10px;">
-                            <tr>
-                                <td align="center" valign="top" style="font-size: 0; text-align: center;">
-                                    <!--[if mso]>
-                                    <table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td valign="top" width="290">
-                                    <![endif]-->
-                                    <div class="stack-column" style="display: inline-block; vertical-align: top; width: 100%; max-width: 290px;">
-                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                                            <tr>
-                                                <td class="card-wrapper" style="padding: 8px;">
-                                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; border-left: 4px solid #2563EB;">
-                                                        <tr>
-                                                            <td style="padding: 16px; font-family: 'Inter', 'Segoe UI', Arial, sans-serif; text-align: left;">
-                                                                <p style="margin: 0 0 6px 0; font-size: 13px; color: #64748B; font-weight: 500;">Total Enquiries</p>
-                                                                <p style="margin: 0; font-size: 24px; color: #0F172A; font-weight: 700;">{{ kpis.totalEnquiryCount|default:"0" }}</p>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <!--[if mso]>
-                                    </td><td valign="top" width="290">
-                                    <![endif]-->
-                                    <div class="stack-column" style="display: inline-block; vertical-align: top; width: 100%; max-width: 290px;">
-                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                                            <tr>
-                                                <td class="card-wrapper" style="padding: 8px;">
-                                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; border-left: 4px solid #F59E0B;">
-                                                        <tr>
-                                                            <td style="padding: 16px; font-family: 'Inter', 'Segoe UI', Arial, sans-serif; text-align: left;">
-                                                                <p style="margin: 0 0 6px 0; font-size: 13px; color: #64748B; font-weight: 500;">Pending Enquiries</p>
-                                                                <p style="margin: 0; font-size: 24px; color: #0F172A; font-weight: 700;">{{ kpis.overallPendingCount|default:"0" }}</p>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <!--[if mso]>
-                                    </td></tr></table>
-                                    <![endif]-->
-                                </td>
-                            </tr>
-                        </table>
-
-                        <!-- ROW 2 -->
-                        <table width="100%" border="0" cellpadding="0" cellspacing="0" style="padding: 0 10px;">
-                            <tr>
-                                <td align="center" valign="top" style="font-size: 0; text-align: center;">
-                                    <!--[if mso]>
-                                    <table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td valign="top" width="290">
-                                    <![endif]-->
-                                    <div class="stack-column" style="display: inline-block; vertical-align: top; width: 100%; max-width: 290px;">
-                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                                            <tr>
-                                                <td class="card-wrapper" style="padding: 8px;">
-                                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; border-left: 4px solid #DC2626;">
-                                                        <tr>
-                                                            <td style="padding: 16px; font-family: 'Inter', 'Segoe UI', Arial, sans-serif; text-align: left;">
-                                                                <p style="margin: 0 0 6px 0; font-size: 13px; color: #64748B; font-weight: 500;">Stuck Enquiries (>90 Days)</p>
-                                                                <p style="margin: 0; font-size: 24px; color: #0F172A; font-weight: 700;">{{ kpis.quoted90Days|default:"0" }}</p>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <!--[if mso]>
-                                    </td><td valign="top" width="290">
-                                    <![endif]-->
-                                    <div class="stack-column" style="display: inline-block; vertical-align: top; width: 100%; max-width: 290px;">
-                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                                            <tr>
-                                                <td class="card-wrapper" style="padding: 8px;">
-                                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; border-left: 4px solid #8B5CF6;">
-                                                        <tr>
-                                                            <td style="padding: 16px; font-family: 'Inter', 'Segoe UI', Arial, sans-serif; text-align: left;">
-                                                                <p style="margin: 0 0 6px 0; font-size: 13px; color: #64748B; font-weight: 500;">Budgetary Quotes</p>
-                                                                <p style="margin: 0; font-size: 24px; color: #0F172A; font-weight: 700;">{{ kpis.budgetaryCount|default:"0" }}</p>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <!--[if mso]>
-                                    </td></tr></table>
-                                    <![endif]-->
-                                </td>
-                            </tr>
-                        </table>
-
-                        <!-- ROW 3 -->
-                        <table width="100%" border="0" cellpadding="0" cellspacing="0" style="padding: 0 10px;">
-                            <tr>
-                                <td align="center" valign="top" style="font-size: 0; text-align: center;">
-                                    <!--[if mso]>
-                                    <table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td valign="top" width="290">
-                                    <![endif]-->
-                                    <div class="stack-column" style="display: inline-block; vertical-align: top; width: 100%; max-width: 290px;">
-                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                                            <tr>
-                                                <td class="card-wrapper" style="padding: 8px;">
-                                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; border-left: 4px solid #06B6D4;">
-                                                        <tr>
-                                                            <td style="padding: 16px; font-family: 'Inter', 'Segoe UI', Arial, sans-serif; text-align: left;">
-                                                                <p style="margin: 0 0 6px 0; font-size: 13px; color: #64748B; font-weight: 500;">Open (L1) Opportunities</p>
-                                                                <p style="margin: 0; font-size: 24px; color: #0F172A; font-weight: 700;">{{ kpis.openL1Count|default:"0" }}</p>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <!--[if mso]>
-                                    </td><td valign="top" width="290">
-                                    <![endif]-->
-                                    <div class="stack-column" style="display: inline-block; vertical-align: top; width: 100%; max-width: 290px;">
-                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                                            <tr>
-                                                <td class="card-wrapper" style="padding: 8px;">
-                                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; border-left: 4px solid #16A34A;">
-                                                        <tr>
-                                                            <td style="padding: 16px; font-family: 'Inter', 'Segoe UI', Arial, sans-serif; text-align: left;">
-                                                                <p style="margin: 0 0 6px 0; font-size: 13px; color: #64748B; font-weight: 500;">Won Enquiries</p>
-                                                                <p style="margin: 0; font-size: 24px; color: #0F172A; font-weight: 700;">{{ kpis.wonCount|default:"0" }}</p>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <!--[if mso]>
-                                    </td></tr></table>
-                                    <![endif]-->
-                                </td>
-                            </tr>
-                        </table>
-
-                        <!-- ROW 4 -->
-                        <table width="100%" border="0" cellpadding="0" cellspacing="0" style="padding: 0 10px;">
-                            <tr>
-                                <td align="center" valign="top" style="font-size: 0; text-align: center;">
-                                    <!--[if mso]>
-                                    <table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td valign="top" width="290">
-                                    <![endif]-->
-                                    <div class="stack-column" style="display: inline-block; vertical-align: top; width: 100%; max-width: 290px;">
-                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                                            <tr>
-                                                <td class="card-wrapper" style="padding: 8px;">
-                                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; border-left: 4px solid #64748B;">
-                                                        <tr>
-                                                            <td style="padding: 16px; font-family: 'Inter', 'Segoe UI', Arial, sans-serif; text-align: left;">
-                                                                <p style="margin: 0 0 6px 0; font-size: 13px; color: #64748B; font-weight: 500;">Lost Enquiries</p>
-                                                                <p style="margin: 0; font-size: 24px; color: #0F172A; font-weight: 700;">{{ kpis.lostCount|default:"0" }}</p>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <!--[if mso]>
-                                    </td><td valign="top" width="290">
-                                    <![endif]-->
-                                    <div class="stack-column" style="display: inline-block; vertical-align: top; width: 100%; max-width: 290px;">
-                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                                            <tr>
-                                                <td class="card-wrapper" style="padding: 8px;">
-                                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; border-left: 4px solid #CBD5E1;">
-                                                        <tr>
-                                                            <td style="padding: 16px; font-family: 'Inter', 'Segoe UI', Arial, sans-serif; text-align: left;">
-                                                                <p style="margin: 0 0 6px 0; font-size: 13px; color: #64748B; font-weight: 500;">On Hold Enquiries</p>
-                                                                <p style="margin: 0; font-size: 24px; color: #0F172A; font-weight: 700;">{{ kpis.holdCount|default:"0" }}</p>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <!--[if mso]>
-                                    </td></tr></table>
-                                    <![endif]-->
-                                </td>
-                            </tr>
-                        </table>
-
-                        <!-- SPACER -->
-                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                            <tr><td height="20" style="font-size: 20px; line-height: 20px;">&nbsp;</td></tr>
-                        </table>
-
-                        <!-- SECTION: FINANCIAL PIPELINE -->
-                        <table width="100%" border="0" cellpadding="0" cellspacing="0" style="padding: 10px 20px;">
-                            <tr>
-                                <td style="padding-bottom: 15px;">
-                                    <h2 style="margin: 0; font-family: 'Inter', 'Segoe UI', Arial, sans-serif; font-size: 16px; font-weight: 600; color: #0F172A; text-transform: uppercase; letter-spacing: 0.5px;">Financial Pipeline</h2>
-                                </td>
-                            </tr>
-                        </table>
-
-                        <table width="100%" border="0" cellpadding="0" cellspacing="0" style="padding: 0 10px;">
-                            <tr>
-                                <td align="center" valign="top" style="font-size: 0; text-align: center;">
-                                    <!--[if mso]>
-                                    <table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td valign="top" width="290">
-                                    <![endif]-->
-                                    <div class="stack-column" style="display: inline-block; vertical-align: top; width: 100%; max-width: 290px;">
-                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                                            <tr>
-                                                <td class="card-wrapper" style="padding: 8px;">
-                                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px;">
-                                                        <tr>
-                                                            <td style="padding: 20px 16px; font-family: 'Inter', 'Segoe UI', Arial, sans-serif; text-align: center;">
-                                                                <p style="margin: 0 0 8px 0; font-size: 13px; color: #64748B; font-weight: 600; text-transform: uppercase;">Total Quoted Value</p>
-                                                                <p style="margin: 0; font-size: 22px; color: #2563EB; font-weight: 700;">INR {{ kpis.quotedValue|default:"0" }}</p>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <!--[if mso]>
-                                    </td><td valign="top" width="290">
-                                    <![endif]-->
-                                    <div class="stack-column" style="display: inline-block; vertical-align: top; width: 100%; max-width: 290px;">
-                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                                            <tr>
-                                                <td class="card-wrapper" style="padding: 8px;">
-                                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px;">
-                                                        <tr>
-                                                            <td style="padding: 20px 16px; font-family: 'Inter', 'Segoe UI', Arial, sans-serif; text-align: center;">
-                                                                <p style="margin: 0 0 8px 0; font-size: 13px; color: #64748B; font-weight: 600; text-transform: uppercase;">Total PO Value</p>
-                                                                <p style="margin: 0; font-size: 22px; color: #16A34A; font-weight: 700;">INR {{ kpis.poValue|default:"0" }}</p>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <!--[if mso]>
-                                    </td></tr><tr><td valign="top" width="290">
-                                    <![endif]-->
-                                    <div class="stack-column" style="display: inline-block; vertical-align: top; width: 100%; max-width: 290px;">
-                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                                            <tr>
-                                                <td class="card-wrapper" style="padding: 8px;">
-                                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px;">
-                                                        <tr>
-                                                            <td style="padding: 20px 16px; font-family: 'Inter', 'Segoe UI', Arial, sans-serif; text-align: center;">
-                                                                <p style="margin: 0 0 8px 0; font-size: 13px; color: #64748B; font-weight: 600; text-transform: uppercase;">Open L1 Value</p>
-                                                                <p style="margin: 0; font-size: 22px; color: #06B6D4; font-weight: 700;">INR {{ kpis.openL1Value|default:"0" }}</p>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <!--[if mso]>
-                                    </td><td valign="top" width="290">
-                                    <![endif]-->
-                                    <div class="stack-column" style="display: inline-block; vertical-align: top; width: 100%; max-width: 290px;">
-                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                                            <tr>
-                                                <td class="card-wrapper" style="padding: 8px;">
-                                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px;">
-                                                        <tr>
-                                                            <td style="padding: 20px 16px; font-family: 'Inter', 'Segoe UI', Arial, sans-serif; text-align: center;">
-                                                                <p style="margin: 0 0 8px 0; font-size: 13px; color: #64748B; font-weight: 600; text-transform: uppercase;">Lost Value</p>
-                                                                <p style="margin: 0; font-size: 22px; color: #64748B; font-weight: 700;">INR {{ kpis.lostValue|default:"0" }}</p>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <!--[if mso]>
-                                    </td></tr></table>
-                                    <![endif]-->
-                                </td>
-                            </tr>
-                        </table>
-
-                        <!-- SPACER -->
-                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                            <tr><td height="20" style="font-size: 20px; line-height: 20px;">&nbsp;</td></tr>
-                        </table>
-
-                        <!-- SECTION: DUE DATE ALERTS -->
-                        <table width="100%" border="0" cellpadding="0" cellspacing="0" style="padding: 10px 20px;">
-                            <tr>
-                                <td style="padding-bottom: 15px;">
-                                    <h2 style="margin: 0; font-family: 'Inter', 'Segoe UI', Arial, sans-serif; font-size: 16px; font-weight: 600; color: #0F172A; text-transform: uppercase; letter-spacing: 0.5px;">Due Date Alerts</h2>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <!-- DUE TODAY -->
-                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 12px; background-color: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 12px;">
-                                        <tr>
-                                            <td style="padding: 16px; font-family: 'Inter', 'Segoe UI', Arial, sans-serif;">
-                                                <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                                                    <tr>
-                                                        <td width="30" valign="top">
-                                                            <span style="font-size: 20px;">🟢</span>
-                                                        </td>
-                                                        <td valign="middle">
-                                                            <p style="margin: 0 0 2px 0; font-size: 15px; color: #166534; font-weight: 700;">Due Today</p>
-                                                            <p style="margin: 0; font-size: 14px; color: #15803D;">{{ kpis.todaysDue|default:"0" }} Enquiries</p>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                            </td>
-                                        </tr>
-                                    </table>
-
-                                    <!-- DUE TOMORROW -->
-                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color: #FEF3C7; border: 1px solid #FDE68A; border-radius: 12px;">
-                                        <tr>
-                                            <td style="padding: 16px; font-family: 'Inter', 'Segoe UI', Arial, sans-serif;">
-                                                <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                                                    <tr>
-                                                        <td width="30" valign="top">
-                                                            <span style="font-size: 20px;">🟡</span>
-                                                        </td>
-                                                        <td valign="middle">
-                                                            <p style="margin: 0 0 2px 0; font-size: 15px; color: #92400E; font-weight: 700;">Due Tomorrow</p>
-                                                            <p style="margin: 0; font-size: 14px; color: #B45309;">{{ kpis.tomorrowDue|default:"0" }} Enquiries</p>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </td>
-                            </tr>
-                        </table>
-                        
-                        <!-- BOTTOM SPACER -->
-                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                            <tr><td height="20" style="font-size: 20px; line-height: 20px;">&nbsp;</td></tr>
-                        </table>
-
+                    <td style="padding-bottom: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: left;">
+                        <p style="margin: 0 0 6px 0; font-size: 16px; color: #1e293b; font-weight: 500;">Please find the below summary and open RFQ status as on today</p>
+                        <p style="margin: 0; font-size: 13px; color: #9a55ff; font-weight: bold;">Note: Displaying data from 1st April 2026.</p>
                     </td>
                 </tr>
 
-                <!-- FOOTER SECTION -->
+                <!-- 18 KPI GRID SECTION (3x6 Layout) - Matching Dashboard Card Styles and Gradients -->
                 <tr>
-                    <td align="center" style="padding: 30px 20px; background-color: #0F172A; border-radius: 0 0 16px 16px;">
-                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                    <td style="padding-bottom: 25px;">
+                        <table width="100%" border="0" cellpadding="0" cellspacing="6" style="width: 100%; border-collapse: separate; margin: 0 auto;">
+                            <!-- ROW 1 -->
                             <tr>
-                                <td align="center" style="font-family: 'Inter', 'Segoe UI', Arial, sans-serif; color: #94A3B8; font-size: 13px; line-height: 1.6;">
-                                    <hr style="border: 0; border-top: 1px solid #334155; margin: 0 0 20px 0; width: 100%;">
-                                    <p style="margin: 0 0 12px 0;">This is an automated report generated by Astra CRM.</p>
-                                    <p style="margin: 0 0 12px 0;"><strong>Generated:</strong><br/>{{ current_date }}</p>
-                                    <p style="margin: 0 0 20px 0;">Best Regards,<br/><strong>Astra CRM Automation System</strong></p>
-                                    <hr style="border: 0; border-top: 1px solid #334155; margin: 0 0 0 0; width: 100%;">
+                                <td align="center" valign="middle" style="background-color: #fe7096; background: linear-gradient(135deg, #ffbf96 0%, #fe7096 100%); padding: 14px 6px; border-radius: 6px; width: 16.66%;">
+                                    <div style="font-family: inherit; font-size: 10px; font-weight: bold; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.1; letter-spacing: 0.3px; opacity: 0.9;">Total Enquiry</div>
+                                    <div style="font-family: inherit; font-size: 18px; font-weight: 700; color: #ffffff;">{{ kpis.totalEnquiryCount|default:"0" }}</div>
+                                </td>
+                                <td align="center" valign="middle" style="background-color: #047edf; background: linear-gradient(135deg, #90caf9 0%, #047edf 100%); padding: 14px 6px; border-radius: 6px; width: 16.66%;">
+                                    <div style="font-family: inherit; font-size: 10px; font-weight: bold; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.1; letter-spacing: 0.3px; opacity: 0.9;">Overall Pending</div>
+                                    <div style="font-family: inherit; font-size: 18px; font-weight: 700; color: #ffffff;">{{ kpis.overallPendingCount|default:"0" }}</div>
+                                </td>
+                                <td align="center" valign="middle" style="background-color: #07cdae; background: linear-gradient(135deg, #84d9d2 0%, #07cdae 100%); padding: 14px 6px; border-radius: 6px; width: 16.66%;">
+                                    <div style="font-family: inherit; font-size: 10px; font-weight: bold; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.1; letter-spacing: 0.3px; opacity: 0.9;">Quoted</div>
+                                    <div style="font-family: inherit; font-size: 18px; font-weight: 700; color: #ffffff;">{{ kpis.totalQuotedRecords|default:"0" }}</div>
+                                </td>
+                                <td align="center" valign="middle" style="background-color: #fe7096; background: linear-gradient(135deg, #ffbf96 0%, #fe7096 100%); padding: 14px 6px; border-radius: 6px; width: 16.66%;">
+                                    <div style="font-family: inherit; font-size: 10px; font-weight: bold; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.1; letter-spacing: 0.3px; opacity: 0.9;">Open-L1</div>
+                                    <div style="font-family: inherit; font-size: 18px; font-weight: 700; color: #ffffff;">{{ kpis.openL1Count|default:"0" }}</div>
+                                </td>
+                                <td align="center" valign="middle" style="background-color: #07cdae; background: linear-gradient(135deg, #84d9d2 0%, #07cdae 100%); padding: 14px 6px; border-radius: 6px; width: 16.66%;">
+                                    <div style="font-family: inherit; font-size: 10px; font-weight: bold; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.1; letter-spacing: 0.3px; opacity: 0.9;">Won</div>
+                                    <div style="font-family: inherit; font-size: 18px; font-weight: 700; color: #ffffff;">{{ kpis.wonCount|default:"0" }}</div>
+                                </td>
+                                <td align="center" valign="middle" style="background-color: #7f39fb; background: linear-gradient(135deg, #c3a1ff 0%, #7f39fb 100%); padding: 14px 6px; border-radius: 6px; width: 16.66%;">
+                                    <div style="font-family: inherit; font-size: 10px; font-weight: bold; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.1; letter-spacing: 0.3px; opacity: 0.9;">Regretted</div>
+                                    <div style="font-family: inherit; font-size: 18px; font-weight: 700; color: #ffffff;">{{ kpis.regrettedCount|default:"0" }}</div>
+                                </td>
+                            </tr>
+                            <!-- ROW 2 -->
+                            <tr>
+                                <td align="center" valign="middle" style="background-color: #475569; background: linear-gradient(135deg, #64748b 0%, #475569 100%); padding: 14px 6px; border-radius: 6px; border: 1px solid #475569;">
+                                    <div style="font-family: inherit; font-size: 10px; font-weight: bold; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.1; letter-spacing: 0.3px; opacity: 0.9;">Lost</div>
+                                    <div style="font-family: inherit; font-size: 18px; font-weight: 700; color: #ffffff;">{{ kpis.lostCount|default:"0" }}</div>
+                                </td>
+                                <td align="center" valign="middle" style="background-color: #fe7096; background: linear-gradient(135deg, #ffbf96 0%, #fe7096 100%); padding: 14px 6px; border-radius: 6px; border: 1px solid #fe7096;">
+                                    <div style="font-family: inherit; font-size: 10px; font-weight: bold; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.1; letter-spacing: 0.3px; opacity: 0.9;">Hold</div>
+                                    <div style="font-family: inherit; font-size: 18px; font-weight: 700; color: #ffffff;">{{ kpis.holdCount|default:"0" }}</div>
+                                </td>
+                                <td align="center" valign="middle" style="background-color: #047edf; background: linear-gradient(135deg, #90caf9 0%, #047edf 100%); padding: 14px 6px; border-radius: 6px; border: 1px solid #047edf;">
+                                    <div style="font-family: inherit; font-size: 10px; font-weight: bold; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.1; letter-spacing: 0.3px; opacity: 0.9;">Quoted Value</div>
+                                    <div style="font-family: inherit; font-size: 13px; font-weight: 700; color: #ffffff;">Rs {{ kpis.quotedValue|intcomma }}</div>
+                                </td>
+                                <td align="center" valign="middle" style="background-color: #07cdae; background: linear-gradient(135deg, #84d9d2 0%, #07cdae 100%); padding: 14px 6px; border-radius: 6px; border: 1px solid #07cdae;">
+                                    <div style="font-family: inherit; font-size: 10px; font-weight: bold; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.1; letter-spacing: 0.3px; opacity: 0.9;">PO Value</div>
+                                    <div style="font-family: inherit; font-size: 13px; font-weight: 700; color: #ffffff;">Rs {{ kpis.poValue|intcomma }}</div>
+                                </td>
+                                <td align="center" valign="middle" style="background-color: #7f39fb; background: linear-gradient(135deg, #c3a1ff 0%, #7f39fb 100%); padding: 14px 6px; border-radius: 6px; border: 1px solid #7f39fb;">
+                                    <div style="font-family: inherit; font-size: 10px; font-weight: bold; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.1; letter-spacing: 0.3px; opacity: 0.9;">Open-L1 Value</div>
+                                    <div style="font-family: inherit; font-size: 13px; font-weight: 700; color: #ffffff;">Rs {{ kpis.openL1Value|intcomma }}</div>
+                                </td>
+                                <td align="center" valign="middle" style="background-color: #475569; background: linear-gradient(135deg, #64748b 0%, #475569 100%); padding: 14px 6px; border-radius: 6px; border: 1px solid #475569;">
+                                    <div style="font-family: inherit; font-size: 10px; font-weight: bold; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.1; letter-spacing: 0.3px; opacity: 0.9;">Lost Value</div>
+                                    <div style="font-family: inherit; font-size: 13px; font-weight: 700; color: #ffffff;">Rs {{ kpis.lostValue|intcomma }}</div>
+                                </td>
+                            </tr>
+                            <!-- ROW 3 -->
+                            <tr>
+                                <td align="center" valign="middle" style="background-color: #047edf; background: linear-gradient(135deg, #90caf9 0%, #047edf 100%); padding: 14px 6px; border-radius: 6px;">
+                                    <div style="font-family: inherit; font-size: 10px; font-weight: bold; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.1; letter-spacing: 0.3px; opacity: 0.9;">Sales To Quote</div>
+                                    <div style="font-family: inherit; font-size: 18px; font-weight: 700; color: #ffffff;">{{ kpis.salesToQuoteCount|default:"0" }}</div>
+                                </td>
+                                <td align="center" valign="middle" style="background-color: #7f39fb; background: linear-gradient(135deg, #c3a1ff 0%, #7f39fb 100%); padding: 14px 6px; border-radius: 6px;">
+                                    <div style="font-family: inherit; font-size: 10px; font-weight: bold; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.1; letter-spacing: 0.3px; opacity: 0.9;">Pending With Sales</div>
+                                    <div style="font-family: inherit; font-size: 18px; font-weight: 700; color: #ffffff;">{{ kpis.pendingWithSalesCount|default:"0" }}</div>
+                                </td>
+                                <td align="center" valign="middle" style="background-color: #fe7096; background: linear-gradient(135deg, #ffbf96 0%, #fe7096 100%); padding: 14px 6px; border-radius: 6px;">
+                                    <div style="font-family: inherit; font-size: 10px; font-weight: bold; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.1; letter-spacing: 0.3px; opacity: 0.9;">Pending With Engg</div>
+                                    <div style="font-family: inherit; font-size: 18px; font-weight: 700; color: #ffffff;">{{ kpis.pendingWithEnggCount|default:"0" }}</div>
+                                </td>
+                                <td align="center" valign="middle" style="background-color: #07cdae; background: linear-gradient(135deg, #84d9d2 0%, #07cdae 100%); padding: 14px 6px; border-radius: 6px;">
+                                    <div style="font-family: inherit; font-size: 10px; font-weight: bold; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.1; letter-spacing: 0.3px; opacity: 0.9;">Pending Costing</div>
+                                    <div style="font-family: inherit; font-size: 18px; font-weight: 700; color: #ffffff;">{{ kpis.pendingWithCostingCount|default:"0" }}</div>
+                                </td>
+                                <td align="center" valign="middle" style="background-color: #fe7096; background: linear-gradient(135deg, #ffbf96 0%, #fe7096 100%); padding: 14px 6px; border-radius: 6px;">
+                                    <div style="font-family: inherit; font-size: 10px; font-weight: bold; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.1; letter-spacing: 0.3px; opacity: 0.9;">Today's Due</div>
+                                    <div style="font-family: inherit; font-size: 18px; font-weight: 700; color: #ffffff;">{{ kpis.todaysDue|default:"0" }}</div>
+                                </td>
+                                <td align="center" valign="middle" style="background-color: #7f39fb; background: linear-gradient(135deg, #c3a1ff 0%, #7f39fb 100%); padding: 14px 6px; border-radius: 6px;">
+                                    <div style="font-family: inherit; font-size: 10px; font-weight: bold; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; line-height: 1.1; letter-spacing: 0.3px; opacity: 0.9;">Tomorrow Due</div>
+                                    <div style="font-family: inherit; font-size: 18px; font-weight: 700; color: #ffffff;">{{ kpis.tomorrowDue|default:"0" }}</div>
                                 </td>
                             </tr>
                         </table>
+                    </td>
+                </tr>
+
+                <!-- OPEN RFQ DETAILED TABLE SECTION -->
+                <tr>
+                    <td>
+                        <div class="scrollable-table-container">
+                            <table width="100%" border="0" cellpadding="6" cellspacing="0" style="width: 100%; min-width: 900px; border-collapse: collapse; border: 1px solid #cbd5e1; font-family: inherit; font-size: 12px; border-radius: 6px; overflow: hidden;">
+                                <thead>
+                                    <tr style="background: linear-gradient(135deg, #da8cff 0%, #9a55ff 100%); background-color: #9a55ff; border-bottom: 2px solid #ddd6fe;">
+                                        <th align="center" style="font-weight: bold; color: #FFFFFF; border: 1px solid #cbd5e1; padding: 10px 4px; font-size: 11px; width: 40px; text-transform: uppercase; letter-spacing: 0.5px;">S/No</th>
+                                        <th align="left" style="font-weight: bold; color: #FFFFFF; border: 1px solid #cbd5e1; padding: 10px 6px; font-size: 11px; width: 85px; text-transform: uppercase; letter-spacing: 0.5px;">Project No</th>
+                                        <th align="left" style="font-weight: bold; color: #FFFFFF; border: 1px solid #cbd5e1; padding: 10px 6px; font-size: 11px; width: 80px; text-transform: uppercase; letter-spacing: 0.5px;">RFQ Date</th>
+                                        <th align="left" style="font-weight: bold; color: #FFFFFF; border: 1px solid #cbd5e1; padding: 10px 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">RFQ No</th>
+                                        <th align="left" style="font-weight: bold; color: #FFFFFF; border: 1px solid #cbd5e1; padding: 10px 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Customer Name</th>
+                                        <th align="left" style="font-weight: bold; color: #FFFFFF; border: 1px solid #cbd5e1; padding: 10px 6px; font-size: 11px; width: 90px; text-transform: uppercase; letter-spacing: 0.5px;">Project Type</th>
+                                        <th align="left" style="font-weight: bold; color: #FFFFFF; border: 1px solid #cbd5e1; padding: 10px 6px; font-size: 11px; width: 110px; text-transform: uppercase; letter-spacing: 0.5px;">Division</th>
+                                        <th align="left" style="font-weight: bold; color: #FFFFFF; border: 1px solid #cbd5e1; padding: 10px 4px; font-size: 11px; width: 35px; text-transform: uppercase; letter-spacing: 0.5px;">SBU</th>
+                                        <th align="left" style="font-weight: bold; color: #FFFFFF; border: 1px solid #cbd5e1; padding: 10px 6px; font-size: 11px; width: 85px; text-transform: uppercase; letter-spacing: 0.5px;">RFQ Due Date</th>
+                                        <th align="center" style="font-weight: bold; color: #FFFFFF; border: 1px solid #cbd5e1; padding: 10px 4px; font-size: 11px; width: 70px; text-transform: uppercase; letter-spacing: 0.5px;">RFQ Aging</th>
+                                        <th align="left" style="font-weight: bold; color: #FFFFFF; border: 1px solid #cbd5e1; padding: 10px 6px; font-size: 11px; width: 120px; text-transform: uppercase; letter-spacing: 0.5px;">Status</th>
+                                        <th align="left" style="font-weight: bold; color: #FFFFFF; border: 1px solid #cbd5e1; padding: 10px 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for enq in enquiries %}
+                                    <tr style="background-color: {% if forloop.counter|divisibleby:2 %}#fdfbff{% else %}#ffffff{% endif %}; border-bottom: 1px solid #e2e8f0;">
+                                        <td align="center" style="border: 1px solid #cbd5e1; padding: 8px 4px; color: #475569;">{{ forloop.counter }}</td>
+                                        <td align="left" style="border: 1px solid #cbd5e1; padding: 8px 6px; font-weight: bold; color: #9a55ff; white-space: nowrap;">{{ enq.project_number }}</td>
+                                        <td align="left" style="border: 1px solid #cbd5e1; padding: 8px 6px; color: #475569; white-space: nowrap;">{{ enq.rfq_date|date:"d-m-Y" }}</td>
+                                        <td align="left" style="border: 1px solid #cbd5e1; padding: 8px 6px; color: #1e293b;">{{ enq.rfq_no }}</td>
+                                        <td align="left" style="border: 1px solid #cbd5e1; padding: 8px 6px; font-weight: 500; color: #1e293b;">{{ enq.customer.name }}</td>
+                                        <td align="left" style="border: 1px solid #cbd5e1; padding: 8px 6px; color: #475569;">{{ enq.rfq_type.name }}</td>
+                                        <td align="left" style="border: 1px solid #cbd5e1; padding: 8px 6px; color: #475569;">{{ enq.division.name }}</td>
+                                        <td align="left" style="border: 1px solid #cbd5e1; padding: 8px 4px; color: #475569; text-align: center;">{{ enq.sbu.name }}</td>
+                                        <td align="left" style="border: 1px solid #cbd5e1; padding: 8px 6px; color: #475569; white-space: nowrap;">{{ enq.rfq_due_date|date:"d-m-Y" }}</td>
+                                        <td align="center" style="border: 1px solid #cbd5e1; padding: 8px 4px; color: #475569;">{{ enq.rfq_aging }}</td>
+                                        <td align="left" style="border: 1px solid #cbd5e1; padding: 8px 6px; font-weight: 500; color: #1e293b; white-space: nowrap;">
+                                            <span style="display: inline-block; padding: 2px 6px; background-color: #f3e8ff; color: #6b21a8; border-radius: 4px; font-size: 11px;">{{ enq.status }}</span>
+                                        </td>
+                                        <td align="left" style="border: 1px solid #cbd5e1; padding: 8px 6px; color: #64748b;">{{ enq.remarks }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="12" align="center" style="padding: 30px; font-size: 14px; color: #64748b;">No open RFQs as of today.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+                
+                <!-- FOOTER DETAILS SECTION -->
+                <tr>
+                    <td style="padding-top: 30px; border-top: 1px solid #e2e8f0; font-family: inherit; font-size: 12px; color: #64748b; line-height: 1.6; text-align: left;">
+                        <p style="margin: 0 0 8px 0;">This is an automated performance update generated by CRM.</p>
+                        <p style="margin: 0 0 16px 0;"><strong>Dispatch Date:</strong> {{ current_date }}</p>
+                        <p style="margin: 0;">Best Regards,<br/><strong>CRM Automation System</strong></p>
                     </td>
                 </tr>
 
             </table>
-
+            
             <!--[if mso]>
             </td></tr></table>
             <![endif]-->

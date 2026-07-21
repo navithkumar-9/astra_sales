@@ -39,6 +39,8 @@ def send_mail_all_task(self, triggered_by_id=None):
     - Bug #11: Rate limiting with batch sleep intervals
     """
     from core.services.email_service import EmailService
+    from core.services.report_service import ReportService
+    from django.utils import timezone
 
     try:
         # Generate unique batch ID for this run
@@ -51,17 +53,28 @@ def send_mail_all_task(self, triggered_by_id=None):
             logger.info("No registered email addresses found.")
             return "No recipients found."
 
-        # Compose report
-        subject = "Astra CRM - Real-time Pipeline Performance Summary"
+        # Step 1: Generate latest report attachment
+        attachments = []
+        try:
+            report_path = ReportService.generate_latest_rfq_report()
+            attachments.append(report_path)
+            logger.info(f"Successfully generated RFQ report: {report_path}")
+        except Exception as e:
+            # Log failure but continue with email dispatch (graceful fallback)
+            logger.exception("Failed to generate RFQ report attachment. Dispatching email summary without attachment.")
+
+        # Step 2: Compose report
+        subject = f"RFQ Update - {timezone.now().strftime('%d-%m-%Y')}"
         body = EmailService.compose_crm_report_body()
 
-        # Send with connection pooling, rate limiting, and logging
+        # Step 3: Send with connection pooling, rate limiting, and logging
         result = EmailService.send_bulk_report(
             subject=subject,
             body=body,
             recipients=recipients,
             batch_id=batch_id,
             triggered_by_id=triggered_by_id,
+            attachments=attachments,
         )
 
         msg = (

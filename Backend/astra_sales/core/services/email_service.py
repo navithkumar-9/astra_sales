@@ -38,6 +38,7 @@ class EmailService:
         Uses cached dashboard data when available to avoid heavy re-computation.
         """
         from django.template.loader import render_to_string
+        from core.models.enquiry import Enquiry
         
         # Try cache first, fall back to live computation
         stats = CacheService.get_dashboard_stats()
@@ -45,10 +46,17 @@ class EmailService:
             stats = DashboardService.calculate_stats()
 
         kpis = stats.get('kpis', {})
+        
+        # Query open enquiries to display in the email template table
+        terminal_statuses = ['Won', 'Lost', 'Regretted', 'Quote Regretted']
+        enquiries = Enquiry.objects.exclude(status__in=terminal_statuses).order_by('-created_at').select_related(
+            'customer', 'sbu', 'division', 'rfq_type', 'fg_type', 'sales_rep'
+        )
 
         context = {
             'kpis': kpis,
-            'current_date': timezone.now().strftime("%B %d, %Y")
+            'current_date': timezone.now().strftime("%d-%m-%Y"),
+            'enquiries': enquiries,
         }
         
         return render_to_string('emails/crm_report.html', context)
@@ -69,7 +77,8 @@ class EmailService:
         body: str,
         recipients: List[str],
         batch_id: str,
-        triggered_by_id: Optional[int] = None
+        triggered_by_id: Optional[int] = None,
+        attachments: Optional[List[str]] = None
     ) -> dict:
         """
         Send individual emails to each recipient using SMTP connection pooling.
@@ -122,6 +131,16 @@ class EmailService:
                         connection=connection,
                     )
                     msg.content_subtype = "html"
+
+                    # Attach files if provided
+                    if attachments:
+                        from core.services.attachment_service import AttachmentService
+                        for attach_path in attachments:
+                            try:
+                                AttachmentService.attach_file(msg, attach_path)
+                            except Exception as ae:
+                                logger.error(f"Failed to attach file {attach_path} to email: {ae}")
+
                     msg.send(fail_silently=False)
 
                     sent_count += 1
