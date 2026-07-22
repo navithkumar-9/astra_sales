@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars, react-hooks/exhaustive-deps, react-hooks/rules-of-hooks */
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart,
     Tooltip, ResponsiveContainer, XAxis, YAxis, LineChart, Line, AreaChart, Area
@@ -10,8 +11,8 @@ import { useToast } from '../context/ToastContext';
 // Harmonious, premium color palette for charts
 const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#f97316', '#64748b', '#06b6d4'];
 
-const KpiCard = ({ title, value, gradient, shadowColor, icon, subtitle }) => (
-    <div className="card border-0 h-100 text-white shadow-sm" style={{ 
+const KpiCard = ({ title, value, gradient, shadowColor, icon, subtitle, onClick }) => (
+    <div className="card border-0 h-100 text-white shadow-sm" onClick={onClick} role={onClick ? 'button' : undefined} style={{  
         background: gradient, 
         borderRadius: '12px',
         boxShadow: `0 6px 20px ${shadowColor}`,
@@ -77,6 +78,7 @@ const ChartCard = ({ title, children }) => (
 
 const Dashboard = () => {
     const { showToast } = useToast();
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState({
         kpis: {
@@ -193,6 +195,26 @@ const Dashboard = () => {
 
     const { kpis, charts } = data;
 
+    const goTo = (path) => () => navigate(path);
+
+    const handleStatusNavigate = (statusName) => {
+        if (!statusName) return;
+        switch(statusName) {
+            case 'Pending with Engg': navigate('/pending-engg'); break;
+            case 'Pending with Costing': navigate('/pending-costing'); break;
+            case 'Sales to Quote': navigate('/sales-to-quote'); break;
+            case 'Pending with Sales': navigate('/pending-sales'); break;
+            case 'Quote Submitted': navigate('/enquiries?status=Quote%20Submitted'); break;
+            case 'Open - L1': navigate('/pipeline/open-l1'); break;
+            case 'Won': navigate('/pipeline/won'); break;
+            case 'Lost': navigate('/pipeline/lost'); break;
+            case 'Regretted':
+            case 'Quote Regretted': navigate('/pipeline/regretted'); break;
+            case 'On Hold': navigate('/pipeline/hold'); break;
+            default: navigate('/enquiries'); break;
+        }
+    };
+
     const formatCurrency = (val) => {
         const num = Number(val);
         if (isNaN(num)) return '₹0';
@@ -253,42 +275,42 @@ const Dashboard = () => {
             {/* KPIs Grid */}
             <div className="row g-3 mb-4">
                 <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="Total Enquiries" value={kpis.totalEnquiryCount} gradient="linear-gradient(to right, #ffbf96, #fe7096)" shadowColor="rgba(254, 112, 150, 0.25)" icon={icons.chart} subtitle={`+${kpis.recentCreatedCount} in last 30 days`} />
+                    <KpiCard title="Total Enquiries" value={kpis.totalEnquiryCount} gradient="linear-gradient(to right, #ffbf96, #fe7096)" shadowColor="rgba(254, 112, 150, 0.25)" icon={icons.chart} subtitle={`+${kpis.recentCreatedCount} in last 30 days`} onClick={goTo('/enquiries')} />
                 </div>
                 <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="Overall Pending" value={kpis.overallPendingCount} gradient="linear-gradient(to right, #90caf9, #047edf 99%)" shadowColor="rgba(4, 126, 223, 0.25)" icon={icons.clock} subtitle={`${kpis.overdueCount} Overdue`} />
+                    <KpiCard title="Overall Pending" value={kpis.overallPendingCount} gradient="linear-gradient(to right, #90caf9, #047edf 99%)" shadowColor="rgba(4, 126, 223, 0.25)" icon={icons.clock} subtitle={`${kpis.overdueCount} Overdue`} onClick={goTo('/kanban')} />
                 </div>
                 <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="Quoted (>90 Days)" value={kpis.quoted90Days} gradient="linear-gradient(to right, #84d9d2, #07cdae)" shadowColor="rgba(7, 205, 174, 0.25)" icon={icons.alert} subtitle="RFQ date > 90 days ago" />
+                    <KpiCard title="Quoted (>90 Days)" value={kpis.quoted90Days} gradient="linear-gradient(to right, #84d9d2, #07cdae)" shadowColor="rgba(7, 205, 174, 0.25)" icon={icons.alert} subtitle="RFQ date > 90 days ago" onClick={goTo('/pipeline/quoted-90')} />
                 </div>
                 <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="Budgetary Quotes" value={kpis.budgetaryCount} gradient="linear-gradient(to right, #c3a1ff, #7f39fb)" shadowColor="rgba(127, 57, 251, 0.25)" icon={icons.bookmark} subtitle={`Value: ${formatCurrency(kpis.budgetaryValue)}`} />
-                </div>
-                
-                <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="Open - L1" value={kpis.openL1Count} gradient="linear-gradient(to right, #ffbf96, #fe7096)" shadowColor="rgba(254, 112, 150, 0.25)" icon={icons.award} subtitle={`Value: ${formatCurrency(kpis.openL1Value)}`} />
-                </div>
-                <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="Won" value={kpis.wonCount} gradient="linear-gradient(to right, #84d9d2, #07cdae)" shadowColor="rgba(7, 205, 174, 0.25)" icon={icons.diamond} subtitle={`Win Rate: ${kpis.winRate}%`} />
-                </div>
-                <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="Lost" value={kpis.lostCount} gradient="linear-gradient(to right, #64748b, #475569)" shadowColor="rgba(100, 116, 139, 0.25)" icon={icons.clock} subtitle={`Value: ${formatCurrency(kpis.lostValue)}`} />
-                </div>
-                <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="On Hold" value={kpis.holdCount} gradient="linear-gradient(to right, #ffbf96, #fe7096)" shadowColor="rgba(254, 112, 150, 0.25)" icon={icons.bookmark} subtitle={`Value: ${formatCurrency(kpis.holdValue)}`} />
+                    <KpiCard title="Budgetary Quotes" value={kpis.budgetaryCount} gradient="linear-gradient(to right, #c3a1ff, #7f39fb)" shadowColor="rgba(127, 57, 251, 0.25)" icon={icons.bookmark} subtitle={`Value: ${formatCurrency(kpis.budgetaryValue)}`} onClick={goTo('/enquiries?rfq_type=Budgetary')} />
                 </div>
                 
                 <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="Quoted Value" value={formatCurrency(kpis.quotedValue)} gradient="linear-gradient(to right, #90caf9, #047edf 99%)" shadowColor="rgba(4, 126, 223, 0.25)" icon={icons.cash} subtitle="Total quoted pipeline" />
+                    <KpiCard title="Open - L1" value={kpis.openL1Count} gradient="linear-gradient(to right, #ffbf96, #fe7096)" shadowColor="rgba(254, 112, 150, 0.25)" icon={icons.award} subtitle={`Value: ${formatCurrency(kpis.openL1Value)}`} onClick={goTo('/pipeline/open-l1')} />
                 </div>
                 <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="PO Value" value={formatCurrency(kpis.poValue)} gradient="linear-gradient(to right, #84d9d2, #07cdae)" shadowColor="rgba(7, 205, 174, 0.25)" icon={icons.trending} subtitle="Total PO registered value" />
+                    <KpiCard title="Won" value={kpis.wonCount} gradient="linear-gradient(to right, #84d9d2, #07cdae)" shadowColor="rgba(7, 205, 174, 0.25)" icon={icons.diamond} subtitle={`Win Rate: ${kpis.winRate}%`} onClick={goTo('/pipeline/won')} />
                 </div>
                 <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="Open L1 Value" value={formatCurrency(kpis.openL1Value)} gradient="linear-gradient(to right, #c3a1ff, #7f39fb)" shadowColor="rgba(127, 57, 251, 0.25)" icon={icons.cash} subtitle="Active L1 value" />
+                    <KpiCard title="Lost" value={kpis.lostCount} gradient="linear-gradient(to right, #64748b, #475569)" shadowColor="rgba(100, 116, 139, 0.25)" icon={icons.clock} subtitle={`Value: ${formatCurrency(kpis.lostValue)}`} onClick={goTo('/pipeline/lost')} />
                 </div>
                 <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="Lost Value" value={formatCurrency(kpis.lostValue)} gradient="linear-gradient(to right, #64748b, #475569)" shadowColor="rgba(100, 116, 139, 0.25)" icon={icons.cash} subtitle="Failed quote value" />
+                    <KpiCard title="On Hold" value={kpis.holdCount} gradient="linear-gradient(to right, #ffbf96, #fe7096)" shadowColor="rgba(254, 112, 150, 0.25)" icon={icons.bookmark} subtitle={`Value: ${formatCurrency(kpis.holdValue)}`} onClick={goTo('/pipeline/hold')} />
+                </div>
+                
+                <div className="col-xl-3 col-md-4 col-sm-6">
+                    <KpiCard title="Quoted Value" value={formatCurrency(kpis.quotedValue)} gradient="linear-gradient(to right, #90caf9, #047edf 99%)" shadowColor="rgba(4, 126, 223, 0.25)" icon={icons.cash} subtitle="Total quoted pipeline" onClick={goTo('/enquiries?status=Quote%20Submitted')} />
+                </div>
+                <div className="col-xl-3 col-md-4 col-sm-6">
+                    <KpiCard title="PO Value" value={formatCurrency(kpis.poValue)} gradient="linear-gradient(to right, #84d9d2, #07cdae)" shadowColor="rgba(7, 205, 174, 0.25)" icon={icons.trending} subtitle="Total PO registered value" onClick={goTo('/pipeline/won')} />
+                </div>
+                <div className="col-xl-3 col-md-4 col-sm-6">
+                    <KpiCard title="Open L1 Value" value={formatCurrency(kpis.openL1Value)} gradient="linear-gradient(to right, #c3a1ff, #7f39fb)" shadowColor="rgba(127, 57, 251, 0.25)" icon={icons.cash} subtitle="Active L1 value" onClick={goTo('/pipeline/open-l1')} />
+                </div>
+                <div className="col-xl-3 col-md-4 col-sm-6">
+                    <KpiCard title="Lost Value" value={formatCurrency(kpis.lostValue)} gradient="linear-gradient(to right, #64748b, #475569)" shadowColor="rgba(100, 116, 139, 0.25)" icon={icons.cash} subtitle="Failed quote value" onClick={goTo('/pipeline/lost')} />
                 </div>
             </div>
 
@@ -299,8 +321,8 @@ const Dashboard = () => {
                     <ChartCard title="Status Distribution">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
-                                <Pie data={charts.statusDistribution} cx="50%" cy="50%" innerRadius={60} outerRadius={85} paddingAngle={4} dataKey="value">
-                                    {charts.statusDistribution?.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
+                                <Pie data={charts.statusDistribution} cx="50%" cy="50%" innerRadius={60} outerRadius={85} paddingAngle={4} dataKey="value" style={{ cursor: 'pointer' }} onClick={(entry) => entry && entry.name && handleStatusNavigate(entry.name)}>
+                                    {charts.statusDistribution?.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} cursor="pointer" />)}
                                 </Pie>
                                 <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }} />
                                 <Legend verticalAlign="bottom" height={36} iconType="circle" />
@@ -339,8 +361,8 @@ const Dashboard = () => {
                                 <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
                                 <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 11 }} width={120} />
                                 <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} />
-                                <Bar dataKey="value" fill="#8b5cf6" radius={[0, 6, 6, 0]}>
-                                    {charts.pipeline?.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
+                                <Bar dataKey="value" fill="#8b5cf6" radius={[0, 6, 6, 0]} style={{ cursor: 'pointer' }} onClick={(entry) => entry && entry.name && handleStatusNavigate(entry.name)}>
+                                    {charts.pipeline?.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} cursor="pointer" />)}
                                 </Bar>
                             </BarChart>
                         </ResponsiveContainer>
@@ -373,8 +395,8 @@ const Dashboard = () => {
                                 <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
                                 <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 11 }} width={100} />
                                 <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} />
-                                <Bar dataKey="count" fill="#3b82f6" radius={[0, 6, 6, 0]}>
-                                    {charts.salesPerformance?.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
+                                <Bar dataKey="count" fill="#3b82f6" radius={[0, 6, 6, 0]} style={{ cursor: 'pointer' }} onClick={() => navigate('/sales-rep-performance')}>
+                                    {charts.salesPerformance?.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} cursor="pointer" />)}
                                 </Bar>
                             </BarChart>
                         </ResponsiveContainer>
@@ -411,8 +433,14 @@ const Dashboard = () => {
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
                                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
                                 <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} />
-                                <Bar dataKey="value" fill="#f59e0b" radius={[6, 6, 0, 0]}>
-                                    {charts.ageing?.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
+                                <Bar dataKey="value" fill="#f59e0b" radius={[6, 6, 0, 0]} style={{ cursor: 'pointer' }} onClick={(entry) => {
+                                    if (entry && entry.name && (entry.name.includes('90') || entry.name.includes('>'))) {
+                                        navigate('/pipeline/quoted-90');
+                                    } else {
+                                        navigate('/kanban');
+                                    }
+                                }}>
+                                    {charts.ageing?.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} cursor="pointer" />)}
                                 </Bar>
                             </BarChart>
                         </ResponsiveContainer>
@@ -424,8 +452,8 @@ const Dashboard = () => {
                     <ChartCard title="Pending by Department">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
-                                <Pie data={charts.pendingByDept} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" labelLine={false} label>
-                                    {charts.pendingByDept?.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
+                                <Pie data={charts.pendingByDept} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" labelLine={false} label style={{ cursor: 'pointer' }} onClick={(entry) => entry && entry.name && handleStatusNavigate(entry.name)}>
+                                    {charts.pendingByDept?.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} cursor="pointer" />)}
                                 </Pie>
                                 <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} />
                                 <Legend verticalAlign="bottom" height={36} iconType="circle" />
@@ -473,7 +501,7 @@ const Dashboard = () => {
                             <tbody style={{ fontSize: '0.9rem', color: '#334155' }}>
                                 {data.recentQuotes && data.recentQuotes.length > 0 ? (
                                     data.recentQuotes.map((enq) => (
-                                        <tr key={enq.id} style={{ transition: 'background-color 0.15s' }}>
+                                        <tr key={enq.id} style={{ transition: 'background-color 0.15s', cursor: 'pointer' }} onClick={() => navigate('/enquiries?status=Quote%20Submitted')} title="Click to view Quote Submitted enquiries">
                                             <td className="px-3 py-3 font-weight-bold text-primary">{enq.project_number}</td>
                                             <td className="py-3">{enq.project_name}</td>
                                             <td className="py-3">{enq.customer}</td>

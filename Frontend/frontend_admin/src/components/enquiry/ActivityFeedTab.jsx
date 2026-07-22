@@ -122,7 +122,7 @@ const ActivityFeedTab = ({ enq, onSuccess }) => {
                     onChange={(e) => setDescription(e.target.value)}
                 />
                 <div className="d-flex justify-content-end">
-                    <button type="button" onClick={handleSubmit} className="btn btn-sm btn-primary px-4" disabled={submitting || !description.trim()}>
+                    <button type="button" onClick={handleSubmit} className="btn btn-sm btn-gradient-primary px-4 border-0 text-white" disabled={submitting || !description.trim()}>
                         {submitting ? 'Posting...' : 'Post Activity'}
                     </button>
                 </div>
@@ -198,7 +198,7 @@ const ActivityFeedTab = ({ enq, onSuccess }) => {
                                                 </button>
                                                 <button 
                                                     type="button" 
-                                                    className="btn btn-xs btn-primary px-2 py-0"
+                                                    className="btn btn-xs btn-gradient-primary px-2 py-0 border-0 text-white"
                                                     style={{ fontSize: '0.7rem' }}
                                                     onClick={() => handleEditSave(activity.id)}
                                                     disabled={updating || !editText.trim()}

@@ -366,7 +366,7 @@ const ViewEnquiryModal = ({ show, onClose, selectedEnquiry, onRefresh }) => {
                             <div className="enq-details-label">Attached Documents</div>
                             <div className="d-flex gap-3 mt-2">
                                 {selectedEnquiry.rfq_document ? (
-                                    <a href={selectedEnquiry.rfq_document} target="_blank" rel="noreferrer" className="btn btn-outline-primary btn-sm d-flex align-items-center gap-2 rounded-pill px-3">
+                                    <a href={selectedEnquiry.rfq_document} target="_blank" rel="noreferrer" className="btn btn-sm d-flex align-items-center gap-2 rounded-pill px-3 border shadow-sm" style={{ borderColor: '#9a55ff', color: '#9a55ff', fontWeight: '600' }}>
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                                             <polyline points="14 2 14 8 20 8" />
@@ -386,7 +386,7 @@ const ViewEnquiryModal = ({ show, onClose, selectedEnquiry, onRefresh }) => {
                                 )}
 
                                 {selectedEnquiry.po_document ? (
-                                    <a href={selectedEnquiry.po_document} target="_blank" rel="noreferrer" className="btn btn-outline-info btn-sm d-flex align-items-center gap-2 rounded-pill px-3">
+                                    <a href={selectedEnquiry.po_document} target="_blank" rel="noreferrer" className="btn btn-sm d-flex align-items-center gap-2 rounded-pill px-3 border shadow-sm" style={{ borderColor: '#9a55ff', color: '#9a55ff', fontWeight: '600' }}>
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                                             <polyline points="14 2 14 8 20 8" />

@@ -80,28 +80,32 @@ const SalesRepPerformance = () => {
     return (
         <div className="page-container p-4 fade-in" style={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
             {/* Header */}
-            <div className="row mb-4 align-items-center">
-                <div className="col-md-8">
-                    <h3 className="font-weight-bold text-dark mb-1" style={{ letterSpacing: '-0.5px' }}>Sales Rep Performance</h3>
-                    <p className="text-muted mb-0" style={{ fontSize: '0.9rem' }}>
+            <div className="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                <div>
+                    <h2 className="font-weight-bold text-dark mb-1" style={{ letterSpacing: '-0.5px' }}>Sales Rep Performance</h2>
+                    <p className="text-muted mb-0 small">
                         Track and analyze enquiry workflow, outcome metrics, and pipeline valuations for sales representatives.
                     </p>
                 </div>
-                <div className="col-md-4 text-md-end mt-3 mt-md-0">
+                <div>
                     <button 
-                        className="btn btn-outline-primary d-inline-flex align-items-center gap-2 border shadow-sm px-3 py-2"
+                        className="btn text-white border-0 shadow-sm rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
                         onClick={fetchPerformanceData}
                         disabled={loading}
-                        style={{ borderRadius: '8px', fontWeight: '500' }}
+                        style={{
+                            background: 'linear-gradient(to right, #da8cff, #9a55ff)',
+                            fontWeight: '600',
+                            fontSize: '0.85rem'
+                        }}
                     >
                         {loading ? (
                             <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                         ) : (
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                 <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
                             </svg>
                         )}
-                        Refresh Stats
+                        Sync Stats
                     </button>
                 </div>
             </div>
@@ -111,78 +115,118 @@ const SalesRepPerformance = () => {
                     <div className="spinner-border text-primary mb-3" style={{ width: '3rem', height: '3rem' }} role="status">
                         <span className="visually-hidden">Loading...</span>
                     </div>
-                    <div className="text-muted font-weight-bold">Loading Sales Rep Analytics...</div>
+                    <div className="text-muted font-weight-bold" style={{ letterSpacing: '1px' }}>LOADING SALES REP ANALYTICS...</div>
                 </div>
             ) : (
                 <>
-                    {/* KPI Dashboard Cards */}
-                    <div className="row mb-4">
+                    {/* KPI Dashboard Cards (Dashboard Color Theme) */}
+                    <div className="row g-3 mb-4">
                         {/* Card 1: Total Enquiries */}
-                        <div className="col-lg-3 col-md-6 mb-3">
-                            <div className="card border-0 h-100 shadow-sm" style={{ 
-                                borderRadius: '12px', 
-                                background: 'linear-gradient(135deg, #4f46e5 0%, #3730a3 100%)',
-                                color: '#ffffff'
+                        <div className="col-xl-3 col-md-4 col-sm-6">
+                            <div className="card border-0 h-100 text-white shadow-sm" style={{ 
+                                background: 'linear-gradient(to right, #ffbf96, #fe7096)', 
+                                borderRadius: '12px',
+                                boxShadow: '0 6px 20px rgba(254, 112, 150, 0.25)',
+                                position: 'relative',
+                                overflow: 'hidden'
                             }}>
-                                <div className="card-body p-4 position-relative overflow-hidden">
-                                    <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.08)' }} />
-                                    <h6 className="text-uppercase mb-2 font-weight-bold" style={{ fontSize: '0.75rem', letterSpacing: '1px', opacity: 0.85 }}>Total Enquiries</h6>
-                                    <h2 className="mb-0 font-weight-bold" style={{ fontSize: '2rem' }}>{performanceData.summary.totalEnquiries}</h2>
-                                    <p className="mb-0 mt-2 small" style={{ opacity: 0.75 }}>Assigned to all active reps</p>
+                                <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '130px', height: '130px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.13)' }} />
+                                <div style={{ position: 'absolute', top: '30px', right: '-60px', width: '130px', height: '130px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.13)' }} />
+                                <div className="card-body p-4 position-relative" style={{ zIndex: 2 }}>
+                                    <div className="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div className="small font-weight-bold text-uppercase tracking-wider mb-2" style={{ fontSize: '0.8rem', opacity: 0.85 }}>Total Enquiries</div>
+                                            <h2 className="mb-2 font-weight-bold" style={{ fontSize: '1.8rem', textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>{performanceData.summary.totalEnquiries}</h2>
+                                            <div className="small mt-2" style={{ opacity: 0.8, fontSize: '0.75rem' }}>Assigned to all active reps</div>
+                                        </div>
+                                        <div style={{ opacity: 0.85 }}>
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Card 2: Won Count */}
-                        <div className="col-lg-3 col-md-6 mb-3">
-                            <div className="card border-0 h-100 shadow-sm" style={{ 
-                                borderRadius: '12px', 
-                                background: 'linear-gradient(135deg, #10b981 0%, #065f46 100%)',
-                                color: '#ffffff'
+                        {/* Card 2: Total Won */}
+                        <div className="col-xl-3 col-md-4 col-sm-6">
+                            <div className="card border-0 h-100 text-white shadow-sm" style={{ 
+                                background: 'linear-gradient(to right, #84d9d2, #07cdae)', 
+                                borderRadius: '12px',
+                                boxShadow: '0 6px 20px rgba(7, 205, 174, 0.25)',
+                                position: 'relative',
+                                overflow: 'hidden'
                             }}>
-                                <div className="card-body p-4 position-relative overflow-hidden">
-                                    <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.08)' }} />
-                                    <h6 className="text-uppercase mb-2 font-weight-bold" style={{ fontSize: '0.75rem', letterSpacing: '1px', opacity: 0.85 }}>Total Won</h6>
-                                    <h2 className="mb-0 font-weight-bold" style={{ fontSize: '2rem' }}>{performanceData.summary.wonCount}</h2>
-                                    <p className="mb-0 mt-2 small" style={{ opacity: 0.75 }}>
-                                        Successful conversions ({performanceData.summary.totalEnquiries ? roundPercent(performanceData.summary.wonCount, performanceData.summary.totalEnquiries) : 0}%)
-                                    </p>
+                                <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '130px', height: '130px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.13)' }} />
+                                <div style={{ position: 'absolute', top: '30px', right: '-60px', width: '130px', height: '130px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.13)' }} />
+                                <div className="card-body p-4 position-relative" style={{ zIndex: 2 }}>
+                                    <div className="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div className="small font-weight-bold text-uppercase tracking-wider mb-2" style={{ fontSize: '0.8rem', opacity: 0.85 }}>Total Won</div>
+                                            <h2 className="mb-2 font-weight-bold" style={{ fontSize: '1.8rem', textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>{performanceData.summary.wonCount}</h2>
+                                            <div className="small mt-2" style={{ opacity: 0.8, fontSize: '0.75rem' }}>
+                                                Successful conversions ({performanceData.summary.totalEnquiries ? roundPercent(performanceData.summary.wonCount, performanceData.summary.totalEnquiries) : 0}%)
+                                            </div>
+                                        </div>
+                                        <div style={{ opacity: 0.85 }}>
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 3h12l4 6-10 13L2 9z"/></svg>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Card 3: Regretted Count */}
-                        <div className="col-lg-3 col-md-6 mb-3">
-                            <div className="card border-0 h-100 shadow-sm" style={{ 
-                                borderRadius: '12px', 
-                                background: 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)',
-                                color: '#ffffff'
+                        {/* Card 3: Total Regretted */}
+                        <div className="col-xl-3 col-md-4 col-sm-6">
+                            <div className="card border-0 h-100 text-white shadow-sm" style={{ 
+                                background: 'linear-gradient(to right, #c3a1ff, #7f39fb)', 
+                                borderRadius: '12px',
+                                boxShadow: '0 6px 20px rgba(127, 57, 251, 0.25)',
+                                position: 'relative',
+                                overflow: 'hidden'
                             }}>
-                                <div className="card-body p-4 position-relative overflow-hidden">
-                                    <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.08)' }} />
-                                    <h6 className="text-uppercase mb-2 font-weight-bold" style={{ fontSize: '0.75rem', letterSpacing: '1px', opacity: 0.85 }}>Total Regretted</h6>
-                                    <h2 className="mb-0 font-weight-bold" style={{ fontSize: '2rem' }}>{performanceData.summary.regrettedCount}</h2>
-                                    <p className="mb-0 mt-2 small" style={{ opacity: 0.75 }}>
-                                        Regretted + Quote Regretted ({performanceData.summary.totalEnquiries ? roundPercent(performanceData.summary.regrettedCount, performanceData.summary.totalEnquiries) : 0}%)
-                                    </p>
+                                <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '130px', height: '130px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.13)' }} />
+                                <div style={{ position: 'absolute', top: '30px', right: '-60px', width: '130px', height: '130px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.13)' }} />
+                                <div className="card-body p-4 position-relative" style={{ zIndex: 2 }}>
+                                    <div className="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div className="small font-weight-bold text-uppercase tracking-wider mb-2" style={{ fontSize: '0.8rem', opacity: 0.85 }}>Total Regretted</div>
+                                            <h2 className="mb-2 font-weight-bold" style={{ fontSize: '1.8rem', textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>{performanceData.summary.regrettedCount}</h2>
+                                            <div className="small mt-2" style={{ opacity: 0.8, fontSize: '0.75rem' }}>
+                                                Regretted + Quote Regretted ({performanceData.summary.totalEnquiries ? roundPercent(performanceData.summary.regrettedCount, performanceData.summary.totalEnquiries) : 0}%)
+                                            </div>
+                                        </div>
+                                        <div style={{ opacity: 0.85 }}>
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Card 4: Lost Count */}
-                        <div className="col-lg-3 col-md-6 mb-3">
-                            <div className="card border-0 h-100 shadow-sm" style={{ 
-                                borderRadius: '12px', 
-                                background: 'linear-gradient(135deg, #ef4444 0%, #991b1b 100%)',
-                                color: '#ffffff'
+                        {/* Card 4: Total Lost */}
+                        <div className="col-xl-3 col-md-4 col-sm-6">
+                            <div className="card border-0 h-100 text-white shadow-sm" style={{ 
+                                background: 'linear-gradient(to right, #64748b, #475569)', 
+                                borderRadius: '12px',
+                                boxShadow: '0 6px 20px rgba(100, 116, 139, 0.25)',
+                                position: 'relative',
+                                overflow: 'hidden'
                             }}>
-                                <div className="card-body p-4 position-relative overflow-hidden">
-                                    <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.08)' }} />
-                                    <h6 className="text-uppercase mb-2 font-weight-bold" style={{ fontSize: '0.75rem', letterSpacing: '1px', opacity: 0.85 }}>Total Lost</h6>
-                                    <h2 className="mb-0 font-weight-bold" style={{ fontSize: '2rem' }}>{performanceData.summary.lostCount}</h2>
-                                    <p className="mb-0 mt-2 small" style={{ opacity: 0.75 }}>
-                                        Lost outcomes ({performanceData.summary.totalEnquiries ? roundPercent(performanceData.summary.lostCount, performanceData.summary.totalEnquiries) : 0}%)
-                                    </p>
+                                <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '130px', height: '130px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.13)' }} />
+                                <div style={{ position: 'absolute', top: '30px', right: '-60px', width: '130px', height: '130px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.13)' }} />
+                                <div className="card-body p-4 position-relative" style={{ zIndex: 2 }}>
+                                    <div className="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div className="small font-weight-bold text-uppercase tracking-wider mb-2" style={{ fontSize: '0.8rem', opacity: 0.85 }}>Total Lost</div>
+                                            <h2 className="mb-2 font-weight-bold" style={{ fontSize: '1.8rem', textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>{performanceData.summary.lostCount}</h2>
+                                            <div className="small mt-2" style={{ opacity: 0.8, fontSize: '0.75rem' }}>
+                                                Lost outcomes ({performanceData.summary.totalEnquiries ? roundPercent(performanceData.summary.lostCount, performanceData.summary.totalEnquiries) : 0}%)
+                                            </div>
+                                        </div>
+                                        <div style={{ opacity: 0.85 }}>
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

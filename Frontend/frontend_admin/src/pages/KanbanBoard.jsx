@@ -179,7 +179,11 @@ const KanbanBoard = () => {
                                 </div>
                                 
                                 {/* Column Body */}
-                                <div className="kanban-column-body flex-grow-1" style={{ overflowY: 'auto', paddingRight: '4px' }}>
+                                <div className="kanban-column-body flex-grow-1" style={{ 
+                                    maxHeight: stageEnquiries.length > 5 ? '680px' : 'none', 
+                                    overflowY: stageEnquiries.length > 5 ? 'auto' : 'visible', 
+                                    paddingRight: '4px' 
+                                }}>
                                     {stageEnquiries.length === 0 ? (
                                         <div className="text-center p-5 text-muted small border-dashed rounded bg-white" style={{ opacity: 0.75, border: '2px dashed #cbd5e1' }}>
                                             No Enquiries
@@ -190,7 +194,6 @@ const KanbanBoard = () => {
                                             const ageColor = days > 60 ? '#ef4444' : days > 30 ? '#f59e0b' : '#10b981';
                                             const isOverdue = new Date(enq.rfq_due_date) < new Date() && !['Won', 'Lost', 'Regretted'].includes(enq.status);
                                             const priority = getPriority(enq);
-                                            const expectedRevenue = enq.quote_value || enq.po_value || 0;
                                             
                                             return (
                                                 <div 
@@ -223,11 +226,6 @@ const KanbanBoard = () => {
                                                         
                                                         <div className="text-secondary small mb-2 font-weight-medium text-truncate" title={enq.customer?.name} style={{ fontSize: '0.75rem' }}>
                                                             🏢 {enq.customer?.name || 'Unknown Customer'}
-                                                        </div>
-
-                                                        {/* Expected Revenue / Quote Value */}
-                                                        <div className="mb-2 text-dark font-weight-bold" style={{ fontSize: '0.8rem' }}>
-                                                            💰 Est: INR {Number(expectedRevenue).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                         </div>
 
                                                         {/* Badges/SBU/RFQs info */}

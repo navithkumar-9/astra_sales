@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars, react-hooks/exhaustive-deps, react-hooks/rules-of-hooks */
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import API from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -13,9 +14,20 @@ import FilterPanel from '../components/common/FilterPanel';
 import Pagination from '../components/common/Pagination';
 
 
+const getFiltersFromSearch = (search) => {
+    const params = new URLSearchParams(search);
+    const filters = {};
+    ['status', 'rfq_type'].forEach((key) => {
+        const value = params.get(key);
+        if (value) filters[key] = value;
+    });
+    return filters;
+};
+
 const Enquiries = () => {
     const { user } = useAuth();
     const { showToast } = useToast();
+    const location = useLocation();
 
     // Check role permissions
     const isSuperAdmin = user?.role === 'SUPERADMIN';
@@ -32,7 +44,7 @@ const Enquiries = () => {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [totalCount, setTotalCount] = useState(0);
-    const [filters, setFilters] = useState({});
+    const [filters, setFilters] = useState(() => getFiltersFromSearch(location.search));
     const [sortField, setSortField] = useState('created_at');
     const [sortDirection, setSortDirection] = useState('desc');
 
@@ -42,6 +54,16 @@ const Enquiries = () => {
     const [selectedEnquiry, setSelectedEnquiry] = useState(null);
 
     // Modals now manage their own state.
+
+    useEffect(() => {
+        const urlFilters = getFiltersFromSearch(location.search);
+        setFilters(prev => {
+            const withoutUrlFilters = { ...prev };
+            delete withoutUrlFilters.status;
+            delete withoutUrlFilters.rfq_type;
+            return { ...withoutUrlFilters, ...urlFilters };
+        });
+    }, [location.search]);
 
     // Fetch enquiries list
     const fetchEnquiries = async () => {

@@ -394,7 +394,17 @@ const EditSalesModal = ({ enq, show, onClose, onSuccess, onRefresh, canEdit, vie
                                 <div className="col-md-6">
                                     <label className="form-label font-weight-semibold text-secondary small uppercase" style={{ letterSpacing: '0.5px' }}>Status</label>
                                     <select className="form-select border-0 shadow-sm" style={{ padding: '0.75rem 1rem', borderRadius: '10px', fontWeight: 'bold', color: '#9a55ff' }} value={status} onChange={(e) => setStatus(e.target.value)} disabled={!canEdit || viewOnly}>
-                                        {enq?.status === 'Pending with Sales' || enq?.status === 'Quote Submitted' ? (
+                                        {enq?.status === 'Quote Submitted' ? (
+                                            <>
+                                                <option value="Quote Submitted">Quote Submitted</option>
+                                                <option value="Open - L1">Open - L1</option>
+                                                <option value="Won">Won</option>
+                                                <option value="Lost">Lost</option>
+                                                <option value="Regretted">Regretted</option>
+                                                <option value="Quote Regretted">Quote Regretted</option>
+                                                <option value="On Hold">On Hold</option>
+                                            </>
+                                        ) : enq?.status === 'Pending with Sales' ? (
                                             <>
                                                 <option value="Pending with Sales">Pending with Sales</option>
                                                 <option value="Quote Submitted">Quote Submitted</option>

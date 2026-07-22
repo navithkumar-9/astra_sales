@@ -21,8 +21,9 @@ const Sidebar = () => {
         openL1Count: 0,
         wonCount: 0,
         regrettedCount: 0,
-        lostCount: 0,
-        holdCount: 0
+                lostCount: 0,
+        holdCount: 0,
+        quoteSubmittedCount: 0
     });
 
     useEffect(() => {
@@ -36,8 +37,9 @@ const Sidebar = () => {
                         openL1Count: k.openL1Count || 0,
                         wonCount: k.wonCount || 0,
                         regrettedCount: k.regrettedCount || 0,
-                        lostCount: k.lostCount || 0,
-                        holdCount: k.holdCount || 0
+                                                lostCount: k.lostCount || 0,
+                        holdCount: k.holdCount || 0,
+                        quoteSubmittedCount: k.totalQuotedRecords || 0
                     });
                 }
             } catch (err) {
@@ -55,10 +57,12 @@ const Sidebar = () => {
                 return counts.wonCount;
             case 'Regretted':
                 return counts.regrettedCount;
-            case 'Lost':
+                        case 'Lost':
                 return counts.lostCount;
             case 'On Hold':
                 return counts.holdCount;
+            case 'Quote Submitted':
+                return counts.quoteSubmittedCount;
             default:
                 return null;
         }
@@ -163,11 +167,12 @@ const Sidebar = () => {
                 >
                     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
                     <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                    <line x1="12" y1="22.08" x2="12" y2="12" />
+                                        <line x1="12" y1="22.08" x2="12" y2="12" />
                 </svg>
             ),
             children: [
                 { path: '/pipeline/quoted-90', label: 'Quoted (>90 Days)' },
+                ...(counts.quoteSubmittedCount > 5 ? [{ path: '/enquiries?status=Quote%20Submitted', label: 'Quote Submitted' }] : []),
                 { path: '/pipeline/open-l1', label: 'Open L1' },
                 { path: '/pipeline/won', label: 'Won' },
                 { path: '/pipeline/regretted', label: 'Regretted' },
