@@ -44,10 +44,23 @@ class CacheService:
     def invalidate_all_enquiries():
         """Invalidate all cached enquiry lists."""
         if hasattr(cache, "delete_pattern"):
-            cache.delete_pattern(f"{CacheService.ENQUIRIES_CACHE_PREFIX}:*")
-        else:
-            # Fallback if cache backend doesn't support delete_pattern (e.g. dummy cache)
-            pass
+            try:
+                cache.delete_pattern(f"{CacheService.ENQUIRIES_CACHE_PREFIX}:*")
+                return
+            except Exception:
+                pass
+        
+        # Robust fallback for django-redis or default backends
+        try:
+            if hasattr(cache, "_cache") and hasattr(cache._cache, "get_client"):
+                client = cache._cache.get_client()
+                keys = client.keys(f"*{CacheService.ENQUIRIES_CACHE_PREFIX}:*")
+                if keys:
+                    client.delete(*keys)
+            else:
+                cache.clear()
+        except Exception:
+            cache.clear()
 
     @staticmethod
     def invalidate_dashboard():

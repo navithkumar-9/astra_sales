@@ -104,11 +104,10 @@ const CreateMember = () => {
                     <div className="form-group mb-3">
                         <label className="form-label">Role</label>
                         <select
-                            className="form-input"
+                            className="form-input form-control bg-transparent text-dark w-100"
                             value={form.role}
                             onChange={(e) => setForm({ ...form, role: e.target.value })}
                             required
-                            className="form-control bg-transparent text-dark w-100"
                         >
                             {getAllowedRoles().map((role) => (
                                 <option key={role.value} value={role.value} className="text-dark bg-white">

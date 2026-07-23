@@ -27,7 +27,9 @@ def run_export_task(self, job_id: int, export_format: str, filters: dict):
     try:
         # Step 1: Fetch job and target queryset
         job = repository.get(job_id)
-        queryset = Enquiry.objects.all().order_by('-created_at')
+        queryset = Enquiry.objects.select_related(
+            'customer', 'sbu', 'division', 'rfq_type', 'fg_type', 'sales_rep'
+        ).order_by('-created_at')
 
         # Apply filters (basic support for status and search)
         if filters:

@@ -207,13 +207,13 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "UTC"
 
-# Celery Hardening (Bug #2, #3, #9 fixes)
-# CELERY_TASK_SOFT_TIME_LIMIT = 300          # 5 min soft limit (raises SoftTimeLimitExceeded)
-# CELERY_TASK_TIME_LIMIT = 360               # 6 min hard kill
-# CELERY_TASK_ACKS_LATE = True               # Acknowledge after execution, not before
-# CELERY_TASK_REJECT_ON_WORKER_LOST = True   # Re-queue if worker crashes
-# CELERY_WORKER_PREFETCH_MULTIPLIER = 1      # Prevent greedy prefetching
-# CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True  # Retry broker connection on boot
+# Celery Hardening
+CELERY_TASK_SOFT_TIME_LIMIT = 300          # 5 min soft limit (raises SoftTimeLimitExceeded)
+CELERY_TASK_TIME_LIMIT = 360               # 6 min hard kill
+CELERY_TASK_ACKS_LATE = True               # Acknowledge after execution, not before
+CELERY_TASK_REJECT_ON_WORKER_LOST = True   # Re-queue if worker crashes
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1      # Prevent greedy prefetching
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True  # Retry broker connection on boot
 
 # ──────────────────────────────────────────────
 # Email Configuration

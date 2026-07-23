@@ -85,6 +85,10 @@ class Enquiry(TimeStampedModel):
             models.Index(fields=['rfq_date'], name='enq_rfq_date_idx'),
             models.Index(fields=['rfq_due_date'], name='enq_rfq_due_date_idx'),
             models.Index(fields=['quote_date'], name='enq_quote_date_idx'),
+            models.Index(fields=['status', 'sales_rep', 'rfq_date'], name='enq_stat_rep_date_idx'),
+            models.Index(fields=['sales_rep', 'rfq_date'], name='enq_rep_date_idx'),
+            models.Index(fields=['status', 'customer', 'rfq_date'], name='enq_stat_cust_date_idx'),
+            models.Index(fields=['status', 'rfq_due_date'], name='enq_stat_duedate_idx'),
         ]
         constraints = [
             models.CheckConstraint(condition=models.Q(quote_value__gte=0), name='check_quote_value_non_negative'),
@@ -160,13 +164,6 @@ class Enquiry(TimeStampedModel):
                 )
 
         super().save(*args, **kwargs)
-
-    class Meta:
-        indexes = [
-            models.Index(fields=['status', 'sales_rep', 'rfq_date']),
-            models.Index(fields=['sales_rep', 'rfq_date']),
-            models.Index(fields=['status', 'customer', 'rfq_date']),
-        ]
 
     def __str__(self):
         return f"{self.project_number} - {self.project_name}"
