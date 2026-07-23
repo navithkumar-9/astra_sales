@@ -65,12 +65,12 @@ const KpiCard = ({ title, value, gradient, shadowColor, icon, subtitle, onClick 
     </div>
 );
 
-const ChartCard = ({ title, children }) => (
+const ChartCard = ({ title, children, minHeight = '340px', bodyStyle = {} }) => (
     <div className="card border-0 h-100 shadow-sm" style={{ borderRadius: '16px', backgroundColor: '#ffffff' }}>
         <div className="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex align-items-center justify-content-between">
             <h6 className="font-weight-bold mb-0 text-dark" style={{ letterSpacing: '0.5px' }}>{title}</h6>
         </div>
-        <div className="card-body px-4 pb-4 pt-3" style={{ height: '320px', position: 'relative' }}>
+        <div className="card-body px-4 pb-4 pt-3 d-flex flex-column" style={{ minHeight, position: 'relative', ...bodyStyle }}>
             {children}
         </div>
     </div>
@@ -327,15 +327,15 @@ const Dashboard = () => {
                 {/* 1. Enquiry Status Distribution */}
                 <div className="col-lg-4 col-md-6">
                     <ChartCard title="Status Distribution">
-                        <div style={{ width: '100%', height: '220px' }}>
+                        <div style={{ width: '100%', height: '185px' }}>
                             <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
+                                <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
                                     <Pie 
                                         data={charts.statusDistribution?.map(d => ({ ...d, name: d.name || d.status }))} 
                                         cx="50%" 
                                         cy="50%" 
-                                        innerRadius={50} 
-                                        outerRadius={75} 
+                                        innerRadius={42} 
+                                        outerRadius={68} 
                                         paddingAngle={4} 
                                         dataKey="value" 
                                         label={({ value }) => value > 0 ? `${value}` : ''}
@@ -374,8 +374,8 @@ const Dashboard = () => {
                             </ResponsiveContainer>
                         </div>
                         {/* Detailed Status Breakdown List */}
-                        <div className="mt-2 pt-2 border-top" style={{ maxHeight: '130px', overflowY: 'auto' }}>
-                            <div className="row g-2">
+                        <div className="mt-2 pt-2 border-top flex-grow-1" style={{ maxHeight: '130px', overflowY: 'auto' }}>
+                            <div className="row g-1">
                                 {charts.statusDistribution?.map((item, idx) => {
                                     const statusName = item.status || item.name;
                                     const val = item.value || 0;
@@ -385,7 +385,7 @@ const Dashboard = () => {
                                     return (
                                         <div 
                                             key={idx} 
-                                            className="col-12 d-flex align-items-center justify-content-between p-2 rounded-2 bg-light" 
+                                            className="col-12 d-flex align-items-center justify-content-between p-1.5 px-2 rounded-2 bg-light mb-1" 
                                             style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
                                             onClick={() => handleStatusNavigate(statusName)}
                                         >
