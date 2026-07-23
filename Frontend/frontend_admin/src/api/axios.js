@@ -6,6 +6,15 @@ const API = axios.create({
 
 let cachedToken = null;
 
+export const setCachedToken = (token) => {
+    cachedToken = token;
+    if (token) {
+        API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+        delete API.defaults.headers.common['Authorization'];
+    }
+};
+
 // Retrieve access token from memory cache or fallback to localStorage
 const getAccessToken = () => {
     if (cachedToken) return cachedToken;
@@ -22,7 +31,16 @@ const getAccessToken = () => {
 if (typeof window !== 'undefined') {
     window.addEventListener('storage', (e) => {
         if (e.key === 'admin_tokens') {
-            cachedToken = null;
+            if (!e.newValue) {
+                setCachedToken(null);
+            } else {
+                try {
+                    const parsed = JSON.parse(e.newValue);
+                    setCachedToken(parsed?.access || null);
+                } catch {
+                    setCachedToken(null);
+                }
+            }
         }
     });
 }

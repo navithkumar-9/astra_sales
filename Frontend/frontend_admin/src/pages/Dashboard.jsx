@@ -281,36 +281,44 @@ const Dashboard = () => {
                     <KpiCard title="Overall Pending" value={kpis.overallPendingCount} gradient="linear-gradient(to right, #90caf9, #047edf 99%)" shadowColor="rgba(4, 126, 223, 0.25)" icon={icons.clock} subtitle={`${kpis.overdueCount} Overdue`} onClick={goTo('/kanban')} />
                 </div>
                 <div className="col-xl-3 col-md-4 col-sm-6">
+                    <KpiCard title="Today's Due" value={kpis.todaysDue} gradient="linear-gradient(to right, #ffb74d, #f57c00)" shadowColor="rgba(245, 124, 0, 0.25)" icon={icons.clock} subtitle="Pending action today" onClick={goTo(`/enquiries?rfq_due_date=${new Date().toISOString().split('T')[0]}`)} />
+                </div>
+                <div className="col-xl-3 col-md-4 col-sm-6">
+                    <KpiCard 
+                        title="Tomorrow's Due" 
+                        value={kpis.tomorrowDue} 
+                        gradient="linear-gradient(to right, #4dd0e1, #00acc1)" 
+                        shadowColor="rgba(0, 172, 193, 0.25)" 
+                        icon={icons.clock} 
+                        subtitle="Pending action tomorrow" 
+                        onClick={goTo(`/enquiries?rfq_due_date=${(() => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().split('T')[0]; })()}`)} 
+                    />
+                </div>
+                
+                <div className="col-xl-3 col-md-4 col-sm-6">
                     <KpiCard title="Quoted (>90 Days)" value={kpis.quoted90Days} gradient="linear-gradient(to right, #84d9d2, #07cdae)" shadowColor="rgba(7, 205, 174, 0.25)" icon={icons.alert} subtitle="RFQ date > 90 days ago" onClick={goTo('/pipeline/quoted-90')} />
                 </div>
                 <div className="col-xl-3 col-md-4 col-sm-6">
                     <KpiCard title="Budgetary Quotes" value={kpis.budgetaryCount} gradient="linear-gradient(to right, #c3a1ff, #7f39fb)" shadowColor="rgba(127, 57, 251, 0.25)" icon={icons.bookmark} subtitle={`Value: ${formatCurrency(kpis.budgetaryValue)}`} onClick={goTo('/enquiries?rfq_type=Budgetary')} />
                 </div>
-                
                 <div className="col-xl-3 col-md-4 col-sm-6">
                     <KpiCard title="Open - L1" value={kpis.openL1Count} gradient="linear-gradient(to right, #ffbf96, #fe7096)" shadowColor="rgba(254, 112, 150, 0.25)" icon={icons.award} subtitle={`Value: ${formatCurrency(kpis.openL1Value)}`} onClick={goTo('/pipeline/open-l1')} />
                 </div>
                 <div className="col-xl-3 col-md-4 col-sm-6">
                     <KpiCard title="Won" value={kpis.wonCount} gradient="linear-gradient(to right, #84d9d2, #07cdae)" shadowColor="rgba(7, 205, 174, 0.25)" icon={icons.diamond} subtitle={`Win Rate: ${kpis.winRate}%`} onClick={goTo('/pipeline/won')} />
                 </div>
+                
                 <div className="col-xl-3 col-md-4 col-sm-6">
                     <KpiCard title="Lost" value={kpis.lostCount} gradient="linear-gradient(to right, #64748b, #475569)" shadowColor="rgba(100, 116, 139, 0.25)" icon={icons.clock} subtitle={`Value: ${formatCurrency(kpis.lostValue)}`} onClick={goTo('/pipeline/lost')} />
                 </div>
                 <div className="col-xl-3 col-md-4 col-sm-6">
                     <KpiCard title="On Hold" value={kpis.holdCount} gradient="linear-gradient(to right, #ffbf96, #fe7096)" shadowColor="rgba(254, 112, 150, 0.25)" icon={icons.bookmark} subtitle={`Value: ${formatCurrency(kpis.holdValue)}`} onClick={goTo('/pipeline/hold')} />
                 </div>
-                
                 <div className="col-xl-3 col-md-4 col-sm-6">
                     <KpiCard title="Quoted Value" value={formatCurrency(kpis.quotedValue)} gradient="linear-gradient(to right, #90caf9, #047edf 99%)" shadowColor="rgba(4, 126, 223, 0.25)" icon={icons.cash} subtitle="Total quoted pipeline" onClick={goTo('/enquiries?status=Quote%20Submitted')} />
                 </div>
                 <div className="col-xl-3 col-md-4 col-sm-6">
                     <KpiCard title="PO Value" value={formatCurrency(kpis.poValue)} gradient="linear-gradient(to right, #84d9d2, #07cdae)" shadowColor="rgba(7, 205, 174, 0.25)" icon={icons.trending} subtitle="Total PO registered value" onClick={goTo('/pipeline/won')} />
-                </div>
-                <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="Open L1 Value" value={formatCurrency(kpis.openL1Value)} gradient="linear-gradient(to right, #c3a1ff, #7f39fb)" shadowColor="rgba(127, 57, 251, 0.25)" icon={icons.cash} subtitle="Active L1 value" onClick={goTo('/pipeline/open-l1')} />
-                </div>
-                <div className="col-xl-3 col-md-4 col-sm-6">
-                    <KpiCard title="Lost Value" value={formatCurrency(kpis.lostValue)} gradient="linear-gradient(to right, #64748b, #475569)" shadowColor="rgba(100, 116, 139, 0.25)" icon={icons.cash} subtitle="Failed quote value" onClick={goTo('/pipeline/lost')} />
                 </div>
             </div>
 
@@ -319,15 +327,80 @@ const Dashboard = () => {
                 {/* 1. Enquiry Status Distribution */}
                 <div className="col-lg-4 col-md-6">
                     <ChartCard title="Status Distribution">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie data={charts.statusDistribution} cx="50%" cy="50%" innerRadius={60} outerRadius={85} paddingAngle={4} dataKey="value" style={{ cursor: 'pointer' }} onClick={(entry) => entry && entry.name && handleStatusNavigate(entry.name)}>
-                                    {charts.statusDistribution?.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} cursor="pointer" />)}
-                                </Pie>
-                                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }} />
-                                <Legend verticalAlign="bottom" height={36} iconType="circle" />
-                            </PieChart>
-                        </ResponsiveContainer>
+                        <div style={{ width: '100%', height: '220px' }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie 
+                                        data={charts.statusDistribution?.map(d => ({ ...d, name: d.name || d.status }))} 
+                                        cx="50%" 
+                                        cy="50%" 
+                                        innerRadius={50} 
+                                        outerRadius={75} 
+                                        paddingAngle={4} 
+                                        dataKey="value" 
+                                        label={({ value }) => value > 0 ? `${value}` : ''}
+                                        labelLine={false}
+                                        style={{ cursor: 'pointer' }} 
+                                        onClick={(entry) => entry && (entry.name || entry.status) && handleStatusNavigate(entry.name || entry.status)}
+                                    >
+                                        {charts.statusDistribution?.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} cursor="pointer" />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip 
+                                        content={({ active, payload }) => {
+                                            if (active && payload && payload.length) {
+                                                const data = payload[0];
+                                                const statusName = data.name || data.payload?.status || 'Unknown';
+                                                const val = data.value || 0;
+                                                const total = charts.statusDistribution?.reduce((sum, item) => sum + (item.value || 0), 0) || 1;
+                                                const pct = ((val / total) * 100).toFixed(1);
+                                                return (
+                                                    <div className="p-3 bg-white shadow-lg rounded-3 border-0" style={{ fontSize: '0.85rem' }}>
+                                                        <div className="d-flex align-items-center gap-2 font-weight-bold mb-1" style={{ color: data.color || '#9a55ff' }}>
+                                                            <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: data.color || '#9a55ff' }} />
+                                                            {statusName}
+                                                        </div>
+                                                        <div className="text-dark font-weight-bold" style={{ fontSize: '0.95rem' }}>
+                                                            {val} <span className="text-muted font-weight-normal" style={{ fontSize: '0.75rem' }}>enquiries ({pct}%)</span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        }}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                        {/* Detailed Status Breakdown List */}
+                        <div className="mt-2 pt-2 border-top" style={{ maxHeight: '130px', overflowY: 'auto' }}>
+                            <div className="row g-2">
+                                {charts.statusDistribution?.map((item, idx) => {
+                                    const statusName = item.status || item.name;
+                                    const val = item.value || 0;
+                                    const total = charts.statusDistribution?.reduce((sum, i) => sum + (i.value || 0), 0) || 1;
+                                    const pct = ((val / total) * 100).toFixed(1);
+                                    const color = CHART_COLORS[idx % CHART_COLORS.length];
+                                    return (
+                                        <div 
+                                            key={idx} 
+                                            className="col-12 d-flex align-items-center justify-content-between p-2 rounded-2 bg-light" 
+                                            style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
+                                            onClick={() => handleStatusNavigate(statusName)}
+                                        >
+                                            <div className="d-flex align-items-center gap-2 text-truncate pe-1">
+                                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: color, flexShrink: 0 }} />
+                                                <span className="small font-weight-medium text-dark text-truncate" title={statusName}>{statusName}</span>
+                                            </div>
+                                            <span className="badge bg-white text-dark border shadow-sm rounded-pill font-weight-bold ms-1" style={{ fontSize: '0.72rem' }}>
+                                                {val} <span className="text-muted ms-1">({pct}%)</span>
+                                            </span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
                     </ChartCard>
                 </div>
 

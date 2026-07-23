@@ -24,6 +24,7 @@
    ══════════════════════════════════════════ */
 .sidebar {
     width: 260px;
+    height: 100vh;
     min-height: 100vh;
     background: var(--bg-sidebar);
     display: flex;
@@ -32,7 +33,7 @@
     border-right: 1px solid var(--border-color);
     position: sticky;
     top: 0;
-    height: 100vh;
+    overflow: hidden;
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .sidebar.collapsed {
@@ -43,39 +44,47 @@
 .sidebar.collapsed .nav-section-label,
 .sidebar.collapsed .sidebar-profile-info,
 .sidebar.collapsed .logout-label {
-    display: none;
+    display: none !important;
 }
 .sidebar.collapsed .nav-item {
-    justify-content: center;
-    padding: 10px 0;
+    justify-content: center !important;
+    padding: 12px 0 !important;
+    width: 100% !important;
+}
+.sidebar.collapsed .nav-icon {
+    margin: 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 .sidebar.collapsed .sidebar-brand {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 10px 0 20px;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    padding: 14px 0 16px !important;
+    margin-bottom: 12px !important;
 }
 .sidebar.collapsed .sidebar-toggle-btn {
-    margin: 0 auto;
-    align-self: center;
+    margin: 0 auto !important;
+    align-self: center !important;
 }
 .sidebar.collapsed .sidebar-profile {
-    justify-content: center;
-    padding: 8px 0;
-    margin: 0 auto 15px;
-    background: transparent;
-    border: none;
-    box-shadow: none;
+    justify-content: center !important;
+    padding: 8px 0 !important;
+    margin: 0 auto 15px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 .sidebar.collapsed .sidebar-bottom {
-    align-items: center;
-    justify-content: center;
+    align-items: center !important;
+    justify-content: center !important;
 }
 .sidebar.collapsed .sidebar-logout {
-    justify-content: center;
-    padding: 10px;
-    width: 40px;
+    justify-content: center !important;
+    padding: 10px !important;
+    width: 40px !important;
 }
 .sidebar-toggle-btn {
     margin-left: auto;
@@ -96,6 +105,25 @@
 }
 .sidebar-top {
     padding: 20px 0 14px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.sidebar-top::-webkit-scrollbar {
+    width: 4px;
+}
+.sidebar-top::-webkit-scrollbar-track {
+    background: transparent;
+}
+.sidebar-top::-webkit-scrollbar-thumb {
+    background: rgba(154, 85, 255, 0.2);
+    border-radius: 4px;
+}
+.sidebar-top::-webkit-scrollbar-thumb:hover {
+    background: rgba(154, 85, 255, 0.4);
 }
 .sidebar-brand {
     display: flex;

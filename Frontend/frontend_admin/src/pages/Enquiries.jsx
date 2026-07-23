@@ -33,7 +33,8 @@ const Enquiries = () => {
     const isSuperAdmin = user?.role === 'SUPERADMIN';
     const isAdmin = user?.role === 'ADMIN';
     const isRfqTracker = user?.role === 'RFQ_TRACKER';
-    const canCreate = isSuperAdmin || isAdmin || isRfqTracker;
+    const isSalesRep = user?.role === 'SALES_REP';
+    const canCreate = isRfqTracker || isSalesRep;
     const canDelete = isSuperAdmin || isAdmin || isRfqTracker;
 
     const today = new Date().toISOString().split('T')[0];

@@ -270,17 +270,17 @@ const ViewEnquiryModal = ({ show, onClose, selectedEnquiry, onRefresh }) => {
                             </div>
                             <div className="col-md-4">
                                 <div className="enq-details-card bg-white border-0 shadow-sm">
-                                    <div className="enq-details-label">Quote Value ($)</div>
+                                    <div className="enq-details-label">Quote Value (₹)</div>
                                     <div className="enq-details-value text-secondary" style={{ fontSize: '0.9rem' }}>
-                                        {selectedEnquiry.quote_value ? `INR ${Number(selectedEnquiry.quote_value).toLocaleString()}` : 'N/A'}
+                                        {selectedEnquiry.quote_value ? `₹${Number(selectedEnquiry.quote_value).toLocaleString('en-IN')}` : 'N/A'}
                                     </div>
                                 </div>
                             </div>
                             <div className="col-md-4">
                                 <div className="enq-details-card bg-white border-0 shadow-sm">
-                                    <div className="enq-details-label">Open-L1 Value ($)</div>
+                                    <div className="enq-details-label">Open-L1 Value (₹)</div>
                                     <div className="enq-details-value text-secondary" style={{ fontSize: '0.9rem' }}>
-                                        {selectedEnquiry.open_l1_value ? `INR ${Number(selectedEnquiry.open_l1_value).toLocaleString()}` : 'N/A'}
+                                        {selectedEnquiry.open_l1_value ? `₹${Number(selectedEnquiry.open_l1_value).toLocaleString('en-IN')}` : 'N/A'}
                                     </div>
                                 </div>
                             </div>
@@ -296,9 +296,9 @@ const ViewEnquiryModal = ({ show, onClose, selectedEnquiry, onRefresh }) => {
                             </div>
                             <div className="col-md-4">
                                 <div className="enq-details-card bg-white border-0 shadow-sm">
-                                    <div className="enq-details-label">Lost Value ($)</div>
+                                    <div className="enq-details-label">Lost Value (₹)</div>
                                     <div className="enq-details-value text-secondary" style={{ fontSize: '0.9rem' }}>
-                                        {selectedEnquiry.lost_value ? `INR ${Number(selectedEnquiry.lost_value).toLocaleString()}` : 'N/A'}
+                                        {selectedEnquiry.lost_value ? `₹${Number(selectedEnquiry.lost_value).toLocaleString('en-IN')}` : 'N/A'}
                                     </div>
                                 </div>
                             </div>
@@ -322,9 +322,9 @@ const ViewEnquiryModal = ({ show, onClose, selectedEnquiry, onRefresh }) => {
                             </div>
                             <div className="col-md-6">
                                 <div className="enq-details-card bg-white border-0 shadow-sm">
-                                    <div className="enq-details-label">PO Value ($)</div>
+                                    <div className="enq-details-label">PO Value (₹)</div>
                                     <div className="enq-details-value text-secondary" style={{ fontSize: '0.9rem' }}>
-                                        {selectedEnquiry.po_value ? `INR ${Number(selectedEnquiry.po_value).toLocaleString()}` : 'N/A'}
+                                        {selectedEnquiry.po_value ? `₹${Number(selectedEnquiry.po_value).toLocaleString('en-IN')}` : 'N/A'}
                                     </div>
                                 </div>
                             </div>

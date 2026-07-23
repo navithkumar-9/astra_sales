@@ -85,6 +85,10 @@ class EnquiryViewSet(BaseModelViewSet):
             else:
                 queryset = queryset.filter(rfq_type__name__icontains=rfq_type)
 
+        rfq_due_date = params.get("rfq_due_date", "").strip()
+        if rfq_due_date:
+            queryset = queryset.filter(rfq_due_date=rfq_due_date)
+
         # Date Range filters
         rfq_date_from = params.get("rfq_date_from", "").strip()
         if rfq_date_from:

@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars, react-hooks/exhaustive-deps, react-hooks/rules-of-hooks */
 import { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import API from '../api/axios';
+import API, { setCachedToken } from '../api/axios';
 
 const AuthContext = createContext();
 
@@ -22,15 +22,13 @@ export const AuthProvider = ({ children }) => {
                 if (res.data.success) {
                     const profileData = res.data.data;
                     setUser((prev) => {
-                        if (!prev) return prev;
                         const updated = {
-                            ...prev,
-                            id: profileData.id,
-                            can_crud_tasks: profileData.can_crud_tasks,
-                            name: profileData.name,
-                            employee_id: profileData.employee_id,
-                            profile_picture: profileData.profile_picture,
+                            ...(prev || {}),
+                            ...profileData,
+                            role: profileData.role || prev?.role,
+                            username: profileData.username || prev?.username,
                         };
+                        localStorage.setItem('admin_user', JSON.stringify(updated));
                         return updated;
                     });
                 }
@@ -39,8 +37,11 @@ export const AuthProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        if (tokens) {
+        if (tokens?.access) {
+            setCachedToken(tokens.access);
             fetchProfile();
+        } else {
+            setCachedToken(null);
         }
     }, [tokens]);
 
@@ -53,17 +54,15 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = (userData, tokenData) => {
+        setCachedToken(tokenData?.access || null);
         setUser(userData);
         setTokens(tokenData);
-        const basicUser = {
-            username: userData.username,
-            role: userData.role
-        };
-        localStorage.setItem('admin_user', JSON.stringify(basicUser));
+        localStorage.setItem('admin_user', JSON.stringify(userData));
         localStorage.setItem('admin_tokens', JSON.stringify(tokenData));
     };
 
     const logout = () => {
+        setCachedToken(null);
         setUser(null);
         setTokens(null);
         localStorage.removeItem('admin_user');

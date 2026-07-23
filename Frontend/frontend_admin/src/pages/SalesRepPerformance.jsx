@@ -53,9 +53,9 @@ const SalesRepPerformance = () => {
     };
 
     const formatCurrency = (value) => {
-        return new Intl.NumberFormat('en-AE', {
+        return new Intl.NumberFormat('en-IN', {
             style: 'currency',
-            currency: 'AED',
+            currency: 'INR',
             minimumFractionDigits: 0,
             maximumFractionDigits: 0
         }).format(value);

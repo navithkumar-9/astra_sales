@@ -172,7 +172,6 @@ const Sidebar = () => {
             ),
             children: [
                 { path: '/pipeline/quoted-90', label: 'Quoted (>90 Days)' },
-                ...(counts.quoteSubmittedCount > 5 ? [{ path: '/enquiries?status=Quote%20Submitted', label: 'Quote Submitted' }] : []),
                 { path: '/pipeline/open-l1', label: 'Open L1' },
                 { path: '/pipeline/won', label: 'Won' },
                 { path: '/pipeline/regretted', label: 'Regretted' },
@@ -354,13 +353,16 @@ const Sidebar = () => {
                                 <div key={item.label} className="nav-item-group">
                                     <button
                                         onClick={() => toggleMenu(item.label)}
-                                        className="nav-item nav-item-parent w-100 text-start bg-transparent border-0 d-flex align-items-center justify-content-between cursor-pointer"
+                                        className={`nav-item nav-item-parent w-100 text-start bg-transparent border-0 d-flex align-items-center ${isCollapsed ? 'justify-content-center' : 'justify-content-between'} cursor-pointer`}
+                                        title={isCollapsed ? item.label : undefined}
                                     >
-                                        <div className="d-flex align-items-center gap-3">
+                                        <div className={`d-flex align-items-center ${isCollapsed ? 'justify-content-center gap-0 w-100' : 'gap-3'}`}>
                                             <span className="nav-icon">{item.icon}</span>
-                                            <span className="nav-label">
-                                                {item.label}
-                                            </span>
+                                            {!isCollapsed && (
+                                                <span className="nav-label">
+                                                    {item.label}
+                                                </span>
+                                            )}
                                         </div>
                                         {!isCollapsed && (
                                             <svg
@@ -423,11 +425,12 @@ const Sidebar = () => {
                                 key={item.path}
                                 to={item.path}
                                 className={({ isActive }) =>
-                                    `nav-item ${isActive ? 'nav-item-active' : ''}`
+                                    `nav-item ${isActive ? 'nav-item-active' : ''} ${isCollapsed ? 'justify-content-center' : ''}`
                                 }
+                                title={isCollapsed ? item.label : undefined}
                             >
                                 <span className="nav-icon">{item.icon}</span>
-                                <span className="nav-label">{item.label}</span>
+                                {!isCollapsed && <span className="nav-label">{item.label}</span>}
                             </NavLink>
                         );
                     })}

@@ -486,13 +486,13 @@ const EditSalesModal = ({ enq, show, onClose, onSuccess, onRefresh, canEdit, vie
                                 </div>
                                 <div className="col-md-3">
                                     <div className="enq-details-card bg-white border-0 shadow-sm">
-                                        <label className="enq-details-label">Quote Value ($)</label>
+                                        <label className="enq-details-label">Quote Value (₹)</label>
                                         <input type="number" className="form-control border-0 bg-transparent text-secondary p-0 font-weight-bold shadow-none" style={{ fontSize: '0.9rem' }} value={quoteValue} onChange={(e) => setQuoteValue(e.target.value)} disabled={!canEdit || viewOnly} />
                                     </div>
                                 </div>
                                 <div className="col-md-3">
                                     <div className="enq-details-card bg-white border-0 shadow-sm">
-                                        <label className="enq-details-label">Open-L1 Value ($)</label>
+                                        <label className="enq-details-label">Open-L1 Value (₹)</label>
                                         <input type="number" className="form-control border-0 bg-transparent text-secondary p-0 font-weight-bold shadow-none" style={{ fontSize: '0.9rem' }} value={openL1Value} onChange={(e) => setOpenL1Value(e.target.value)} disabled={!canEdit || viewOnly} />
                                     </div>
                                 </div>
@@ -506,7 +506,7 @@ const EditSalesModal = ({ enq, show, onClose, onSuccess, onRefresh, canEdit, vie
                             <div className="row g-3 mb-4">
                                 <div className="col-md-3">
                                     <div className="enq-details-card bg-white border-0 shadow-sm">
-                                        <label className="enq-details-label">Lost Value ($)</label>
+                                        <label className="enq-details-label">Lost Value (₹)</label>
                                         <input type="number" className="form-control border-0 bg-transparent text-secondary p-0 font-weight-bold shadow-none" style={{ fontSize: '0.9rem' }} value={lostValue} onChange={(e) => setLostValue(e.target.value)} disabled={!canEdit || viewOnly} />
                                     </div>
                                 </div>
@@ -524,7 +524,7 @@ const EditSalesModal = ({ enq, show, onClose, onSuccess, onRefresh, canEdit, vie
                                 </div>
                                 <div className="col-md-3">
                                     <div className="enq-details-card bg-white border-0 shadow-sm">
-                                        <label className="enq-details-label">PO Value ($)</label>
+                                        <label className="enq-details-label">PO Value (₹)</label>
                                         <input type="number" className="form-control border-0 bg-transparent text-secondary p-0 font-weight-bold shadow-none" style={{ fontSize: '0.9rem' }} value={poValue} onChange={(e) => setPoValue(e.target.value)} disabled={!canEdit || viewOnly} />
                                     </div>
                                 </div>
