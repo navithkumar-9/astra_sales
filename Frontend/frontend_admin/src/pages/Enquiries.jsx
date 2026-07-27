@@ -12,6 +12,7 @@ import ViewEnquiryModal from '../components/enquiry/ViewEnquiryModal';
 import ExportButton from '../components/common/ExportButton';
 import FilterPanel from '../components/common/FilterPanel';
 import Pagination from '../components/common/Pagination';
+import StatusBadge from '../components/common/StatusBadge';
 
 
 const getFiltersFromSearch = (search) => {
@@ -238,9 +239,7 @@ const Enquiries = () => {
                                 </td>
                                 <td className="py-3 align-middle text-secondary font-weight-medium">{enq.division?.name || 'N/A'}</td>
                                 <td className="py-3 align-middle">
-                                    <span className="badge bg-light text-dark px-3 py-2" style={{ fontSize: '0.72rem', fontWeight: '600' }}>
-                                        {enq.status}
-                                    </span>
+                                    <StatusBadge status={enq.status} />
                                 </td>
                                 <td className="py-3 align-middle text-center pe-4">
                                     <div className="d-flex gap-2 justify-content-center">

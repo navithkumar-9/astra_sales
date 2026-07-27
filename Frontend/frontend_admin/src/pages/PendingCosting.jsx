@@ -6,6 +6,7 @@ import { getAvatarStyle } from '../utils/avatar';
 import EnquiryTable from '../components/common/EnquiryTable';
 import FilterPanel from '../components/common/FilterPanel';
 import Pagination from '../components/common/Pagination';
+import StatusBadge from '../components/common/StatusBadge';
 import { enquiryService } from '../services/enquiryService';
 import { userService } from '../services/userService';
 
@@ -112,7 +113,6 @@ const PendingCosting = () => {
         }
 
         setSubmitting(true);
-        // Auto transition status to Sales to Quote if both expected date and actual date are filled
         let targetStatus = status;
         if (edOfCosting && actualDateOfCosting) {
             targetStatus = 'Sales to Quote';
@@ -154,7 +154,11 @@ const PendingCosting = () => {
                 </div>
             </div>
 
-            <div className="row mb-4"><div className="col-12"><FilterPanel filters={filters} onFilterChange={setFilters} showStatusFilter={false} /></div></div>
+            <div className="row mb-4">
+                <div className="col-12">
+                    <FilterPanel filters={filters} onFilterChange={setFilters} showStatusFilter={false} />
+                </div>
+            </div>
 
             {/* Table Listing */}
             <EnquiryTable 
@@ -174,6 +178,7 @@ const PendingCosting = () => {
                     { label: 'Expected Date' },
                     { label: 'Actual Date' },
                     { label: 'Sales Rep' },
+                    { label: 'Status', sortField: 'status' },
                     { label: 'Action', className: 'text-center pe-4' }
                 ]}
                 data={enquiries}
@@ -183,7 +188,7 @@ const PendingCosting = () => {
                     <tr key={enq.id} className="modern-table-row">
                         <td className="ps-4 py-3 align-middle text-secondary font-weight-medium">
                             <span className="badge bg-light text-secondary rounded-circle p-2" style={{ width: '26px', height: '26px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                {idx + 1}
+                                {(page - 1) * pageSize + idx + 1}
                             </span>
                         </td>
                         <td className="py-3 align-middle font-weight-bold text-dark">{enq.project_number}</td>
@@ -194,6 +199,9 @@ const PendingCosting = () => {
                         <td className="py-3 align-middle text-muted">{enq.ed_of_costing || 'N/A'}</td>
                         <td className="py-3 align-middle text-muted">{enq.actual_date_of_costing || 'N/A'}</td>
                         <td className="py-3 align-middle text-dark font-weight-medium">{enq.sales_rep?.name || enq.sales_rep?.username || 'N/A'}</td>
+                        <td className="py-3 align-middle">
+                            <StatusBadge status={enq.status || 'Pending with Costing'} />
+                        </td>
                         <td className="py-3 align-middle text-center pe-4">
                             <div className="d-flex gap-2 justify-content-center">
                                 <button
@@ -223,7 +231,7 @@ const PendingCosting = () => {
                         </td>
                     </tr>
                 )}
-                        />
+            />
 
             <Pagination
                 count={totalCount}

@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars, react-hooks/exhaustive-deps, react-hooks/rules-of-hooks */
 import React, { useState } from 'react';
+import StatusBadge from '../common/StatusBadge';
 import DocumentsTab from './DocumentsTab';
 import AuditHistoryTab from './AuditHistoryTab';
 import ActivityFeedTab from './ActivityFeedTab';
@@ -110,15 +111,9 @@ const ViewEnquiryModal = ({ show, onClose, selectedEnquiry, onRefresh }) => {
                                 <span className="text-secondary">RFQ Type: </span>
                                 <span className="badge bg-white text-dark shadow-sm border px-3 py-2 rounded-pill">{selectedEnquiry.rfq_type?.name || 'N/A'}</span>
                             </div>
-                            <div>
+                            <div className="d-flex align-items-center gap-2">
                                 <span className="text-secondary">Status: </span>
-                                <span className="badge px-3 py-2 rounded-pill shadow-sm" style={{ 
-                                    backgroundColor: statusStyle.bg, 
-                                    color: statusStyle.color,
-                                    fontWeight: 'bold'
-                                }}>
-                                    {selectedEnquiry.status}
-                                </span>
+                                <StatusBadge status={selectedEnquiry.status} />
                             </div>
                         </div>
 

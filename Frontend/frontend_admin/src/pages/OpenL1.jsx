@@ -2,10 +2,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { getAvatarStyle } from '../utils/avatar';
 import EnquiryTable from '../components/common/EnquiryTable';
 import FilterPanel from '../components/common/FilterPanel';
 import Pagination from '../components/common/Pagination';
+import StatusBadge from '../components/common/StatusBadge';
 import { enquiryService } from '../services/enquiryService';
 import EditSalesModal from '../components/enquiry/EditSalesModal';
 
@@ -17,7 +17,7 @@ const OpenL1 = () => {
     const isSuperAdmin = user?.role === 'SUPERADMIN';
     const isAdmin = user?.role === 'ADMIN';
     const isRfqTracker = user?.role === 'RFQ_TRACKER';
-    const canEdit = isRfqTracker; // RFQ trackers can edit, Admins/Superadmins only view
+    const canEdit = isRfqTracker;
 
     const [enquiries, setEnquiries] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -32,7 +32,7 @@ const OpenL1 = () => {
     const [viewOnly, setViewOnly] = useState(false);
     const [selectedEnq, setSelectedEnq] = useState(null);
 
-    // Fetch Sales to Quote enquiries
+    // Fetch Open - L1 enquiries
     const fetchEnquiries = async () => {
         try {
             const params = {
@@ -51,13 +51,11 @@ const OpenL1 = () => {
                 setTotalCount(Array.isArray(list) ? list.length : 0);
             }
         } catch (err) {
-            showToast('Failed to fetch Sales to Quote enquiries.', 'error');
+            showToast('Failed to fetch Open - L1 enquiries.', 'error');
         } finally {
             setLoading(false);
         }
     };
-
-
 
     useEffect(() => {
         setPage(1);
@@ -81,12 +79,16 @@ const OpenL1 = () => {
         <div className="page container-fluid px-4 py-4">
             <div className="page-header d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h1 className="page-title h3 font-weight-bold mb-1">Open L1</h1>
-                    <p className="page-subtitle text-muted mb-0">Manage project enquiries in Open L1 stage</p>
+                    <h1 className="page-title h3 font-weight-bold mb-1">Open - L1</h1>
+                    <p className="page-subtitle text-muted mb-0">Manage project enquiries in Open - L1 stage</p>
                 </div>
             </div>
 
-            <div className="row mb-4"><div className="col-12"><FilterPanel filters={filters} onFilterChange={setFilters} showStatusFilter={false} /></div></div>
+            <div className="row mb-4">
+                <div className="col-12">
+                    <FilterPanel filters={filters} onFilterChange={setFilters} showStatusFilter={false} />
+                </div>
+            </div>
 
             {/* Table Listing */}
             <EnquiryTable 
@@ -104,16 +106,17 @@ const OpenL1 = () => {
                     { label: 'Customer Name', sortField: 'customer__name' },
                     { label: 'Division' },
                     { label: 'Sales Rep' },
+                    { label: 'Status', sortField: 'status' },
                     { label: 'Action', className: 'text-center pe-4' }
                 ]}
                 data={enquiries}
                 loading={loading}
-                emptyMessage="No enquiries in Open L1 stage."
+                emptyMessage="No enquiries in Open - L1 stage."
                 renderRow={(enq, idx) => (
                     <tr key={enq.id} className="modern-table-row">
                         <td className="ps-4 py-3 align-middle text-secondary font-weight-medium">
                             <span className="badge bg-light text-secondary rounded-circle p-2" style={{ width: '26px', height: '26px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                {idx + 1}
+                                {(page - 1) * pageSize + idx + 1}
                             </span>
                         </td>
                         <td className="py-3 align-middle font-weight-bold text-dark">{enq.project_number}</td>
@@ -122,6 +125,9 @@ const OpenL1 = () => {
                         <td className="py-3 align-middle font-weight-semibold text-dark">{enq.customer?.name || 'N/A'}</td>
                         <td className="py-3 align-middle text-secondary font-weight-medium">{enq.division?.name || 'N/A'}</td>
                         <td className="py-3 align-middle text-dark font-weight-medium">{enq.sales_rep?.name || enq.sales_rep?.username || 'N/A'}</td>
+                        <td className="py-3 align-middle">
+                            <StatusBadge status={enq.status || 'Open - L1'} />
+                        </td>
                         <td className="py-3 align-middle text-center pe-4">
                             <div className="d-flex gap-2 justify-content-center">
                                 <button
@@ -151,7 +157,7 @@ const OpenL1 = () => {
                         </td>
                     </tr>
                 )}
-                        />
+            />
 
             <Pagination
                 count={totalCount}

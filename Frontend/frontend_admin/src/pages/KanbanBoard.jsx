@@ -7,6 +7,7 @@ import EditEnggModal from '../components/enquiry/EditEnggModal';
 import EditCostingModal from '../components/enquiry/EditCostingModal';
 import EditSalesModal from '../components/enquiry/EditSalesModal';
 import FilterPanel from '../components/common/FilterPanel';
+import StatusBadge from '../components/common/StatusBadge';
 import { hasPermission, PERMISSIONS } from '../config/permissions';
 
 const PIPELINE_STAGES = [
@@ -229,8 +230,9 @@ const KanbanBoard = () => {
                                                         </div>
 
                                                         {/* Badges/SBU/RFQs info */}
-                                                        <div className="d-flex flex-wrap gap-1 mb-2">
-                                                            <span className="badge text-white" style={{ fontSize: '0.65rem', backgroundColor: '#6366f1', fontWeight: '500' }}>
+                                                        <div className="d-flex flex-wrap align-items-center gap-1 mb-2">
+                                                            <StatusBadge status={enq.status} />
+                                                            <span className="badge text-white ms-1" style={{ fontSize: '0.65rem', backgroundColor: '#6366f1', fontWeight: '500' }}>
                                                                 {enq.sbu?.name || 'SBU'}
                                                             </span>
                                                             <span className="badge bg-light text-dark border" style={{ fontSize: '0.65rem', fontWeight: '500' }}>

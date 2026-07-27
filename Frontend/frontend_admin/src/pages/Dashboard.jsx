@@ -7,6 +7,7 @@ import {
 } from 'recharts';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
+import StatusBadge from '../components/common/StatusBadge';
 
 // Harmonious, premium color palette for charts
 const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#f97316', '#64748b', '#06b6d4'];
@@ -568,6 +569,7 @@ const Dashboard = () => {
                                     <th className="border-0 py-3">SBU</th>
                                     <th className="border-0 py-3 text-end">Quote Value</th>
                                     <th className="border-0 py-3">Sales Rep</th>
+                                    <th className="border-0 py-3">Status</th>
                                     <th className="border-0 px-3 py-3 text-end">Created At</th>
                                 </tr>
                             </thead>
@@ -601,12 +603,15 @@ const Dashboard = () => {
                                                     <span>{enq.sales_rep}</span>
                                                 </div>
                                             </td>
+                                            <td className="py-3">
+                                                <StatusBadge status={enq.status || 'Quote Submitted'} />
+                                            </td>
                                             <td className="px-3 py-3 text-end text-muted" style={{ fontSize: '0.8rem' }}>{enq.created_at}</td>
                                         </tr>
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="7" className="text-center py-4 text-muted">No recent Quote Submitted records found.</td>
+                                        <td colSpan="8" className="text-center py-4 text-muted">No recent Quote Submitted records found.</td>
                                     </tr>
                                 )}
                             </tbody>

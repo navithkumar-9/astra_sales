@@ -6,6 +6,7 @@ import { getAvatarStyle } from '../utils/avatar';
 import EnquiryTable from '../components/common/EnquiryTable';
 import FilterPanel from '../components/common/FilterPanel';
 import Pagination from '../components/common/Pagination';
+import StatusBadge from '../components/common/StatusBadge';
 import { enquiryService } from '../services/enquiryService';
 import { userService } from '../services/userService';
 
@@ -112,7 +113,6 @@ const PendingEngg = () => {
         }
 
         setSubmitting(true);
-        // Auto transition status to Pending with Costing if both expected date and actual date are filled
         let targetStatus = status;
         if (edOfEngg && actualDateOfEngg) {
             targetStatus = 'Pending with Costing';
@@ -154,7 +154,11 @@ const PendingEngg = () => {
                 </div>
             </div>
 
-            <div className="row mb-4"><div className="col-12"><FilterPanel filters={filters} onFilterChange={setFilters} showStatusFilter={false} /></div></div>
+            <div className="row mb-4">
+                <div className="col-12">
+                    <FilterPanel filters={filters} onFilterChange={setFilters} showStatusFilter={false} />
+                </div>
+            </div>
 
             {/* Table Listing */}
             <EnquiryTable 
@@ -174,6 +178,7 @@ const PendingEngg = () => {
                     { label: 'Expected Date' },
                     { label: 'Actual Date' },
                     { label: 'Sales Rep' },
+                    { label: 'Status', sortField: 'status' },
                     { label: 'Action', className: 'text-center pe-4' }
                 ]}
                 data={enquiries}
@@ -183,7 +188,7 @@ const PendingEngg = () => {
                     <tr key={enq.id} className="modern-table-row">
                         <td className="ps-4 py-3 align-middle text-secondary font-weight-medium">
                             <span className="badge bg-light text-secondary rounded-circle p-2" style={{ width: '26px', height: '26px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                {idx + 1}
+                                {(page - 1) * pageSize + idx + 1}
                             </span>
                         </td>
                         <td className="py-3 align-middle font-weight-bold text-dark">{enq.project_number}</td>
@@ -194,6 +199,9 @@ const PendingEngg = () => {
                         <td className="py-3 align-middle text-muted">{enq.ed_of_engg || 'N/A'}</td>
                         <td className="py-3 align-middle text-muted">{enq.actual_date_of_engg || 'N/A'}</td>
                         <td className="py-3 align-middle text-dark font-weight-medium">{enq.sales_rep?.name || enq.sales_rep?.username || 'N/A'}</td>
+                        <td className="py-3 align-middle">
+                            <StatusBadge status={enq.status || 'Pending with Engg'} />
+                        </td>
                         <td className="py-3 align-middle text-center pe-4">
                             <div className="d-flex gap-2 justify-content-center">
                                 <button
@@ -223,7 +231,7 @@ const PendingEngg = () => {
                         </td>
                     </tr>
                 )}
-                        />
+            />
 
             <Pagination
                 count={totalCount}
@@ -305,10 +313,10 @@ const PendingEngg = () => {
                                     </div>
                                 </div>
 
-                                {/* Engineering Fields (Editable/ReadOnly based on Role) */}
+                                {/* Engineering Fields */}
                                 <h6 className="font-weight-bold text-primary mb-3 pb-2 border-bottom">Engineering Status & Action</h6>
                                 <div className="row g-3 mb-4">
-                                    {/* Expected Date of Engineering */}
+                                    {/* Expected Date of Engg */}
                                     <div className="col-md-6">
                                         <label className="form-label font-weight-semibold">Expected Date of Engineering</label>
                                         <input
@@ -319,7 +327,7 @@ const PendingEngg = () => {
                                             disabled={!canEdit || viewOnly}
                                         />
                                     </div>
-                                    {/* Actual Date of Engineering */}
+                                    {/* Actual Date of Engg */}
                                     <div className="col-md-6">
                                         <label className="form-label font-weight-semibold">Actual Date of Engineering</label>
                                         <input
@@ -360,13 +368,13 @@ const PendingEngg = () => {
                                         >
                                             <option value="Pending with Engg">Pending with Engg</option>
                                             <option value="Pending with Costing">Pending with Costing</option>
-                                            <option value="Pending with Sales">Pending with Sales</option>
                                         </select>
                                     </div>
                                 </div>
 
+                                {/* Engineering Remarks */}
                                 <div className="mb-4">
-                                    <label className="form-label font-weight-semibold">Engineering Remarks</label>
+                                    <label className="form-label font-weight-semibold">Engineering Team Remarks</label>
                                     <textarea
                                         className="form-control"
                                         rows="3"

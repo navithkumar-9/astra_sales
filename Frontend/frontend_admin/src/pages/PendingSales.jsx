@@ -6,12 +6,12 @@ import { getAvatarStyle } from '../utils/avatar';
 import EnquiryTable from '../components/common/EnquiryTable';
 import FilterPanel from '../components/common/FilterPanel';
 import Pagination from '../components/common/Pagination';
+import StatusBadge from '../components/common/StatusBadge';
 import { enquiryService } from '../services/enquiryService';
 import { userService } from '../services/userService';
 import { masterDataService } from '../services/masterDataService';
 
 const PendingSales = () => {
-    const { user } = useAuth();
     const { showToast } = useToast();
 
     // Check roles
@@ -267,6 +267,7 @@ const PendingSales = () => {
                     { label: 'ED Of Costing' },
                     { label: 'ED Of Sales' },
                     { label: 'RFQ Type' },
+                    { label: 'Status', sortField: 'status' },
                     { label: 'Action', className: 'text-center pe-4' }
                 ]}
                 data={enquiries}
@@ -276,7 +277,7 @@ const PendingSales = () => {
                     <tr key={enq.id} className="modern-table-row">
                         <td className="ps-4 py-3 align-middle text-secondary font-weight-medium">
                             <span className="badge bg-light text-secondary rounded-circle p-2" style={{ width: '26px', height: '26px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                {idx + 1}
+                                {(page - 1) * pageSize + idx + 1}
                             </span>
                         </td>
                         <td className="py-3 align-middle font-weight-bold text-dark">{enq.project_number}</td>
@@ -287,6 +288,9 @@ const PendingSales = () => {
                         <td className="py-3 align-middle text-muted">{enq.ed_of_costing || 'N/A'}</td>
                         <td className="py-3 align-middle text-muted">{enq.ed_of_sales || 'N/A'}</td>
                         <td className="py-3 align-middle text-dark font-weight-medium">{enq.rfq_type?.name || 'N/A'}</td>
+                        <td className="py-3 align-middle">
+                            <StatusBadge status={enq.status || 'Pending with Sales'} />
+                        </td>
                         <td className="py-3 align-middle text-center pe-4">
                             <div className="d-flex gap-2 justify-content-center">
                                 <button

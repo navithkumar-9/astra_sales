@@ -2,10 +2,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { getAvatarStyle } from '../utils/avatar';
 import EnquiryTable from '../components/common/EnquiryTable';
 import FilterPanel from '../components/common/FilterPanel';
 import Pagination from '../components/common/Pagination';
+import StatusBadge from '../components/common/StatusBadge';
 import { enquiryService } from '../services/enquiryService';
 import EditSalesModal from '../components/enquiry/EditSalesModal';
 
@@ -17,7 +17,7 @@ const Lost = () => {
     const isSuperAdmin = user?.role === 'SUPERADMIN';
     const isAdmin = user?.role === 'ADMIN';
     const isRfqTracker = user?.role === 'RFQ_TRACKER';
-    const canEdit = isRfqTracker; // RFQ trackers can edit, Admins/Superadmins only view
+    const canEdit = isRfqTracker;
 
     const [enquiries, setEnquiries] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -32,7 +32,7 @@ const Lost = () => {
     const [viewOnly, setViewOnly] = useState(false);
     const [selectedEnq, setSelectedEnq] = useState(null);
 
-    // Fetch Sales to Quote enquiries
+    // Fetch Lost enquiries
     const fetchEnquiries = async () => {
         try {
             const params = {
@@ -51,13 +51,11 @@ const Lost = () => {
                 setTotalCount(Array.isArray(list) ? list.length : 0);
             }
         } catch (err) {
-            showToast('Failed to fetch Sales to Quote enquiries.', 'error');
+            showToast('Failed to fetch Lost enquiries.', 'error');
         } finally {
             setLoading(false);
         }
     };
-
-
 
     useEffect(() => {
         setPage(1);
@@ -86,7 +84,11 @@ const Lost = () => {
                 </div>
             </div>
 
-            <div className="row mb-4"><div className="col-12"><FilterPanel filters={filters} onFilterChange={setFilters} showStatusFilter={false} /></div></div>
+            <div className="row mb-4">
+                <div className="col-12">
+                    <FilterPanel filters={filters} onFilterChange={setFilters} showStatusFilter={false} />
+                </div>
+            </div>
 
             {/* Table Listing */}
             <EnquiryTable 
@@ -104,6 +106,7 @@ const Lost = () => {
                     { label: 'Customer Name', sortField: 'customer__name' },
                     { label: 'Division' },
                     { label: 'Sales Rep' },
+                    { label: 'Status', sortField: 'status' },
                     { label: 'Action', className: 'text-center pe-4' }
                 ]}
                 data={enquiries}
@@ -113,7 +116,7 @@ const Lost = () => {
                     <tr key={enq.id} className="modern-table-row">
                         <td className="ps-4 py-3 align-middle text-secondary font-weight-medium">
                             <span className="badge bg-light text-secondary rounded-circle p-2" style={{ width: '26px', height: '26px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                                {idx + 1}
+                                {(page - 1) * pageSize + idx + 1}
                             </span>
                         </td>
                         <td className="py-3 align-middle font-weight-bold text-dark">{enq.project_number}</td>
@@ -122,6 +125,9 @@ const Lost = () => {
                         <td className="py-3 align-middle font-weight-semibold text-dark">{enq.customer?.name || 'N/A'}</td>
                         <td className="py-3 align-middle text-secondary font-weight-medium">{enq.division?.name || 'N/A'}</td>
                         <td className="py-3 align-middle text-dark font-weight-medium">{enq.sales_rep?.name || enq.sales_rep?.username || 'N/A'}</td>
+                        <td className="py-3 align-middle">
+                            <StatusBadge status={enq.status || 'Lost'} />
+                        </td>
                         <td className="py-3 align-middle text-center pe-4">
                             <div className="d-flex gap-2 justify-content-center">
                                 <button
@@ -151,7 +157,7 @@ const Lost = () => {
                         </td>
                     </tr>
                 )}
-                        />
+            />
 
             <Pagination
                 count={totalCount}

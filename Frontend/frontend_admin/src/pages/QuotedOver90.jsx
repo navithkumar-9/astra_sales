@@ -5,6 +5,7 @@ import { useToast } from '../context/ToastContext';
 import EnquiryTable from '../components/common/EnquiryTable';
 import FilterPanel from '../components/common/FilterPanel';
 import Pagination from '../components/common/Pagination';
+import StatusBadge from '../components/common/StatusBadge';
 import ViewEnquiryModal from '../components/enquiry/ViewEnquiryModal';
 import { enquiryService } from '../services/enquiryService';
 import API from '../api/axios';
@@ -336,7 +337,8 @@ const QuotedOver90 = () => {
                             { label: 'Project', sortField: 'project_name' },
                             { label: 'Quote Value', sortField: 'quote_value' },
                             { label: 'Sales Rep' },
-                            { label: 'Actions', className: 'text-end' }
+                            { label: 'Status', sortField: 'status' },
+                            { label: 'Actions', className: 'text-end pe-4' }
                         ]}
                         data={enquiries}
                         loading={loading}
@@ -370,6 +372,9 @@ const QuotedOver90 = () => {
                                 </td>
                                 <td className="py-3 align-middle text-secondary">
                                     {enq.sales_rep?.username || 'N/A'}
+                                </td>
+                                <td className="py-3 align-middle">
+                                    <StatusBadge status={enq.status || 'Quote Submitted'} />
                                 </td>
                                 <td className="py-3 align-middle text-center pe-4">
                                     <button
@@ -407,4 +412,3 @@ const QuotedOver90 = () => {
 };
 
 export default QuotedOver90;
-
